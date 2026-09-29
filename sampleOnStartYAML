@@ -1,0 +1,460 @@
+// =============================================================================
+//  CISA COCO IGCE = Phase 1 seed
+//
+//  Every collection below mirrors its SharePoint list: same column names, same
+//  connector value shapes. Phase 2 replaces the ClearCollect source with the
+//  list and changes nothing else.
+//
+//  Person  {Claims, DisplayName, Email, Department, JobTitle}
+//  Choice  {Value}
+//  Lookup  {Id, Value}
+//
+//  Column names marked ASSUMED in the README are best guesses from display
+//  names. Nothing outside this file hardcodes one, so correcting a name is a
+//  change here alone.
+//
+//  No real people. The source records carry real CISA names; these are invented.
+// =============================================================================
+
+Set(gblSignedIn,
+    {
+        Claims:      "i:0#.f|membership|" & Lower(User().Email),
+        DisplayName: User().FullName,
+        Email:       Lower(User().Email),
+        Department:  "",
+        JobTitle:    ""
+    }
+);
+
+Set(gblPersonCOR,
+    {
+        Claims:      "i:0#.f|membership|morgan.diaz@example.gov",
+        DisplayName: "Morgan Diaz",
+        Email:       "morgan.diaz@example.gov",
+        Department:  "Acquisition",
+        JobTitle:    "Contracting Officer Representative"
+    }
+);
+
+Set(gblPersonPOC2,
+    {
+        Claims:      "i:0#.f|membership|avery.brooks@example.gov",
+        DisplayName: "Avery Brooks",
+        Email:       "avery.brooks@example.gov",
+        Department:  "Logistics",
+        JobTitle:    "Program Analyst"
+    }
+);
+
+// The people the POC and COR pickers offer. Same five columns as a person
+// column, so a picked row patches straight into IGCEHeader.PointOfContact or
+// .COR. Phase 2 list: none. The pickers read Choices(IGCEHeader.'Point of
+// Contact') and Choices(IGCEHeader.COR) instead, which are the person columns'
+// own choices and need no Office365Users connection. All invented.
+ClearCollect(colPeople,
+    gblSignedIn,
+    gblPersonCOR,
+    gblPersonPOC2,
+    {
+        Claims:      "i:0#.f|membership|riley.chen@example.gov",
+        DisplayName: "Riley Chen",
+        Email:       "riley.chen@example.gov",
+        Department:  "Acquisition",
+        JobTitle:    "Contracting Officer"
+    },
+    {
+        Claims:      "i:0#.f|membership|jordan.ellis@example.gov",
+        DisplayName: "Jordan Ellis",
+        Email:       "jordan.ellis@example.gov",
+        Department:  "Finance",
+        JobTitle:    "Budget Analyst"
+    },
+    {
+        Claims:      "i:0#.f|membership|sam.okafor@example.gov",
+        DisplayName: "Sam Okafor",
+        Email:       "sam.okafor@example.gov",
+        Department:  "Logistics",
+        JobTitle:    "Contracting Officer Representative"
+    }
+);
+
+// =============================================================================
+//  CHOICE VALUES
+//  Placeholders until Choices come back in the fields output. Confirmed values
+//  are noted in the README; the rest must not ship.
+// =============================================================================
+
+ClearCollect(colChoiceIGCEType,
+    { Value: "Cost Reimbursement" },
+    { Value: "Other than Cost Reimbursement" },
+    { Value: "Commercial Firm Fixed Price" },
+    { Value: "Non-Commercial Firm Fixed Price" },
+    { Value: "Time & Materials" },
+    { Value: "Cost Plus Fixed Fee" }
+);
+
+ClearCollect(colChoiceStatus,
+    { Value: "Draft" }, { Value: "Submitted" },
+    { Value: "COR review" }, { Value: "Approved" }
+);
+
+ClearCollect(colChoiceCategory,
+    { Value: "Accountable Property" }, { Value: "Capitalized Equipment" },
+    { Value: "Direct Material" }, { Value: "Other Direct Costs" },
+    { Value: "Products/Supplies" }, { Value: "Subcontract" }, { Value: "Travel" }
+);
+
+ClearCollect(colChoiceSublineType, { Value: "FFP" });
+
+ClearCollect(colChoiceODCCategory,
+    { Value: "Special Tooling and Test Equipment below $500,000" }
+);
+
+ClearCollect(colChoicePropertyType,
+    { Value: "Accountable" }, { Value: "Non Accountable" }
+);
+
+ClearCollect(colChoiceUnits,
+    { Value: "EA" }, { Value: "HR" }, { Value: "LOT" }, { Value: "MO" }
+);
+
+// D2: the categories that carry the indirect burden. Never labor.
+ClearCollect(colBurdenedCategories,
+    { Value: "Direct Material" }, { Value: "Other Direct Costs" },
+    { Value: "Products/Supplies" }, { Value: "Travel" }
+);
+
+ClearCollect(colPropertyCategories,
+    { Value: "Accountable Property" }, { Value: "Capitalized Equipment" }
+);
+
+// =============================================================================
+//  IGCESettings
+//  Key/value. LookUp(colIGCESettings, Title = "x" And Status = "Active").Value
+//  GFP question texts are UNKNOWN. Seeded as marked placeholders so they read
+//  as obviously wrong rather than quietly plausible.
+// =============================================================================
+
+ClearCollect(colIGCESettings,
+    { ID: 1, Title: "AppName", Value: "CISA COCO IGCE", Status: "Active" },
+    { ID: 2, Title: "GFPQuestion1", Value: "[PLACEHOLDER] GFP question 1 text pending from the client", Status: "Active" },
+    { ID: 3, Title: "GFPQuestion2", Value: "[PLACEHOLDER] GFP question 2 text pending from the client", Status: "Active" },
+    { ID: 4, Title: "GFPQuestion3", Value: "[PLACEHOLDER] GFP question 3 text pending from the client", Status: "Active" },
+    { ID: 5, Title: "GFPQuestion4", Value: "[PLACEHOLDER] GFP question 4 text pending from the client", Status: "Active" },
+    { ID: 6, Title: "GFPQuestion5", Value: "[PLACEHOLDER] GFP question 5 text pending from the client", Status: "Active" },
+    { ID: 7, Title: "GFPQuestion6", Value: "[PLACEHOLDER] GFP question 6 text pending from the client", Status: "Active" },
+    { ID: 8,  Title: "LaborCategory", Value: "Program Manager",       Status: "Active" },
+    { ID: 9,  Title: "LaborCategory", Value: "Business Analyst",      Status: "Active" },
+    { ID: 10, Title: "LaborCategory", Value: "Senior Developer",      Status: "Active" },
+    { ID: 11, Title: "LaborCategory", Value: "Developer",             Status: "Active" },
+    { ID: 12, Title: "LaborCategory", Value: "Project Coordinator",   Status: "Active" },
+    { ID: 13, Title: "LaborCategory", Value: "Subject Matter Expert", Status: "Active" },
+    { ID: 14, Title: "LaborCategory", Value: "Help Desk Analyst",     Status: "Active" },
+    { ID: 15, Title: "LaborCategory", Value: "Systems Engineer",      Status: "Active" }
+);
+
+// =============================================================================
+//  PR Tracker
+//  Two requirements with an IGCE, two without, so New IGCE has something to offer.
+// =============================================================================
+
+// COR is the requirement's own COR, which a new estimate starts from. The
+// tracker is where the requirement's COR is recorded, so the estimate takes it
+// and the author may then change it on the header step.
+ClearCollect(colPRTracker,
+    { ID: 1, PRTrackerNumber: "70RCSJ26R0000123", RequirementName: "Receiving and inspection ticket support",
+      COR: LookUp(colPeople, Email = "morgan.diaz@example.gov") },
+    { ID: 2, PRTrackerNumber: "70RCSJ26R0000147", RequirementName: "Warehouse scanner refresh",
+      COR: LookUp(colPeople, Email = "sam.okafor@example.gov") },
+    { ID: 3, PRTrackerNumber: "70RCSJ26R0000161", RequirementName: "Records digitization",
+      COR: LookUp(colPeople, Email = "riley.chen@example.gov") },
+    { ID: 4, PRTrackerNumber: "70RCSJ26R0000170", RequirementName: "Training portal hosting",
+      COR: LookUp(colPeople, Email = "morgan.diaz@example.gov") }
+);
+
+// =============================================================================
+//  IGCEHeader
+//  PR123 revisions 1 (Approved) and 2 (Draft) so revision history and compare
+//  have something to show. PR147 sits in COR review and contains GFP.
+//  POC is the signed in user, so My estimates is never empty.
+// =============================================================================
+
+ClearCollect(colIGCEHeader,
+    {
+        ID: 1, Title: "70RCSJ26R0000123", Revision: 1,
+        PRTrackerID: { Id: 1, Value: "70RCSJ26R0000123" },
+        PRTrackerNumber: "70RCSJ26R0000123", PRID: "1",
+        IGCEType: { Value: "Time & Materials" },
+        PointOfContact: gblSignedIn, COR: gblPersonCOR,
+        BasePeriodStart: Date(2026, 10, 1), BasePeriodEnd: Date(2027, 9, 30),
+        OptionPeriods: 4,
+        InflationRate: 2, FringeRate: 31, OverheadRate: 45,
+        GARate: 8, FCCOMRate: 0.4, ProfitFeeRate: 6.5,
+        ContractAccessFeeRate: 0.75, IndirectBurdenRate: 0,
+        AccountablePropertyTotal: 0,
+        Status: { Value: "Approved" }, ContainsGFP: false,
+        SubmittedBy: "", SubmittedOn: Blank(), Modified: Date(2026, 8, 20)
+    },
+    {
+        ID: 2, Title: "70RCSJ26R0000123", Revision: 2,
+        PRTrackerID: { Id: 1, Value: "70RCSJ26R0000123" },
+        PRTrackerNumber: "70RCSJ26R0000123", PRID: "1",
+        IGCEType: { Value: "Time & Materials" },
+        PointOfContact: gblSignedIn, COR: gblPersonCOR,
+        BasePeriodStart: Date(2026, 10, 1), BasePeriodEnd: Date(2027, 9, 30),
+        OptionPeriods: 4,
+        InflationRate: 2, FringeRate: 32, OverheadRate: 45,
+        GARate: 8, FCCOMRate: 0.4, ProfitFeeRate: 7,
+        ContractAccessFeeRate: 0.75, IndirectBurdenRate: 0,
+        AccountablePropertyTotal: 0,
+        Status: { Value: "Draft" }, ContainsGFP: false,
+        SubmittedBy: "", SubmittedOn: Blank(), Modified: Date(2026, 9, 24)
+    },
+    {
+        ID: 3, Title: "70RCSJ26R0000147", Revision: 1,
+        PRTrackerID: { Id: 2, Value: "70RCSJ26R0000147" },
+        PRTrackerNumber: "70RCSJ26R0000147", PRID: "2",
+        IGCEType: { Value: "Commercial Firm Fixed Price" },
+        PointOfContact: gblPersonPOC2, COR: gblSignedIn,
+        BasePeriodStart: Date(2026, 11, 1), BasePeriodEnd: Date(2027, 10, 31),
+        OptionPeriods: 2,
+        InflationRate: 2, FringeRate: 31, OverheadRate: 45,
+        GARate: 8, FCCOMRate: 0.4, ProfitFeeRate: 6.5,
+        ContractAccessFeeRate: 0.75, IndirectBurdenRate: 0,
+        AccountablePropertyTotal: 0,
+        Status: { Value: "COR review" }, ContainsGFP: true,
+        SubmittedBy: "Avery Brooks", SubmittedOn: Date(2026, 9, 22),
+        Modified: Date(2026, 9, 22)
+    }
+);
+
+// =============================================================================
+//  IGCELine
+//  D5: Labor drives layout and which indirects apply. Category is blank on
+//  labor lines and is never read for them.
+//  The cost columns are ROLLUPS written by the save routine: seeded 0.
+// =============================================================================
+
+ClearCollect(colIGCELine,
+    { ID: 1, IGCEHeaderID: 1, Title: "Program management",         LineNumber: 1001, Labor: true,  Category: Blank(),                         BaseYearCost: 0, OP1Cost: 0, OP2Cost: 0, OP3Cost: 0, OP4Cost: 0, AccountablePropertyTotal: 0 },
+    { ID: 2, IGCEHeaderID: 1, Title: "Power Platform development", LineNumber: 1002, Labor: true,  Category: Blank(),                         BaseYearCost: 0, OP1Cost: 0, OP2Cost: 0, OP3Cost: 0, OP4Cost: 0, AccountablePropertyTotal: 0 },
+    { ID: 3, IGCEHeaderID: 1, Title: "Licensing",                  LineNumber: 1003, Labor: false, Category: { Value: "Other Direct Costs" }, BaseYearCost: 0, OP1Cost: 0, OP2Cost: 0, OP3Cost: 0, OP4Cost: 0, AccountablePropertyTotal: 0 },
+    { ID: 4, IGCEHeaderID: 2, Title: "Program management",         LineNumber: 1001, Labor: true,  Category: Blank(),                         BaseYearCost: 0, OP1Cost: 0, OP2Cost: 0, OP3Cost: 0, OP4Cost: 0, AccountablePropertyTotal: 0 },
+    { ID: 5, IGCEHeaderID: 2, Title: "Power Platform development", LineNumber: 1002, Labor: true,  Category: Blank(),                         BaseYearCost: 0, OP1Cost: 0, OP2Cost: 0, OP3Cost: 0, OP4Cost: 0, AccountablePropertyTotal: 0 },
+    { ID: 6, IGCEHeaderID: 2, Title: "Licensing",                  LineNumber: 1003, Labor: false, Category: { Value: "Other Direct Costs" }, BaseYearCost: 0, OP1Cost: 0, OP2Cost: 0, OP3Cost: 0, OP4Cost: 0, AccountablePropertyTotal: 0 },
+    { ID: 7, IGCEHeaderID: 2, Title: "Site travel",                LineNumber: 1004, Labor: false, Category: { Value: "Travel" },             BaseYearCost: 0, OP1Cost: 0, OP2Cost: 0, OP3Cost: 0, OP4Cost: 0, AccountablePropertyTotal: 0 },
+    { ID: 8, IGCEHeaderID: 3, Title: "Deployment support",         LineNumber: 1001, Labor: true,  Category: Blank(),                         BaseYearCost: 0, OP1Cost: 0, OP2Cost: 0, OP3Cost: 0, OP4Cost: 0, AccountablePropertyTotal: 0 },
+    { ID: 9, IGCEHeaderID: 3, Title: "Handheld scanners",          LineNumber: 1002, Labor: false, Category: { Value: "Accountable Property" },BaseYearCost: 0, OP1Cost: 0, OP2Cost: 0, OP3Cost: 0, OP4Cost: 0, AccountablePropertyTotal: 0 }
+);
+
+// =============================================================================
+//  IGCESubLine
+//  Cost, Burden and TotalCost per period are CALCULATED columns in SharePoint.
+//  Phase 1 seeds them 0 and the save routine computes them from the chain in
+//  App.Formulas. Phase 2 stops writing them and reads them back.
+//  The stored indirects are written by the save routine too, never typed.
+//
+//  Seeded from a compact table and expanded, so a quantity is edited in one
+//  place rather than across five columns.
+// =============================================================================
+
+ClearCollect(colIGCESubLineSeed,
+    { SID: 1,  LID: 1, Nm: "Program Manager",            Rf: "1.1", LC: "Program Manager",    U: "HR", Rt: 78,   Q0: 1920, Q1: 1920, Q2: 1920, Q3: 1920, Q4: 1920, Cp: true,  Pr: false, Pt: "" },
+    { SID: 2,  LID: 1, Nm: "Business Analyst",           Rf: "1.2", LC: "Business Analyst",   U: "HR", Rt: 54,   Q0: 960,  Q1: 960,  Q2: 960,  Q3: 960,  Q4: 960,  Cp: true,  Pr: false, Pt: "" },
+    { SID: 3,  LID: 2, Nm: "Senior Developer",           Rf: "2.1", LC: "Senior Developer",   U: "HR", Rt: 72,   Q0: 1920, Q1: 1920, Q2: 1920, Q3: 1920, Q4: 1920, Cp: true,  Pr: false, Pt: "" },
+    { SID: 4,  LID: 2, Nm: "Developer",                  Rf: "2.2", LC: "Developer",          U: "HR", Rt: 58,   Q0: 1440, Q1: 1440, Q2: 960,  Q3: 960,  Q4: 960,  Cp: true,  Pr: false, Pt: "" },
+    { SID: 5,  LID: 3, Nm: "Scanning software licenses", Rf: "3.1", LC: "",                   U: "EA", Rt: 240,  Q0: 10,   Q1: 10,   Q2: 10,   Q3: 10,   Q4: 10,   Cp: true,  Pr: false, Pt: "" },
+    { SID: 6,  LID: 4, Nm: "Program Manager",            Rf: "1.1", LC: "Program Manager",    U: "HR", Rt: 78,   Q0: 1920, Q1: 1920, Q2: 1920, Q3: 1920, Q4: 1920, Cp: true,  Pr: false, Pt: "" },
+    { SID: 7,  LID: 4, Nm: "Business Analyst",           Rf: "1.2", LC: "Business Analyst",   U: "HR", Rt: 54,   Q0: 960,  Q1: 960,  Q2: 960,  Q3: 960,  Q4: 960,  Cp: true,  Pr: false, Pt: "" },
+    { SID: 8,  LID: 5, Nm: "Senior Developer",           Rf: "2.1", LC: "Senior Developer",   U: "HR", Rt: 72,   Q0: 1920, Q1: 1920, Q2: 1920, Q3: 1920, Q4: 1920, Cp: true,  Pr: false, Pt: "" },
+    { SID: 9,  LID: 5, Nm: "Developer",                  Rf: "2.2", LC: "Developer",          U: "HR", Rt: 58,   Q0: 1920, Q1: 1920, Q2: 960,  Q3: 960,  Q4: 960,  Cp: true,  Pr: false, Pt: "" },
+    { SID: 10, LID: 6, Nm: "Scanning software licenses", Rf: "3.1", LC: "",                   U: "EA", Rt: 240,  Q0: 10,   Q1: 10,   Q2: 10,   Q3: 10,   Q4: 10,   Cp: true,  Pr: false, Pt: "" },
+    { SID: 11, LID: 7, Nm: "Warehouse site visit",       Rf: "4.1", LC: "",                   U: "EA", Rt: 1650, Q0: 2,    Q1: 2,    Q2: 2,    Q3: 2,    Q4: 2,    Cp: true,  Pr: false, Pt: "" },
+    { SID: 12, LID: 8, Nm: "Systems Engineer",           Rf: "1.1", LC: "Systems Engineer",   U: "HR", Rt: 70,   Q0: 480,  Q1: 120,  Q2: 120,  Q3: 0,    Q4: 0,    Cp: true,  Pr: false, Pt: "" },
+    { SID: 13, LID: 9, Nm: "Rugged handheld scanners",   Rf: "2.1", LC: "",                   U: "EA", Rt: 1400, Q0: 40,   Q1: 0,    Q2: 10,   Q3: 0,    Q4: 0,    Cp: false, Pr: true,  Pt: "Accountable" }
+);
+
+ClearCollect(
+    colIGCESubLine,
+    ForAll(
+        colIGCESubLineSeed As s,
+        {
+            ID: s.SID, IGCELineID: s.LID, Title: s.Nm, Ref: s.Rf,
+            SerialNumber: "", SublineType: { Value: "FFP" },
+            IncludesProperty: s.Pr,
+            PropertyType: If(s.Pr, { Value: s.Pt }, Blank()),
+            LaborCategories: s.LC,
+            ODCCategory: Blank(),
+            Units: { Value: s.U },
+            Software: false,
+            CalculateOptionPeriods: s.Cp,
+            BaseYearQuantity: s.Q0, OP1Quantity: s.Q1, OP2Quantity: s.Q2,
+            OP3Quantity: s.Q3, OP4Quantity: s.Q4,
+            BaseYearRate: s.Rt,
+            OP1Rate: If(s.Cp, 0, s.Rt), OP2Rate: If(s.Cp, 0, s.Rt),
+            OP3Rate: If(s.Cp, 0, s.Rt), OP4Rate: If(s.Cp, 0, s.Rt),
+            BaseYearFringe: 0, BaseYearOverhead: 0, BaseYearGAndA: 0, BaseYearFCCOM: 0,
+            OP1Fringe: 0, OP1Overhead: 0, OP1GAndA: 0, OP1FCCOM: 0,
+            OP2Fringe: 0, OP2Overhead: 0, OP2GAndA: 0, OP2FCCOM: 0,
+            OP3Fringe: 0, OP3Overhead: 0, OP3GAndA: 0, OP3FCCOM: 0,
+            OP4Fringe: 0, OP4Overhead: 0, OP4GAndA: 0, OP4FCCOM: 0,
+            BaseYearCost: 0, OP1Cost: 0, OP2Cost: 0, OP3Cost: 0, OP4Cost: 0,
+            BaseYearBurden: 0, OP1Burden: 0, OP2Burden: 0, OP3Burden: 0, OP4Burden: 0,
+            BaseYearTotalCost: 0, OP1TotalCost: 0, OP2TotalCost: 0,
+            OP3TotalCost: 0, OP4TotalCost: 0, TotalCost: 0
+        }
+    )
+);
+
+Clear(colIGCESubLineSeed);
+
+// =============================================================================
+//  EDIT STAGING ROWS
+//  One row each, holding the exact set of columns a screen may edit. A screen
+//  patches this row from its controls, then calls the matching save routine.
+//
+//  These shapes are the contract. A column absent here cannot be written by a
+//  screen at all, which is why no rollup, calculated column or Status appears.
+//  A misspelled column in a screen's Patch fails against this schema.
+//
+//  Not SharePoint lists. They stay collections in Phase 2.
+// =============================================================================
+
+ClearCollect(colIGCEHeaderEdit,
+    {
+        Title: "",
+        Revision: 1,
+        PRTrackerID: { Id: 0, Value: "" },
+        PRTrackerNumber: "",
+        PRID: "",
+        IGCEType: { Value: "" },
+        PointOfContact: gblSignedIn,
+        COR: gblSignedIn,
+        // If(false, Today()) is a DATE typed blank. Seeding Blank() here resolved
+        // the column to type Blank, and every Patch of a real date then failed
+        // with "does not match the expected type 'Blank'". The staging schema is
+        // the contract, so its types have to be right, not just its names.
+        BasePeriodStart: If(false, Today()),
+        BasePeriodEnd: If(false, Today()),
+        OptionPeriods: 0,
+        InflationRate: 0,
+        FringeRate: 0,
+        OverheadRate: 0,
+        GARate: 0,
+        FCCOMRate: 0,
+        ProfitFeeRate: 0,
+        ContractAccessFeeRate: 0,
+        IndirectBurdenRate: 0,
+        ContainsGFP: false
+    }
+);
+
+ClearCollect(colIGCELineEdit,
+    {
+        IGCEHeaderID: 0,
+        Title: "",
+        LineNumber: 0,
+        Labor: false,
+        Category: { Value: "" }
+    }
+);
+
+ClearCollect(colIGCESubLineEdit,
+    {
+        IGCELineID: 0,
+        Title: "",
+        Ref: "",
+        SerialNumber: "",
+        SublineType: { Value: "FFP" },
+        IncludesProperty: false,
+        PropertyType: { Value: "" },
+        LaborCategories: "",
+        ODCCategory: { Value: "" },
+        Units: { Value: "EA" },
+        Software: false,
+        CalculateOptionPeriods: true,
+        BaseYearQuantity: 0, OP1Quantity: 0, OP2Quantity: 0,
+        OP3Quantity: 0, OP4Quantity: 0,
+        BaseYearRate: 0, OP1Rate: 0, OP2Rate: 0, OP3Rate: 0, OP4Rate: 0
+    }
+);
+
+// =============================================================================
+//  BASIS OF ESTIMATE DEFINITIONS
+//  The 19 sections from the mockup: group, key, label and hint. Bounded
+//  reference data, so a collection is the right home and it will not grow.
+//
+//  These keys are the MOCKUP's, not SharePoint's. The 19 internal column names
+//  are README open question 1. Until they land, answers stage in
+//  colIGCEBoeAnswer and are not written to IGCEHeader, and scrIgceBoe says so.
+// =============================================================================
+
+ClearCollect(colIGCEBoeDef,
+    { SortOrder:  1, Grp: "General", BoeKey: "assume", Label: "Assumptions", Hint: "Details not yet confirmed and what you assumed for each." },
+    { SortOrder:  2, Grp: "General", BoeKey: "tools", Label: "Information and tools used", Hint: "For example GSA CALC, prior contracts, BLS data." },
+    { SortOrder:  3, Grp: "General", BoeKey: "source", Label: "Information obtained from", Hint: "Prior IGCEs, prior contracts, technical team." },
+    { SortOrder:  4, Grp: "General", BoeKey: "prior", Label: "Previous contracts", Hint: "How prior estimates compared with prices paid. Sole source contracts cannot be used alone." },
+    { SortOrder:  5, Grp: "Labor", BoeKey: "labor", Label: "Basis for labor", Hint: "Overall approach to the labor estimate." },
+    { SortOrder:  6, Grp: "Labor", BoeKey: "lcats", Label: "Basis for labor categories", Hint: "Where the categories came from and why they fit the work." },
+    { SortOrder:  7, Grp: "Labor", BoeKey: "lrates", Label: "Basis for labor rates", Hint: "How direct rates were set." },
+    { SortOrder:  8, Grp: "Labor", BoeKey: "hours", Label: "Basis for hours", Hint: "How hours were estimated and any change from prior periods." },
+    { SortOrder:  9, Grp: "Labor", BoeKey: "udl", Label: "Basis for unburdened direct labor", Hint: "How direct labor was separated from burdens." },
+    { SortOrder: 10, Grp: "Direct costs", BoeKey: "odc", Label: "Basis for other direct costs", Hint: "Types of ODCs and why they benefit the contract." },
+    { SortOrder: 11, Grp: "Direct costs", BoeKey: "material", Label: "Basis for direct material", Hint: "" },
+    { SortOrder: 12, Grp: "Direct costs", BoeKey: "products", Label: "Basis for products and supplies", Hint: "" },
+    { SortOrder: 13, Grp: "Direct costs", BoeKey: "subk", Label: "Basis for subcontracts", Hint: "" },
+    { SortOrder: 14, Grp: "Direct costs", BoeKey: "travel", Label: "Basis for travel", Hint: "Basis for estimated trips and why they benefit the contract." },
+    { SortOrder: 15, Grp: "Indirect rates and fee", BoeKey: "indirect", Label: "Basis for indirect rates", Hint: "Source of the fringe and overhead rates." },
+    { SortOrder: 16, Grp: "Indirect rates and fee", BoeKey: "burden", Label: "Basis for indirect burden", Hint: "Rate applied to ODC, material and travel." },
+    { SortOrder: 17, Grp: "Indirect rates and fee", BoeKey: "ga", Label: "Basis for G&A", Hint: "" },
+    { SortOrder: 18, Grp: "Indirect rates and fee", BoeKey: "fccom", Label: "Basis for facilities cost of money", Hint: "" },
+    { SortOrder: 19, Grp: "Indirect rates and fee", BoeKey: "fixedfee", Label: "Basis for fixed fee", Hint: "" }
+);
+
+// Staged answers. Not SharePoint lists, and in Phase 2 the BOE answers move onto
+// IGCEHeader once its columns are known, while the GFP answers wait on the
+// values open question 4 settles.
+ClearCollect(colIGCEBoeAnswer,
+    { IGCEHeaderID: 0, BoeKey: "", Answer: "" }
+);
+Clear(colIGCEBoeAnswer);
+
+ClearCollect(colIGCEGfpAnswer,
+    { IGCEHeaderID: 0, QIndex: 0, Answer: "" }
+);
+Clear(colIGCEGfpAnswer);
+
+// Editor state. gblIgceHeaderID is the estimate being viewed or edited;
+// gblIgcePRID drives the requirement and compare screens; the two compare
+// globals hold the revisions being diffed. _stepSel is the stepper component's
+// app scope output, initialised here because that component has
+// AccessAppScope true. Its name is deliberately not written out: the linter's
+// control/unresolved-reference check does not skip // comments, so a bare
+// component identifier in one reads as a broken reference.
+Set(gblIgceHeaderID, 0);
+Set(gblIgcePRID, "");
+Set(gblIgceCmpA, 0);
+Set(gblIgceCmpB, 0);
+Set(_stepSel, 0);
+
+// =============================================================================
+//  VALIDATION OUTPUT
+//  Seeded empty and TYPED, so a screen can bind to them before anything has
+//  been validated. Collect one row to fix the column types, then Clear it:
+//  Clear drops the rows and keeps the schema. A bare Table() would leave
+//  every column type unresolved, and Filter(Table(...), false) resolves them
+//  but compiles with a literal predicate warning.
+//
+//  Neither is a SharePoint list. They are the output of nfIGCEValidate and
+//  stay collections in Phase 2.
+// =============================================================================
+
+ClearCollect(colIGCEBlockers,
+    { Scope: "", RefID: 0, Field: "", Message: "", Fail: false }
+);
+Clear(colIGCEBlockers);
+
+ClearCollect(colIGCEUnchecked,
+    { Scope: "", RefID: 0, Field: "", Message: "", Fail: false }
+);
+Clear(colIGCEUnchecked);
