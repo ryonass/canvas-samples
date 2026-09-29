@@ -1,0 +1,1584 @@
+// =============================================================================
+//  CISA COCO IGCE - calculation chain
+//
+//  Phase 1 reads collections; Phase 2 reads the SharePoint lists of the same
+//  name and shape. Nothing in this file changes between phases.
+//
+//  Every formula here is a pure function of its arguments. None of them read a
+//  collection, so none of them depend on App.OnStart having run, and each can
+//  be reasoned about on its own. The chain is verified against the mockup's
+//  seed estimate: see docs/decisions.md D2.
+// =============================================================================
+
+
+// =============================================================================
+//  RATES
+//  D9: rates are stored whole-number, 32 meaning 32 per cent. Converted once,
+//  here. If real data turns out fractional, this is the only line that changes.
+// =============================================================================
+
+nfIGCEPct(whole: Number): Number = Coalesce(whole, 0) / 100;
+
+// D9: a rate above 100 is almost certainly a fraction entered as a whole
+// number, or the reverse. Validation surfaces it rather than producing an
+// estimate two orders of magnitude out.
+nfIGCERateSuspect(whole: Number): Boolean = Coalesce(whole, 0) > 100;
+
+// D2: the indirect burden column does not exist on IGCEHeader yet. Absent, it
+// reads 0, and the chain then matches the handoff exactly. It does not
+// silently vanish - the README records it and validation reports it.
+nfIGCEBurdenRate(whole: Number): Number = nfIGCEPct(Coalesce(whole, 0));
+
+
+// =============================================================================
+//  PERIODS
+//  D1: OptionPeriods counts OPTION periods (0-4). Active periods are that plus
+//  the base. The mockup's n is the total count; do not copy it.
+// =============================================================================
+
+nfIGCEPeriodCount(optionPeriods: Number): Number =
+    1 + Max(0, Min(4, Coalesce(optionPeriods, 0)));
+
+nfIGCEPeriodActive(periodIndex: Number, optionPeriods: Number): Boolean =
+    periodIndex < nfIGCEPeriodCount(optionPeriods);
+
+nfIGCEPeriodLabel(periodIndex: Number): Text =
+    If(periodIndex = 0, "Base", "OP" & periodIndex);
+
+
+// =============================================================================
+//  SUBLINE COST
+//  Step 1-2 of the chain. Must match the IGCESubLine calculated column formula
+//  once the fields output arrives; where they differ, SharePoint wins.
+//
+//  The mockup rounds the inflated rate to cents BEFORE multiplying by quantity.
+//  That rounding is kept: dropping it moves totals by a few dollars per period,
+//  which is exactly the size of error that survives review.
+// =============================================================================
+
+nfIGCERateFor(baseRate: Number, enteredRate: Number, calcOptionPeriods: Boolean, periodIndex: Number, inflationWhole: Number): Number =
+    If(
+        periodIndex = 0 || !calcOptionPeriods,
+        Coalesce(enteredRate, 0),
+        RoundDown(Coalesce(baseRate, 0) * Power(1 + nfIGCEPct(inflationWhole), periodIndex) * 100 + 0.5, 0) / 100
+    );
+
+nfIGCECostFor(quantity: Number, rate: Number): Number =
+    Coalesce(quantity, 0) * Coalesce(rate, 0);
+
+
+// =============================================================================
+//  SUBLINE INDIRECTS
+//  D4: fringe and overhead apply to labor sublines only. Cost sublines take
+//  G&A and FCCOM on cost directly. If the client says otherwise, the two
+//  formulas below are the whole change.
+// =============================================================================
+
+nfIGCEFringeFor(cost: Number, isLabor: Boolean, fringeWhole: Number): Number =
+    If(isLabor, cost * nfIGCEPct(fringeWhole), 0);
+
+nfIGCEOverheadFor(cost: Number, fringe: Number, isLabor: Boolean, overheadWhole: Number): Number =
+    If(isLabor, (cost + fringe) * nfIGCEPct(overheadWhole), 0);
+
+// The base G&A and FCCOM sit on: loaded labor, or bare cost.
+nfIGCEIndirectBase(cost: Number, fringe: Number, overhead: Number): Number =
+    cost + fringe + overhead;
+
+nfIGCEGAFor(cost: Number, fringe: Number, overhead: Number, gaWhole: Number): Number =
+    nfIGCEIndirectBase(cost, fringe, overhead) * nfIGCEPct(gaWhole);
+
+nfIGCEFCCOMFor(cost: Number, fringe: Number, overhead: Number, fccomWhole: Number): Number =
+    nfIGCEIndirectBase(cost, fringe, overhead) * nfIGCEPct(fccomWhole);
+
+// Step 5. Mirrors the IGCESubLine calculated columns Burden and TotalCost.
+nfIGCEBurdenFor(fringe: Number, overhead: Number, ga: Number, fccom: Number): Number =
+    fringe + overhead + ga + fccom;
+
+nfIGCETotalCostFor(cost: Number, burden: Number): Number = cost + burden;
+
+
+// =============================================================================
+//  ESTIMATE LEVEL, PER PERIOD
+//  Step 6. Operates on sums the caller has already rolled up from the sublines,
+//  so this stays a pure function and the rollup lives in one save routine.
+// =============================================================================
+
+// D2: burden applies only to the burdened cost categories, never to labor.
+nfIGCEIndirectBurden(burdenedCost: Number, burdenWhole: Number): Number =
+    burdenedCost * nfIGCEBurdenRate(burdenWhole);
+
+// Fee excludes facilities cost of money from its base. Both the handoff and
+// the mockup agree on this.
+nfIGCEFixedFee(totalCost: Number, fccom: Number, feeWhole: Number): Number =
+    (totalCost - fccom) * nfIGCEPct(feeWhole);
+
+nfIGCEAccessFee(totalCost: Number, fixedFee: Number, cafWhole: Number): Number =
+    (totalCost + fixedFee) * nfIGCEPct(cafWhole);
+
+nfIGCECeiling(totalCost: Number, fixedFee: Number, accessFee: Number): Number =
+    totalCost + fixedFee + accessFee;
+
+
+// =============================================================================
+//  SETTINGS
+//  Fail loud. A missing key returns a marker that is obvious on screen, not a
+//  blank that reads as "nothing to say here".
+// =============================================================================
+
+nfIGCESettingMissing(key: Text): Text = "[missing setting: " & key & "]";
+
+
+// =============================================================================
+//  DISPLAY
+// =============================================================================
+
+nfIGCEMoney(v: Number): Text = "$" & Text(Coalesce(v, 0), "[$-en-US]#,##0");
+nfIGCEMoney2(v: Number): Text = "$" & Text(Coalesce(v, 0), "[$-en-US]#,##0.00");
+nfIGCEDay(d: DateTime): Text = Text(d, "[$-en-US]mmm d, yyyy");
+
+
+// =============================================================================
+//  IDs
+//  Phase 1 mints its own. Phase 2 deletes these three formulas and takes the ID
+//  SharePoint returns on insert. They are the only place an ID is produced.
+// =============================================================================
+
+nfIGCENextHeaderID  = Coalesce(Max(colIGCEHeader, ID), 0) + 1;
+nfIGCENextLineID    = Coalesce(Max(colIGCELine, ID), 0) + 1;
+nfIGCENextSubLineID = Coalesce(Max(colIGCESubLine, ID), 0) + 1;
+
+
+// =============================================================================
+//  EDIT STAGING
+//  A save routine reads the row being edited from a staging collection and takes
+//  only the ID as a parameter. ID 0 means insert.
+//
+//  This was a record parameter on a User Defined Type, which compiled, and was
+//  changed because house-rules section 7 records UDTs as EXPERIMENTAL and the
+//  linter rejects the signature outright. A staging collection needs no preview
+//  feature and keeps the property that mattered: the three collections are
+//  seeded with their exact editable shape in App.OnStart, so a misspelled column
+//  in a screen's Patch fails against that schema rather than writing nothing.
+//
+//  What is absent from these shapes is the point. No rollup, no calculated
+//  column and no Status, because a routine owns those and a screen does not.
+//
+//  A screen patches the staging row from its form controls, then calls the
+//  routine. One estimate is edited at a time, which is what makes a single
+//  staging row sufficient.
+// =============================================================================
+
+// =============================================================================
+//  RECALC, BOTTOM UP
+//  Three routines, each owning one level. A save or a delete calls
+//  nfIGCERecalcHeader and the whole estimate under it is rebuilt: a header rate
+//  change reaches every subline, which a per-subline recalc would miss.
+//
+//  Phase 2: Cost, Burden and TotalCost per period are SharePoint CALCULATED
+//  columns on IGCESubLine. Patch cannot write them. Drop them from the Patch in
+//  nfIGCERecalcSubLine and read them back instead. The stored indirects
+//  (Fringe, Overhead, GAndA, FCCOM) stay written from here either way.
+// =============================================================================
+
+nfIGCERecalcSubLine(subLineID: Number): Void = {
+    With(
+      { _s: LookUp(colIGCESubLine, ID = subLineID) },
+      With(
+        { _l: LookUp(colIGCELine, ID = _s.IGCELineID) },
+        With(
+          { _h: LookUp(colIGCEHeader, ID = _l.IGCEHeaderID) },
+          With(
+            {
+              _c0: If(nfIGCEPeriodActive(0, _h.OptionPeriods), nfIGCECostFor(_s.BaseYearQuantity, nfIGCERateFor(_s.BaseYearRate, _s.BaseYearRate, _s.CalculateOptionPeriods, 0, _h.InflationRate)), 0),
+              _c1: If(nfIGCEPeriodActive(1, _h.OptionPeriods), nfIGCECostFor(_s.OP1Quantity, nfIGCERateFor(_s.BaseYearRate, _s.OP1Rate, _s.CalculateOptionPeriods, 1, _h.InflationRate)), 0),
+              _c2: If(nfIGCEPeriodActive(2, _h.OptionPeriods), nfIGCECostFor(_s.OP2Quantity, nfIGCERateFor(_s.BaseYearRate, _s.OP2Rate, _s.CalculateOptionPeriods, 2, _h.InflationRate)), 0),
+              _c3: If(nfIGCEPeriodActive(3, _h.OptionPeriods), nfIGCECostFor(_s.OP3Quantity, nfIGCERateFor(_s.BaseYearRate, _s.OP3Rate, _s.CalculateOptionPeriods, 3, _h.InflationRate)), 0),
+              _c4: If(nfIGCEPeriodActive(4, _h.OptionPeriods), nfIGCECostFor(_s.OP4Quantity, nfIGCERateFor(_s.BaseYearRate, _s.OP4Rate, _s.CalculateOptionPeriods, 4, _h.InflationRate)), 0)
+            },
+            With(
+              {
+                _f0: nfIGCEFringeFor(_c0, _l.Labor, _h.FringeRate),
+                _f1: nfIGCEFringeFor(_c1, _l.Labor, _h.FringeRate),
+                _f2: nfIGCEFringeFor(_c2, _l.Labor, _h.FringeRate),
+                _f3: nfIGCEFringeFor(_c3, _l.Labor, _h.FringeRate),
+                _f4: nfIGCEFringeFor(_c4, _l.Labor, _h.FringeRate)
+              },
+              With(
+                {
+                  _o0: nfIGCEOverheadFor(_c0, _f0, _l.Labor, _h.OverheadRate),
+                  _o1: nfIGCEOverheadFor(_c1, _f1, _l.Labor, _h.OverheadRate),
+                  _o2: nfIGCEOverheadFor(_c2, _f2, _l.Labor, _h.OverheadRate),
+                  _o3: nfIGCEOverheadFor(_c3, _f3, _l.Labor, _h.OverheadRate),
+                  _o4: nfIGCEOverheadFor(_c4, _f4, _l.Labor, _h.OverheadRate)
+                },
+                With(
+                  {
+                    _g0: nfIGCEGAFor(_c0, _f0, _o0, _h.GARate),
+                    _g1: nfIGCEGAFor(_c1, _f1, _o1, _h.GARate),
+                    _g2: nfIGCEGAFor(_c2, _f2, _o2, _h.GARate),
+                    _g3: nfIGCEGAFor(_c3, _f3, _o3, _h.GARate),
+                    _g4: nfIGCEGAFor(_c4, _f4, _o4, _h.GARate)
+                  },
+                  With(
+                    {
+                      _k0: nfIGCEFCCOMFor(_c0, _f0, _o0, _h.FCCOMRate),
+                      _k1: nfIGCEFCCOMFor(_c1, _f1, _o1, _h.FCCOMRate),
+                      _k2: nfIGCEFCCOMFor(_c2, _f2, _o2, _h.FCCOMRate),
+                      _k3: nfIGCEFCCOMFor(_c3, _f3, _o3, _h.FCCOMRate),
+                      _k4: nfIGCEFCCOMFor(_c4, _f4, _o4, _h.FCCOMRate)
+                    },
+                    Patch(
+                      colIGCESubLine,
+                      _s,
+                      {
+                        BaseYearFringe:    _f0,
+                        BaseYearOverhead:  _o0,
+                        BaseYearGAndA:     _g0,
+                        BaseYearFCCOM:     _k0,
+                        BaseYearCost:      _c0,
+                        BaseYearBurden:    nfIGCEBurdenFor(_f0, _o0, _g0, _k0),
+                        BaseYearTotalCost: nfIGCETotalCostFor(_c0, nfIGCEBurdenFor(_f0, _o0, _g0, _k0)),
+                        OP1Fringe:    _f1,
+                        OP1Overhead:  _o1,
+                        OP1GAndA:     _g1,
+                        OP1FCCOM:     _k1,
+                        OP1Cost:      _c1,
+                        OP1Burden:    nfIGCEBurdenFor(_f1, _o1, _g1, _k1),
+                        OP1TotalCost: nfIGCETotalCostFor(_c1, nfIGCEBurdenFor(_f1, _o1, _g1, _k1)),
+                        OP2Fringe:    _f2,
+                        OP2Overhead:  _o2,
+                        OP2GAndA:     _g2,
+                        OP2FCCOM:     _k2,
+                        OP2Cost:      _c2,
+                        OP2Burden:    nfIGCEBurdenFor(_f2, _o2, _g2, _k2),
+                        OP2TotalCost: nfIGCETotalCostFor(_c2, nfIGCEBurdenFor(_f2, _o2, _g2, _k2)),
+                        OP3Fringe:    _f3,
+                        OP3Overhead:  _o3,
+                        OP3GAndA:     _g3,
+                        OP3FCCOM:     _k3,
+                        OP3Cost:      _c3,
+                        OP3Burden:    nfIGCEBurdenFor(_f3, _o3, _g3, _k3),
+                        OP3TotalCost: nfIGCETotalCostFor(_c3, nfIGCEBurdenFor(_f3, _o3, _g3, _k3)),
+                        OP4Fringe:    _f4,
+                        OP4Overhead:  _o4,
+                        OP4GAndA:     _g4,
+                        OP4FCCOM:     _k4,
+                        OP4Cost:      _c4,
+                        OP4Burden:    nfIGCEBurdenFor(_f4, _o4, _g4, _k4),
+                        OP4TotalCost: nfIGCETotalCostFor(_c4, nfIGCEBurdenFor(_f4, _o4, _g4, _k4)),
+                        TotalCost:
+                                nfIGCETotalCostFor(_c0, nfIGCEBurdenFor(_f0, _o0, _g0, _k0))
+                              + nfIGCETotalCostFor(_c1, nfIGCEBurdenFor(_f1, _o1, _g1, _k1))
+                              + nfIGCETotalCostFor(_c2, nfIGCEBurdenFor(_f2, _o2, _g2, _k2))
+                              + nfIGCETotalCostFor(_c3, nfIGCEBurdenFor(_f3, _o3, _g3, _k3))
+                              + nfIGCETotalCostFor(_c4, nfIGCEBurdenFor(_f4, _o4, _g4, _k4))
+                      }
+                    )
+                  )
+                )
+              )
+            )
+          )
+        )
+      )
+    );
+};
+
+// D10: a line's period cost is the sum of its sublines' TotalCost, burdened, so
+// the line totals add up to the estimate total that step 6 of the chain works
+// from. D11: AccountablePropertyTotal sums UNBURDENED Cost, across active
+// periods only, for sublines flagged IncludesProperty with PropertyType
+// Accountable. Inactive periods are already zero, so no period guard is needed
+// here: nfIGCERecalcSubLine zeroed them.
+nfIGCERecalcLine(lineID: Number): Void = {
+    ForAll(
+        Filter(colIGCESubLine, IGCELineID = lineID) As s,
+        nfIGCERecalcSubLine(s.ID)
+    );
+    Patch(
+        colIGCELine,
+        LookUp(colIGCELine, ID = lineID),
+        {
+            BaseYearCost: Sum(Filter(colIGCESubLine, IGCELineID = lineID) As s, s.BaseYearTotalCost),
+            OP1Cost: Sum(Filter(colIGCESubLine, IGCELineID = lineID) As s, s.OP1TotalCost),
+            OP2Cost: Sum(Filter(colIGCESubLine, IGCELineID = lineID) As s, s.OP2TotalCost),
+            OP3Cost: Sum(Filter(colIGCESubLine, IGCELineID = lineID) As s, s.OP3TotalCost),
+            OP4Cost: Sum(Filter(colIGCESubLine, IGCELineID = lineID) As s, s.OP4TotalCost),
+            AccountablePropertyTotal:
+                Sum(
+                    Filter(
+                        colIGCESubLine,
+                        IGCELineID = lineID,
+                        IncludesProperty,
+                        PropertyType.Value = "Accountable"
+                    ) As s,
+                    s.BaseYearCost + s.OP1Cost + s.OP2Cost + s.OP3Cost + s.OP4Cost
+                )
+        }
+    );
+};
+
+nfIGCERecalcHeader(headerID: Number): Void = {
+    ForAll(
+        Filter(colIGCELine, IGCEHeaderID = headerID) As l,
+        nfIGCERecalcLine(l.ID)
+    );
+    Patch(
+        colIGCEHeader,
+        LookUp(colIGCEHeader, ID = headerID),
+        {
+            AccountablePropertyTotal:
+                Sum(Filter(colIGCELine, IGCEHeaderID = headerID) As l, l.AccountablePropertyTotal),
+            Modified: Now()
+        }
+    );
+};
+
+
+// =============================================================================
+//  VALIDATION
+//  colIGCEBlockers is the one output. Every row carries Scope, RefID and Field so
+//  a control can show the message next to the field it belongs to:
+//      LookUp(colIGCEBlockers, Field = "InflationRate").Message
+//  Submit calls this and refuses to write while the collection is non empty.
+//
+//  colIGCEUnchecked is separate and deliberately NOT a blocker. It names the
+//  checks this app cannot yet perform because the columns they read are not known
+//  (README open questions 1 and 4). A screen shows it as a warning. Rolling these
+//  into the blockers would make every submit fail; dropping them would make an
+//  unchecked estimate look checked.
+// =============================================================================
+
+nfIGCEValidate(headerID: Number): Void = {
+    Clear(colIGCEBlockers);
+    Clear(colIGCEUnchecked);
+    With(
+        { _h: LookUp(colIGCEHeader, ID = headerID) },
+        Collect(
+            colIGCEBlockers,
+            Filter(
+                Table(
+                    { Scope: "header", RefID: headerID, Field: "PRTrackerNumber",
+                      Message: "Pick the PR this estimate belongs to.",
+                      Fail: IsBlank(_h.PRTrackerNumber) },
+                    { Scope: "header", RefID: headerID, Field: "IGCEType",
+                      Message: "Choose an IGCE type.",
+                      Fail: IsBlank(_h.IGCEType.Value) },
+                    { Scope: "header", RefID: headerID, Field: "PointOfContact",
+                      Message: "Name a point of contact.",
+                      Fail: IsBlank(_h.PointOfContact.Email) },
+                    { Scope: "header", RefID: headerID, Field: "COR",
+                      Message: "Name the COR who will review this estimate.",
+                      Fail: IsBlank(_h.COR.Email) },
+                    { Scope: "header", RefID: headerID, Field: "BasePeriodStart",
+                      Message: "Set the base period start date.",
+                      Fail: IsBlank(_h.BasePeriodStart) },
+                    { Scope: "header", RefID: headerID, Field: "BasePeriodEnd",
+                      Message: "Set the base period end date.",
+                      Fail: IsBlank(_h.BasePeriodEnd) },
+                    { Scope: "header", RefID: headerID, Field: "BasePeriodEnd",
+                      Message: "The base period ends before it starts.",
+                      Fail: !IsBlank(_h.BasePeriodStart) && !IsBlank(_h.BasePeriodEnd)
+                            && _h.BasePeriodEnd <= _h.BasePeriodStart },
+                    { Scope: "header", RefID: headerID, Field: "OptionPeriods",
+                      Message: "Option periods must be 0 to 4.",
+                      Fail: Coalesce(_h.OptionPeriods, -1) < 0 || _h.OptionPeriods > 4 },
+                    { Scope: "header", RefID: headerID, Field: "InflationRate",
+                      Message: "Inflation rate reads as over 100 per cent. Enter it as a whole number: 2 means 2 per cent.",
+                      Fail: nfIGCERateSuspect(_h.InflationRate) },
+                    { Scope: "header", RefID: headerID, Field: "FringeRate",
+                      Message: "Fringe rate reads as over 100 per cent. Enter it as a whole number.",
+                      Fail: nfIGCERateSuspect(_h.FringeRate) },
+                    { Scope: "header", RefID: headerID, Field: "OverheadRate",
+                      Message: "Overhead rate reads as over 100 per cent. Enter it as a whole number.",
+                      Fail: nfIGCERateSuspect(_h.OverheadRate) },
+                    { Scope: "header", RefID: headerID, Field: "GARate",
+                      Message: "G&A rate reads as over 100 per cent. Enter it as a whole number.",
+                      Fail: nfIGCERateSuspect(_h.GARate) },
+                    { Scope: "header", RefID: headerID, Field: "FCCOMRate",
+                      Message: "FCCOM rate reads as over 100 per cent. Enter it as a whole number.",
+                      Fail: nfIGCERateSuspect(_h.FCCOMRate) },
+                    { Scope: "header", RefID: headerID, Field: "ProfitFeeRate",
+                      Message: "Profit or fee rate reads as over 100 per cent. Enter it as a whole number.",
+                      Fail: nfIGCERateSuspect(_h.ProfitFeeRate) },
+                    { Scope: "header", RefID: headerID, Field: "ContractAccessFeeRate",
+                      Message: "Contract access fee rate reads as over 100 per cent. Enter it as a whole number.",
+                      Fail: nfIGCERateSuspect(_h.ContractAccessFeeRate) },
+                    { Scope: "header", RefID: headerID, Field: "Status",
+                      Message: "Only a Draft can be submitted.",
+                      Fail: _h.Status.Value <> "Draft" },
+                    { Scope: "header", RefID: headerID, Field: "Lines",
+                      Message: "An estimate needs at least one line.",
+                      Fail: CountRows(Filter(colIGCELine, IGCEHeaderID = headerID)) = 0 }
+                ),
+                Fail
+            )
+        )
+    );
+
+    // A line with no sublines has nothing to cost, so it would submit as zero.
+    Collect(
+        colIGCEBlockers,
+        Filter(
+            ForAll(
+                Filter(colIGCELine, IGCEHeaderID = headerID) As l,
+                { Scope: "line", RefID: l.ID, Field: "SubLines",
+                  Message: "Line " & l.LineNumber & " " & l.Title & " has no sublines.",
+                  Fail: CountRows(Filter(colIGCESubLine, IGCELineID = l.ID)) = 0 }
+            ),
+            Fail
+        )
+    );
+
+    // Base period quantity and rate are required on every subline. The option
+    // periods are checked below, per period, and only while that period is active.
+    Collect(
+        colIGCEBlockers,
+        Filter(
+            ForAll(
+                Filter(
+                    colIGCESubLine As s,
+                    LookUp(colIGCELine, ID = s.IGCELineID).IGCEHeaderID = headerID
+                ) As s,
+                { Scope: "subline", RefID: s.ID, Field: "BaseYearQuantity",
+                  Message: "Subline " & s.Ref & " " & s.Title & " has no base period quantity.",
+                  Fail: Coalesce(s.BaseYearQuantity, 0) <= 0 }
+            ),
+            Fail
+        )
+    );
+
+    Collect(
+        colIGCEBlockers,
+        Filter(
+            ForAll(
+                Filter(
+                    colIGCESubLine As s,
+                    LookUp(colIGCELine, ID = s.IGCELineID).IGCEHeaderID = headerID
+                ) As s,
+                { Scope: "subline", RefID: s.ID, Field: "BaseYearRate",
+                  Message: "Subline " & s.Ref & " " & s.Title & " has no base period rate.",
+                  Fail: Coalesce(s.BaseYearRate, 0) <= 0 }
+            ),
+            Fail
+        )
+    );
+
+    Collect(
+        colIGCEBlockers,
+        Filter(
+            ForAll(
+                Filter(colIGCESubLine, IncludesProperty) As s,
+                { Scope: "subline", RefID: s.ID, Field: "PropertyType",
+                  Message: "Subline " & s.Ref & " " & s.Title & " is flagged as property but has no property type.",
+                  Fail: LookUp(colIGCELine, ID = s.IGCELineID).IGCEHeaderID = headerID
+                        && IsBlank(s.PropertyType.Value) }
+            ),
+            Fail
+        )
+    );
+
+    // Checks that cannot be written yet. Named rather than skipped.
+    With(
+        { _h: LookUp(colIGCEHeader, ID = headerID) },
+        Collect(
+            colIGCEUnchecked,
+            Filter(
+                Table(
+                    { Scope: "header", RefID: headerID, Field: "ContainsGFP",
+                      Message: "This estimate contains GFP, and the six GFP answers were NOT checked: the answer column names are not yet known. README open question 4.",
+                      Fail: _h.ContainsGFP },
+                    { Scope: "header", RefID: headerID, Field: "BasisOfEstimate",
+                      Message: "The basis of estimate fields were NOT checked: the 19 BOE columns are not yet seeded, pending the IGCEHeader fields output. README open question 1.",
+                      Fail: true },
+                    { Scope: "header", RefID: headerID, Field: "IndirectBurdenRate",
+                      Message: "Indirect burden is 0, so ODC and travel carry no separate burden. If the client expects one, IndirectBurdenRate is a proposed new column. decisions.md D2.",
+                      Fail: Coalesce(_h.IndirectBurdenRate, 0) = 0 }
+                ),
+                Fail
+            )
+        )
+    );
+};
+
+
+// =============================================================================
+//  SAVE
+//  One routine per level. Each writes, then rebuilds the whole estimate from the
+//  header down, because a header rate reaches every subline and a subline
+//  quantity reaches the line and header rollups.
+//
+//  Phase 2 list, per routine:
+//      nfIGCESaveHeader   IGCEHeader
+//      nfIGCESaveLine     IGCELine
+//      nfIGCESaveSubLine  IGCESubLine
+//  Phase 2 also replaces the minted ID with the one Patch returns, and the
+//  cascade then has to wait on that value rather than reading it from the edit.
+// =============================================================================
+
+nfIGCESaveHeader(headerID: Number): Void = {
+    With(
+        {
+            _e:  First(colIGCEHeaderEdit),
+            _id: If(Coalesce(headerID, 0) = 0, nfIGCENextHeaderID, headerID)
+        },
+        If(
+            Coalesce(headerID, 0) = 0,
+            Collect(
+                colIGCEHeader,
+                Patch(
+                    _e,
+                    {
+                        ID: _id,
+                        Status: { Value: "Draft" },
+                        AccountablePropertyTotal: 0,
+                        SubmittedBy: "",
+                        SubmittedOn: Blank(),
+                        Modified: Now()
+                    }
+                )
+            ),
+            Patch(colIGCEHeader, LookUp(colIGCEHeader, ID = _id), _e)
+        );
+        nfIGCERecalcHeader(_id)
+    );
+};
+
+nfIGCESaveLine(lineID: Number): Void = {
+    With(
+        {
+            _e:  First(colIGCELineEdit),
+            _id: If(Coalesce(lineID, 0) = 0, nfIGCENextLineID, lineID)
+        },
+        If(
+            Coalesce(lineID, 0) = 0,
+            Collect(
+                colIGCELine,
+                Patch(
+                    _e,
+                    {
+                        ID: _id,
+                        BaseYearCost: 0, OP1Cost: 0, OP2Cost: 0, OP3Cost: 0, OP4Cost: 0,
+                        AccountablePropertyTotal: 0
+                    }
+                )
+            ),
+            Patch(colIGCELine, LookUp(colIGCELine, ID = _id), _e)
+        );
+        nfIGCERecalcHeader(_e.IGCEHeaderID)
+    );
+};
+
+nfIGCESaveSubLine(subLineID: Number): Void = {
+    With(
+        {
+            _e:  First(colIGCESubLineEdit),
+            _id: If(Coalesce(subLineID, 0) = 0, nfIGCENextSubLineID, subLineID)
+        },
+        If(
+            Coalesce(subLineID, 0) = 0,
+            Collect(colIGCESubLine, Patch(_e, { ID: _id })),
+            Patch(colIGCESubLine, LookUp(colIGCESubLine, ID = _id), _e)
+        );
+        nfIGCERecalcHeader(LookUp(colIGCELine, ID = _e.IGCELineID).IGCEHeaderID)
+    );
+};
+
+
+// =============================================================================
+//  DELETE
+//  Hard delete, cascading downward, then the rollups above are rebuilt. The
+//  parent id is read BEFORE the row goes, because afterwards there is nothing to
+//  read it from.
+//
+//  Phase 2: the cascade becomes three RemoveIf calls against the lists, and the
+//  order still matters. A Flow is not needed; there is no cross site work here.
+// =============================================================================
+
+nfIGCEDeleteSubLine(subLineID: Number): Void = {
+    With(
+        { _headerID: LookUp(colIGCELine, ID = LookUp(colIGCESubLine, ID = subLineID).IGCELineID).IGCEHeaderID },
+        Remove(colIGCESubLine, LookUp(colIGCESubLine, ID = subLineID));
+        nfIGCERecalcHeader(_headerID)
+    );
+};
+
+nfIGCEDeleteLine(lineID: Number): Void = {
+    With(
+        { _headerID: LookUp(colIGCELine, ID = lineID).IGCEHeaderID },
+        RemoveIf(colIGCESubLine, IGCELineID = lineID);
+        Remove(colIGCELine, LookUp(colIGCELine, ID = lineID));
+        nfIGCERecalcHeader(_headerID)
+    );
+};
+
+nfIGCEDeleteHeader(headerID: Number): Void = {
+    RemoveIf(
+        colIGCESubLine,
+        LookUp(colIGCELine, ID = IGCELineID).IGCEHeaderID = headerID
+    );
+    RemoveIf(colIGCELine, IGCEHeaderID = headerID);
+    Remove(colIGCEHeader, LookUp(colIGCEHeader, ID = headerID));
+};
+
+
+// =============================================================================
+//  WORKFLOW
+//  Status is written here and nowhere else. Both routines refuse from the wrong
+//  state rather than moving an estimate sideways, and both say so in
+//  colIGCEBlockers so the refusal is visible on the screen that asked.
+//
+//  Phase 2 list: IGCEHeader. SubmittedBy and SubmittedOn are assumed column
+//  names, see the README.
+// =============================================================================
+
+nfIGCESubmit(headerID: Number): Void = {
+    nfIGCEValidate(headerID);
+    If(
+        IsEmpty(colIGCEBlockers),
+        Patch(
+            colIGCEHeader,
+            LookUp(colIGCEHeader, ID = headerID),
+            {
+                Status: { Value: "Submitted" },
+                SubmittedBy: gblSignedIn.DisplayName,
+                SubmittedOn: Now(),
+                Modified: Now()
+            }
+        )
+    );
+};
+
+nfIGCEApprove(headerID: Number): Void = {
+    Clear(colIGCEBlockers);
+    With(
+        { _h: LookUp(colIGCEHeader, ID = headerID) },
+        If(
+            _h.Status.Value = "Submitted" || _h.Status.Value = "COR review",
+            Patch(
+                colIGCEHeader,
+                _h,
+                { Status: { Value: "Approved" }, Modified: Now() }
+            ),
+            Collect(
+                colIGCEBlockers,
+                {
+                    Scope: "header", RefID: headerID, Field: "Status",
+                    Message: "Only a submitted estimate can be approved. This one is " & _h.Status.Value & ".",
+                    Fail: true
+                }
+            )
+        )
+    );
+};
+
+
+// =============================================================================
+//  START REVISION
+//  Copies a header with its lines and sublines, as the next revision of the same
+//  PR, in Draft. Only one Draft per PR, so a PR with one open Draft is refused.
+//
+//  The copy uses Patch(record, changes) as a merge, which returns a new record
+//  rather than writing one. That means a column added to a list later is carried
+//  across without touching this routine, which enumerating 45 fields would not do.
+//
+//  New ids are computed as a base plus a 1 based position, captured BEFORE any
+//  write. Reading nfIGCENextSubLineID inside the loop would depend on the
+//  collection refreshing mid statement, which is not something to rely on.
+//
+//  Phase 2: the id mapping is the part that changes. SharePoint assigns line ids
+//  on insert, so the subline loop has to read the id each Patch returned rather
+//  than derive it from a position.
+// =============================================================================
+
+nfIGCERevisionCopy(headerID: Number, newRevision: Number): Void = {
+    With(
+        {
+            _h:        LookUp(colIGCEHeader, ID = headerID),
+            _srcLines: Sort(Filter(colIGCELine, IGCEHeaderID = headerID), ID),
+            _srcSubs:  Sort(
+                           Filter(
+                               colIGCESubLine As s,
+                               LookUp(colIGCELine, ID = s.IGCELineID).IGCEHeaderID = headerID
+                           ),
+                           ID
+                       ),
+            _newHdrID: nfIGCENextHeaderID,
+            _lineBase: nfIGCENextLineID,
+            _subBase:  nfIGCENextSubLineID
+        },
+        Collect(
+            colIGCEHeader,
+            Patch(
+                _h,
+                {
+                    ID: _newHdrID,
+                    Revision: newRevision,
+                    Status: { Value: "Draft" },
+                    SubmittedBy: "",
+                    SubmittedOn: Blank(),
+                    Modified: Now()
+                }
+            )
+        );
+        ForAll(
+            Sequence(CountRows(_srcLines)) As i,
+            Collect(
+                colIGCELine,
+                Patch(
+                    Last(FirstN(_srcLines, i.Value)),
+                    { ID: _lineBase + i.Value - 1, IGCEHeaderID: _newHdrID }
+                )
+            )
+        );
+        ForAll(
+            Sequence(CountRows(_srcSubs)) As k,
+            Collect(
+                colIGCESubLine,
+                Patch(
+                    Last(FirstN(_srcSubs, k.Value)),
+                    {
+                        ID: _subBase + k.Value - 1,
+                        IGCELineID:
+                            _lineBase
+                            + CountRows(
+                                  Filter(
+                                      _srcLines As l,
+                                      l.ID <= Last(FirstN(_srcSubs, k.Value)).IGCELineID
+                                  )
+                              )
+                            - 1
+                    }
+                )
+            )
+        );
+        nfIGCERecalcHeader(_newHdrID)
+    );
+};
+
+nfIGCEStartRevision(headerID: Number): Void = {
+    Clear(colIGCEBlockers);
+    With(
+        { _h: LookUp(colIGCEHeader, ID = headerID) },
+        With(
+            {
+                _hasDraft: CountRows(
+                               Filter(colIGCEHeader, PRID = _h.PRID, Status.Value = "Draft")
+                           ) > 0,
+                _nextRev:  Coalesce(Max(Filter(colIGCEHeader, PRID = _h.PRID) As r, r.Revision), 0) + 1
+            },
+            If(
+                _hasDraft,
+                Collect(
+                    colIGCEBlockers,
+                    {
+                        Scope: "header", RefID: headerID, Field: "Revision",
+                        Message: "This PR already has a Draft revision. Finish or delete it before starting another.",
+                        Fail: true
+                    }
+                ),
+                nfIGCERevisionCopy(headerID, _nextRev)
+            )
+        )
+    );
+};
+
+
+// =============================================================================
+//  SCREEN TOKENS
+//  Colours are the mockup's own CSS custom properties, transcribed. Both planes
+//  carry IDENTICAL key sets, 17 each: a key present in one and missing from the
+//  other fails every reference on that theme only, which is the defect that
+//  reaches a buyer.
+//
+//  nfColor resolves to the light plane. There is no theme toggle in v1 because
+//  the mockup has none and the data contract has no preferences list to hold the
+//  choice. The dark plane is transcribed anyway, so adding a toggle is one edit
+//  to nfColor rather than a second palette to write.
+// =============================================================================
+
+nfColorLight = {
+    Ink:         RGBA(22, 35, 58, 1),
+    Ink2:        RGBA(86, 101, 121, 1),
+    Paper:       RGBA(243, 245, 248, 1),
+    Surface:     RGBA(255, 255, 255, 1),
+    Rule:        RGBA(214, 221, 230, 1),
+    Navy:        RGBA(31, 58, 95, 1),
+    NavyInk:     RGBA(255, 255, 255, 1),
+    Money:       RGBA(43, 106, 74, 1),
+    Warn:        RGBA(138, 82, 0, 1),
+    WarnBg:      RGBA(255, 243, 221, 1),
+    Field:       RGBA(251, 252, 253, 1),
+    Sel:         RGBA(228, 236, 246, 1),
+    Band:        RGBA(238, 242, 247, 1),
+    White:       RGBA(255, 255, 255, 1),
+    Transparent: RGBA(0, 0, 0, 0),
+    Up:          RGBA(138, 82, 0, 1),
+    Down:        RGBA(43, 106, 74, 1),
+    Avatar:      RGBA(25, 118, 210, 1),
+    Scrim:       RGBA(22, 35, 58, 0.55)
+};
+
+nfColorDark = {
+    Ink:         RGBA(228, 234, 242, 1),
+    Ink2:        RGBA(157, 174, 194, 1),
+    Paper:       RGBA(14, 23, 38, 1),
+    Surface:     RGBA(21, 33, 58, 1),
+    Rule:        RGBA(42, 59, 87, 1),
+    Navy:        RGBA(156, 192, 234, 1),
+    NavyInk:     RGBA(14, 23, 38, 1),
+    Money:       RGBA(114, 207, 158, 1),
+    Warn:        RGBA(242, 181, 92, 1),
+    WarnBg:      RGBA(58, 42, 16, 1),
+    Field:       RGBA(26, 40, 67, 1),
+    Sel:         RGBA(34, 55, 91, 1),
+    Band:        RGBA(27, 41, 69, 1),
+    White:       RGBA(255, 255, 255, 1),
+    Transparent: RGBA(0, 0, 0, 0),
+    Up:          RGBA(242, 181, 92, 1),
+    Down:        RGBA(114, 207, 158, 1),
+    Avatar:      RGBA(25, 118, 210, 1),
+    Scrim:       RGBA(0, 0, 0, 0.65)
+};
+
+nfColor = nfColorLight;
+
+// 640 and 1024 are the house breakpoints. The mockup uses 720 and 1100, which
+// match nothing else in the library, so the tiers are restated rather than
+// transcribed. Never read these from App.SizeBreakpoints, which holds the
+// platform 600/900/1200 and does not agree with them at any point.
+nfIsMobile  = App.Width < 640;
+nfIsTablet  = App.Width >= 640 && App.Width < 1024;
+nfIsDesktop = App.Width >= 1024;
+
+// Initials for the top bar avatar. Handles "Last, First" as well as "First Last",
+// and a single name. Written by the author in Studio on scrIgceHome, moved here
+// so every screen reads one definition.
+nfIgceInitials =
+    With(
+        { rawName: Trim(User().FullName) },
+        With(
+            {
+                ordered: If(
+                    Find(",", rawName) > 0,
+                    Mid(rawName, Find(",", rawName) + 1) & " " & Left(rawName, Find(",", rawName) - 1),
+                    rawName
+                )
+            },
+            With(
+                { parts: Filter(Split(ordered, " "), !IsBlank(ThisRecord.Value)) },
+                Upper(
+                    If(
+                        CountRows(parts) > 1,
+                        Left(First(parts).Value, 1) & Left(Last(parts).Value, 1),
+                        Left(First(parts).Value, 2)
+                    )
+                )
+            )
+        )
+    );
+
+nfSpace = { Xs: 4, Sm: 8, Md: 12, Lg: 16, Xl: 20, Xxl: 24, Xxxl: 32 };
+
+nfType = { Cap: 11, Small: 12, Body: 13, Body2: 14, H3: 15, H2: 20, Big: 30 };
+
+nfHeights = {
+    topBar:  If(App.Width < 640, 56, 64),
+    input:   36,
+    btn:     34,
+    row:     40,
+    hdrRow:  36,
+    chip:    22,
+    crumb:   24,
+    h2:      34,
+    h3:      26,
+    line:    24,
+    bar:     8,
+    legend:  16,
+    cap:     16,
+    big:     38,
+    subH:    20
+};
+
+nfWidths = { ledger: 290, page: 900, boe: 820 };
+
+// The page cap goes on the gutter's children, not the gutter, so a later
+// full bleed child does not require unpicking every sibling. The subtraction is
+// twice the gutter's own padding, derived from the same tokens so it cannot drift.
+nfPageW = Min(
+    nfWidths.page,
+    App.Width - If(App.Width < 640, 2 * nfSpace.Lg, 2 * nfSpace.Xxl)
+);
+
+// D13: status pill colours, keyed on the Status CHOICE VALUE as it is stored, not
+// on a separate key. Verified by lookup rather than by reading: "COR review"
+// returns the Warn row, not the fallback. A fallback that silently absorbs a
+// wrong key is how every pill ends up the same neutral grey.
+nfIgceStatusStyle(status: Text): Color =
+    Switch(
+        status,
+        "Draft",      nfColor.Band,
+        "Submitted",  nfColor.Sel,
+        "COR review", nfColor.WarnBg,
+        "Approved",   nfColor.Money,
+        nfColor.Band
+    );
+
+nfIgceStatusInk(status: Text): Color =
+    Switch(
+        status,
+        "Draft",      nfColor.Ink,
+        "Submitted",  nfColor.Navy,
+        "COR review", nfColor.Warn,
+        "Approved",   nfColor.White,
+        nfColor.Ink
+    );
+
+// The five editor steps. GFP is present only when the estimate contains
+// government furnished property, which is what makes the count 4 or 5 and why
+// nothing hardcodes a step index.
+nfIgceSteps(containsGfp: Boolean): Text =
+    If(containsGfp, "header,lines,gfp,boe,review", "header,lines,boe,review");
+
+nfIgceStepCount(containsGfp: Boolean): Number = If(containsGfp, 5, 4);
+
+nfIgceStepIndex(step: Text, containsGfp: Boolean): Number =
+    Switch(
+        step,
+        "header", 1,
+        "lines",  2,
+        "gfp",    3,
+        "boe",    If(containsGfp, 4, 3),
+        "review", If(containsGfp, 5, 4),
+        1
+    );
+
+
+// =============================================================================
+//  ESTIMATE LEVEL READS
+//  Screens show a ceiling in list rows and tiles. These roll it up from the
+//  sublines the save routines wrote, so no screen repeats the arithmetic and no
+//  screen reads a rate directly.
+//
+//  Scalar parameter, scalar return. Deliberately not a table return: a UDF cannot
+//  return a table without a User Defined Type, which house-rules records as
+//  experimental, so a table projection stays inline on the screen that needs it.
+// =============================================================================
+
+nfIgceSubsOfTotal(headerID: Number): Number =
+    Sum(
+        Filter(
+            colIGCESubLine As s,
+            LookUp(colIGCELine, ID = s.IGCELineID).IGCEHeaderID = headerID
+        ) As s,
+        s.TotalCost
+    );
+
+nfIgceSubsOfFccom(headerID: Number): Number =
+    Sum(
+        Filter(
+            colIGCESubLine As s,
+            LookUp(colIGCELine, ID = s.IGCELineID).IGCEHeaderID = headerID
+        ) As s,
+        s.BaseYearFCCOM + s.OP1FCCOM + s.OP2FCCOM + s.OP3FCCOM + s.OP4FCCOM
+    );
+
+nfIgceFeeOf(headerID: Number): Number =
+    nfIGCEFixedFee(
+        nfIgceSubsOfTotal(headerID),
+        nfIgceSubsOfFccom(headerID),
+        LookUp(colIGCEHeader, ID = headerID).ProfitFeeRate
+    );
+
+nfIgceCafOf(headerID: Number): Number =
+    nfIGCEAccessFee(
+        nfIgceSubsOfTotal(headerID),
+        nfIgceFeeOf(headerID),
+        LookUp(colIGCEHeader, ID = headerID).ContractAccessFeeRate
+    );
+
+nfIgceCeilingOf(headerID: Number): Number =
+    nfIGCECeiling(
+        nfIgceSubsOfTotal(headerID),
+        nfIgceFeeOf(headerID),
+        nfIgceCafOf(headerID)
+    );
+
+// The latest revision of a PR, by revision number rather than by created order.
+nfIgceLatestIDOf(prid: Text): Number =
+    LookUp(
+        colIGCEHeader As h,
+        h.PRID = prid
+            && h.Revision = Max(Filter(colIGCEHeader, PRID = prid) As r, r.Revision)
+    ).ID;
+
+nfIgceRevCountOf(prid: Text): Number =
+    CountRows(Filter(colIGCEHeader, PRID = prid));
+
+// A revision can be started only from the latest revision of a PR, only when that
+// revision is no longer a Draft, and only when the PR has no open Draft. All three
+// are the mockup's canRevise. nfIGCEStartRevision enforces the third itself and
+// reports a blocker; this is the version a button reads to decide whether to show.
+nfIgceCanRevise(headerID: Number): Boolean =
+    With(
+        { _h: LookUp(colIGCEHeader, ID = headerID) },
+        nfIgceLatestIDOf(_h.PRID) = headerID
+            && _h.Status.Value <> "Draft"
+            && CountRows(Filter(colIGCEHeader, PRID = _h.PRID, Status.Value = "Draft")) = 0
+    );
+
+nfIgceIsReadOnly(headerID: Number): Boolean =
+    LookUp(colIGCEHeader, ID = headerID).Status.Value <> "Draft";
+
+
+// =============================================================================
+//  LIST PROJECTIONS
+//  Written once here rather than five times on one screen. These are named
+//  formulas, not UDFs, because a UDF cannot return a table without a User
+//  Defined Type and house-rules records those as experimental.
+//
+//  They read collections seeded in App.OnStart. A named formula evaluates BEFORE
+//  OnStart, so each is briefly empty and then recomputes reactively when the seed
+//  lands. That is correct for a gallery and is the reason nothing here is used as
+//  a fallback value: house-rules section 9 records the three way collision that
+//  arises when a named formula is asked to supply one.
+// =============================================================================
+
+nfIgceMe = Lower(User().Email);
+
+// One row per PR, the highest revision of each. Revision number, not created
+// order, because a revision can be deleted.
+nfIgceLatest =
+    Filter(
+        colIGCEHeader As h,
+        h.Revision = Max(Filter(colIGCEHeader, PRID = h.PRID) As r, r.Revision)
+    );
+
+nfIgceMineCount =
+    CountRows(
+        Filter(
+            nfIgceLatest As e,
+            CountRows(
+                Filter(colIGCEHeader, PRID = e.PRID, PointOfContact.Email = nfIgceMe)
+            ) > 0
+        )
+    );
+
+nfIgceReviewCount =
+    CountRows(
+        Filter(
+            nfIgceLatest As e,
+            e.COR.Email = nfIgceMe
+                && (e.Status.Value = "Submitted" || e.Status.Value = "COR review")
+        )
+    );
+
+nfIgceAllCount = CountRows(nfIgceLatest);
+
+// The PR number for the title bar. PRID is the tracker row id held as text, so
+// showing it directly printed "PR: 1". Every header of a PR carries the same
+// PRTrackerNumber, so any one of them answers. Phase 2 note: this LookUp does
+// not delegate against a SharePoint list, so IGCEHeader wants an index on PRID.
+nfIgcePRLabel(prid: Text): Text =
+    LookUp(colIGCEHeader, PRID = prid).PRTrackerNumber;
+
+// Requirement name lives on the PR Tracker, not on the header. Phase 2 note: this
+// LookUp inside a Filter predicate does NOT delegate against a SharePoint list.
+// Either denormalise RequirementName onto IGCEHeader or accept a client side
+// search. Flagged rather than worked around.
+nfIgceReqNameOf(prTrackerId: Number): Text =
+    LookUp(colPRTracker, ID = prTrackerId).RequirementName;
+
+// Requirements in the tracker with no IGCE yet. These are what New IGCE offers.
+nfIgceFreePRs =
+    Filter(
+        colPRTracker As p,
+        CountRows(Filter(colIGCEHeader, PRTrackerNumber = p.PRTrackerNumber)) = 0
+    );
+
+
+// =============================================================================
+//  REVISION COMPARE AND PERIOD DATES
+// =============================================================================
+
+nfIgcePrevIDOf(headerID: Number): Number =
+    With(
+        { _h: LookUp(colIGCEHeader, ID = headerID) },
+        LookUp(
+            colIGCEHeader As p,
+            p.PRID = _h.PRID && p.Revision = _h.Revision - 1
+        ).ID
+    );
+
+nfIgceIDOfRev(prid: Text, rev: Number): Number =
+    LookUp(colIGCEHeader As h, h.PRID = prid && h.Revision = rev).ID;
+
+// Per period totals, so the ledger and the review table read one formula each.
+nfIgcePeriodCost(headerID: Number, periodIndex: Number): Number =
+    With(
+        {
+            _subs: Filter(
+                       colIGCESubLine As s,
+                       LookUp(colIGCELine, ID = s.IGCELineID).IGCEHeaderID = headerID
+                   )
+        },
+        Switch(
+            periodIndex,
+            0, Sum(_subs As s, s.BaseYearTotalCost),
+            1, Sum(_subs As s, s.OP1TotalCost),
+            2, Sum(_subs As s, s.OP2TotalCost),
+            3, Sum(_subs As s, s.OP3TotalCost),
+            4, Sum(_subs As s, s.OP4TotalCost),
+            0
+        )
+    );
+
+// Option period dates follow the base period, each one year long, which is the
+// mockup's rule. The note beside it there says to adjust a period on save if the
+// contract differs, so these are a default and not a constraint.
+nfIgcePeriodStart(headerID: Number, periodIndex: Number): DateTime =
+    DateAdd(LookUp(colIGCEHeader, ID = headerID).BasePeriodStart, periodIndex, TimeUnit.Years);
+
+nfIgcePeriodEnd(headerID: Number, periodIndex: Number): DateTime =
+    DateAdd(LookUp(colIGCEHeader, ID = headerID).BasePeriodEnd, periodIndex, TimeUnit.Years);
+
+// Cost build up rows, by element, for one period. The review table and the
+// ledger both read these so the two cannot disagree.
+nfIgceLaborCost(headerID: Number, periodIndex: Number): Number =
+    With(
+        {
+            _subs: Filter(
+                       colIGCESubLine As s,
+                       LookUp(colIGCELine, ID = s.IGCELineID).Labor
+                           && LookUp(colIGCELine, ID = s.IGCELineID).IGCEHeaderID = headerID
+                   )
+        },
+        Switch(
+            periodIndex,
+            0, Sum(_subs As s, s.BaseYearCost),
+            1, Sum(_subs As s, s.OP1Cost),
+            2, Sum(_subs As s, s.OP2Cost),
+            3, Sum(_subs As s, s.OP3Cost),
+            4, Sum(_subs As s, s.OP4Cost),
+            0
+        )
+    );
+
+nfIgceDirectCost(headerID: Number, periodIndex: Number): Number =
+    With(
+        {
+            _subs: Filter(
+                       colIGCESubLine As s,
+                       !LookUp(colIGCELine, ID = s.IGCELineID).Labor
+                           && LookUp(colIGCELine, ID = s.IGCELineID).IGCEHeaderID = headerID
+                   )
+        },
+        Switch(
+            periodIndex,
+            0, Sum(_subs As s, s.BaseYearCost),
+            1, Sum(_subs As s, s.OP1Cost),
+            2, Sum(_subs As s, s.OP2Cost),
+            3, Sum(_subs As s, s.OP3Cost),
+            4, Sum(_subs As s, s.OP4Cost),
+            0
+        )
+    );
+
+nfIgceBurdenCost(headerID: Number, periodIndex: Number): Number =
+    nfIgcePeriodCost(headerID, periodIndex)
+    - nfIgceLaborCost(headerID, periodIndex)
+    - nfIgceDirectCost(headerID, periodIndex);
+
+
+// =============================================================================
+//  COST BUILD UP BY ELEMENT
+//  One function, read by the Review table, the Compare table and the ledger, so
+//  the three cannot disagree about what an element means. Keyed by text rather
+//  than split into seven functions because the callers iterate a row table.
+//
+//  Scalar in, scalar out, so no User Defined Type is involved.
+// =============================================================================
+
+nfIgceElementOf(headerID: Number, key: Text): Number =
+    Switch(
+        key,
+        "labor",
+            nfIgceLaborCost(headerID, 0) + nfIgceLaborCost(headerID, 1)
+            + nfIgceLaborCost(headerID, 2) + nfIgceLaborCost(headerID, 3)
+            + nfIgceLaborCost(headerID, 4),
+        "direct",
+            nfIgceDirectCost(headerID, 0) + nfIgceDirectCost(headerID, 1)
+            + nfIgceDirectCost(headerID, 2) + nfIgceDirectCost(headerID, 3)
+            + nfIgceDirectCost(headerID, 4),
+        "burden",
+            nfIgceBurdenCost(headerID, 0) + nfIgceBurdenCost(headerID, 1)
+            + nfIgceBurdenCost(headerID, 2) + nfIgceBurdenCost(headerID, 3)
+            + nfIgceBurdenCost(headerID, 4),
+        "total",   nfIgceSubsOfTotal(headerID),
+        "fccom",   nfIgceSubsOfFccom(headerID),
+        "fee",     nfIgceFeeOf(headerID),
+        "caf",     nfIgceCafOf(headerID),
+        "ceiling", nfIgceCeilingOf(headerID),
+        0
+    );
+
+// The same seven elements for ONE period. The review table is per period, so it
+// needs this rather than the all periods total above.
+// Per period FCCOM, needed because the fee base EXCLUDES facilities cost of
+// money. Passing 0 here would overstate the fee in every period.
+nfIgcePeriodFccom(headerID: Number, periodIndex: Number): Number =
+    With(
+        {
+            _subs: Filter(
+                       colIGCESubLine As s,
+                       LookUp(colIGCELine, ID = s.IGCELineID).IGCEHeaderID = headerID
+                   )
+        },
+        Switch(
+            periodIndex,
+            0, Sum(_subs As s, s.BaseYearFCCOM),
+            1, Sum(_subs As s, s.OP1FCCOM),
+            2, Sum(_subs As s, s.OP2FCCOM),
+            3, Sum(_subs As s, s.OP3FCCOM),
+            4, Sum(_subs As s, s.OP4FCCOM),
+            0
+        )
+    );
+
+nfIgcePeriodFee(headerID: Number, periodIndex: Number): Number =
+    nfIGCEFixedFee(
+        nfIgcePeriodCost(headerID, periodIndex),
+        nfIgcePeriodFccom(headerID, periodIndex),
+        LookUp(colIGCEHeader, ID = headerID).ProfitFeeRate
+    );
+
+nfIgcePeriodCaf(headerID: Number, periodIndex: Number): Number =
+    nfIGCEAccessFee(
+        nfIgcePeriodCost(headerID, periodIndex),
+        nfIgcePeriodFee(headerID, periodIndex),
+        LookUp(colIGCEHeader, ID = headerID).ContractAccessFeeRate
+    );
+
+nfIgceElementPeriodOf(headerID: Number, key: Text, periodIndex: Number): Number =
+    Switch(
+        key,
+        "labor",   nfIgceLaborCost(headerID, periodIndex),
+        "direct",  nfIgceDirectCost(headerID, periodIndex),
+        "burden",  nfIgceBurdenCost(headerID, periodIndex),
+        "total",   nfIgcePeriodCost(headerID, periodIndex),
+        "fccom",   nfIgcePeriodFccom(headerID, periodIndex),
+        "fee",     nfIgcePeriodFee(headerID, periodIndex),
+        "caf",     nfIgcePeriodCaf(headerID, periodIndex),
+        "ceiling",
+            nfIGCECeiling(
+                nfIgcePeriodCost(headerID, periodIndex),
+                nfIgcePeriodFee(headerID, periodIndex),
+                nfIgcePeriodCaf(headerID, periodIndex)
+            ),
+        0
+    );
+
+
+// =============================================================================
+//  LINE LEVEL COMPARE
+//  Revisions are matched by line Title, which is what the mockup does. A renamed
+//  line therefore reads as one removed plus one added rather than as a change.
+//  That is the mockup's behaviour and it is left alone: matching on ID would be
+//  wrong, because a revision copy mints new line IDs.
+// =============================================================================
+
+nfIgceLineTotalOf(lineID: Number): Number =
+    With(
+        { _l: LookUp(colIGCELine, ID = lineID) },
+        _l.BaseYearCost + _l.OP1Cost + _l.OP2Cost + _l.OP3Cost + _l.OP4Cost
+    );
+
+nfIgceLineTotalIn(headerID: Number, title: Text): Number =
+    Sum(
+        Filter(colIGCELine, IGCEHeaderID = headerID, Title = title) As l,
+        l.BaseYearCost + l.OP1Cost + l.OP2Cost + l.OP3Cost + l.OP4Cost
+    );
+
+nfIgceLineCountIn(headerID: Number, title: Text): Number =
+    CountRows(Filter(colIGCELine, IGCEHeaderID = headerID, Title = title));
+
+
+// =============================================================================
+//  EDITOR NAVIGATION
+//  One routing function, called by every stepper and every pager, so a step order
+//  change is one edit. The GFP step exists only when the estimate contains
+//  government furnished property, which is why nothing hardcodes an index.
+// =============================================================================
+
+nfIgceStepNav(stepIndex: Number, containsGfp: Boolean): Void = {
+    Switch(
+        stepIndex,
+        1, Navigate(scrIgceHeader, ScreenTransition.None),
+        2, Navigate(scrIgceLines, ScreenTransition.None),
+        3, If(
+               containsGfp,
+               Navigate(scrIgceGfp, ScreenTransition.None),
+               Navigate(scrIgceBoe, ScreenTransition.None)
+           ),
+        4, If(
+               containsGfp,
+               Navigate(scrIgceBoe, ScreenTransition.None),
+               Navigate(scrIgceReview, ScreenTransition.None)
+           ),
+        5, Navigate(scrIgceReview, ScreenTransition.None)
+    );
+};
+
+nfIgceStepLabels(containsGfp: Boolean): Text =
+    If(
+        containsGfp,
+        "IGCE header|Lines|GFP justification|Basis of estimate|Review",
+        "IGCE header|Lines|Basis of estimate|Review"
+    );
+
+
+// =============================================================================
+//  BASIS OF ESTIMATE
+//  The 19 sections, their groups, labels, hints and required conditions are the
+//  mockup's, transcribed. What is NOT known is the SharePoint internal column
+//  name for each, which is README open question 1, so answers are staged in
+//  colIGCEBoeAnswer and NOT written to IGCEHeader. scrIgceBoe says so on screen
+//  rather than letting a user believe the text was saved to the estimate.
+// =============================================================================
+
+nfIgceHasLabor(headerID: Number): Boolean =
+    CountRows(Filter(colIGCELine, IGCEHeaderID = headerID, Labor)) > 0;
+
+nfIgceHasCat(headerID: Number, cat: Text): Boolean =
+    CountRows(
+        Filter(
+            colIGCELine,
+            IGCEHeaderID = headerID,
+            !Labor,
+            Category.Value = cat
+        )
+    ) > 0;
+
+nfIgceHasBurdenedCat(headerID: Number): Boolean =
+    nfIgceHasCat(headerID, "Direct Material")
+    || nfIgceHasCat(headerID, "Other Direct Costs")
+    || nfIgceHasCat(headerID, "Products/Supplies")
+    || nfIgceHasCat(headerID, "Travel");
+
+// Which sections this estimate actually has to answer. The mockup's boeNeeded.
+nfIgceBoeNeeded(headerID: Number, boeKey: Text): Boolean =
+    With(
+        { _h: LookUp(colIGCEHeader, ID = headerID) },
+        Switch(
+            boeKey,
+            "assume",   true,
+            "tools",    true,
+            "source",   true,
+            "prior",    true,
+            "labor",    nfIgceHasLabor(headerID),
+            "lcats",    nfIgceHasLabor(headerID),
+            "lrates",   nfIgceHasLabor(headerID),
+            "hours",    nfIgceHasLabor(headerID),
+            "udl",      nfIgceHasLabor(headerID),
+            "odc",      nfIgceHasCat(headerID, "Other Direct Costs"),
+            "material", nfIgceHasCat(headerID, "Direct Material"),
+            "products", nfIgceHasCat(headerID, "Products/Supplies"),
+            "subk",     nfIgceHasCat(headerID, "Subcontract"),
+            "travel",   nfIgceHasCat(headerID, "Travel"),
+            "indirect", nfIgceHasLabor(headerID)
+                            && (_h.FringeRate > 0 || _h.OverheadRate > 0),
+            "burden",   _h.IndirectBurdenRate > 0 && nfIgceHasBurdenedCat(headerID),
+            "ga",       _h.GARate > 0,
+            "fccom",    _h.FCCOMRate > 0,
+            "fixedfee", _h.ProfitFeeRate > 0,
+            false
+        )
+    );
+
+nfIgceBoeAnswerOf(headerID: Number, boeKey: Text): Text =
+    LookUp(
+        colIGCEBoeAnswer,
+        IGCEHeaderID = headerID && BoeKey = boeKey
+    ).Answer;
+
+nfIgceBoeOpenCount(headerID: Number): Number =
+    CountRows(
+        Filter(
+            colIGCEBoeDef As d,
+            nfIgceBoeNeeded(headerID, d.BoeKey)
+                && IsBlank(Trim(nfIgceBoeAnswerOf(headerID, d.BoeKey)))
+        )
+    );
+
+nfIgceGfpAnswerOf(headerID: Number, qIndex: Number): Text =
+    LookUp(
+        colIGCEGfpAnswer,
+        IGCEHeaderID = headerID && QIndex = qIndex
+    ).Answer;
+
+nfIgceGfpOpenCount(headerID: Number): Number =
+    CountRows(
+        Filter(
+            Table({ Q: 1 }, { Q: 2 }, { Q: 3 }, { Q: 4 }, { Q: 5 }, { Q: 6 }) As q,
+            IsBlank(Trim(nfIgceGfpAnswerOf(headerID, q.Q)))
+        )
+    );
+
+// Upsert one answer. Staged only: see the note above.
+nfIgceSetBoeAnswer(headerID: Number, boeKey: Text, answer: Text): Void = {
+    If(
+        CountRows(
+            Filter(colIGCEBoeAnswer, IGCEHeaderID = headerID && BoeKey = boeKey)
+        ) = 0,
+        Collect(
+            colIGCEBoeAnswer,
+            { IGCEHeaderID: headerID, BoeKey: boeKey, Answer: answer }
+        ),
+        Patch(
+            colIGCEBoeAnswer,
+            LookUp(colIGCEBoeAnswer, IGCEHeaderID = headerID && BoeKey = boeKey),
+            { Answer: answer }
+        )
+    );
+};
+
+nfIgceSetGfpAnswer(headerID: Number, qIndex: Number, answer: Text): Void = {
+    If(
+        CountRows(
+            Filter(colIGCEGfpAnswer, IGCEHeaderID = headerID && QIndex = qIndex)
+        ) = 0,
+        Collect(
+            colIGCEGfpAnswer,
+            { IGCEHeaderID: headerID, QIndex: qIndex, Answer: answer }
+        ),
+        Patch(
+            colIGCEGfpAnswer,
+            LookUp(colIGCEGfpAnswer, IGCEHeaderID = headerID && QIndex = qIndex),
+            { Answer: answer }
+        )
+    );
+};
+
+
+// =============================================================================
+//  STAGE HELPERS
+//  An inline edit in a gallery changes ONE field. These load the rest of the row
+//  into the staging collection first, so a control does three short calls rather
+//  than restating 24 fields, and the save routine still sees a complete row.
+// =============================================================================
+
+nfIgceStageLine(lineID: Number): Void = {
+    With(
+        { _l: LookUp(colIGCELine, ID = lineID) },
+        Patch(
+            colIGCELineEdit,
+            First(colIGCELineEdit),
+            {
+                IGCEHeaderID: _l.IGCEHeaderID,
+                Title: _l.Title,
+                LineNumber: _l.LineNumber,
+                Labor: _l.Labor,
+                Category: _l.Category
+            }
+        )
+    );
+};
+
+nfIgceStageSubLine(subLineID: Number): Void = {
+    With(
+        { _s: LookUp(colIGCESubLine, ID = subLineID) },
+        Patch(
+            colIGCESubLineEdit,
+            First(colIGCESubLineEdit),
+            {
+                IGCELineID: _s.IGCELineID,
+                Title: _s.Title,
+                Ref: _s.Ref,
+                SerialNumber: _s.SerialNumber,
+                SublineType: _s.SublineType,
+                IncludesProperty: _s.IncludesProperty,
+                PropertyType: _s.PropertyType,
+                LaborCategories: _s.LaborCategories,
+                ODCCategory: _s.ODCCategory,
+                Units: _s.Units,
+                Software: _s.Software,
+                CalculateOptionPeriods: _s.CalculateOptionPeriods,
+                BaseYearQuantity: _s.BaseYearQuantity,
+                OP1Quantity: _s.OP1Quantity,
+                OP2Quantity: _s.OP2Quantity,
+                OP3Quantity: _s.OP3Quantity,
+                OP4Quantity: _s.OP4Quantity,
+                BaseYearRate: _s.BaseYearRate,
+                OP1Rate: _s.OP1Rate,
+                OP2Rate: _s.OP2Rate,
+                OP3Rate: _s.OP3Rate,
+                OP4Rate: _s.OP4Rate
+            }
+        )
+    );
+};
+
+// The next line number and subline ref, so adding one does not collide.
+nfIgceNextLineNumber(headerID: Number): Number =
+    Coalesce(Max(Filter(colIGCELine, IGCEHeaderID = headerID), LineNumber), 1000) + 1;
+
+nfIgceNextRef(lineID: Number): Text =
+    With(
+        { _l: LookUp(colIGCELine, ID = lineID) },
+        Text(_l.LineNumber - 1000)
+            & "."
+            & (CountRows(Filter(colIGCESubLine, IGCELineID = lineID)) + 1)
+    );
+
+// The per period rate a subline actually uses, so a screen shows the inflated
+// rate without recomputing the rule.
+nfIgceSubRate(subLineID: Number, periodIndex: Number): Number =
+    With(
+        { _s: LookUp(colIGCESubLine, ID = subLineID) },
+        nfIGCERateFor(
+            _s.BaseYearRate,
+            Switch(
+                periodIndex,
+                0, _s.BaseYearRate,
+                1, _s.OP1Rate,
+                2, _s.OP2Rate,
+                3, _s.OP3Rate,
+                4, _s.OP4Rate,
+                0
+            ),
+            _s.CalculateOptionPeriods,
+            periodIndex,
+            LookUp(
+                colIGCEHeader,
+                ID = LookUp(colIGCELine, ID = _s.IGCELineID).IGCEHeaderID
+            ).InflationRate
+        )
+    );
+
+nfIgceSubQty(subLineID: Number, periodIndex: Number): Number =
+    With(
+        { _s: LookUp(colIGCESubLine, ID = subLineID) },
+        Switch(
+            periodIndex,
+            0, _s.BaseYearQuantity,
+            1, _s.OP1Quantity,
+            2, _s.OP2Quantity,
+            3, _s.OP3Quantity,
+            4, _s.OP4Quantity,
+            0
+        )
+    );
+
+nfIgceSubCost(subLineID: Number, periodIndex: Number): Number =
+    With(
+        { _s: LookUp(colIGCESubLine, ID = subLineID) },
+        Switch(
+            periodIndex,
+            0, _s.BaseYearTotalCost,
+            1, _s.OP1TotalCost,
+            2, _s.OP2TotalCost,
+            3, _s.OP3TotalCost,
+            4, _s.OP4TotalCost,
+            0
+        )
+    );
