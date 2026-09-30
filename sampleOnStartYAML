@@ -1,1554 +1,239 @@
-- con_SubModalHost_Details:
-    Control: GroupContainer@1.5.0
-    Variant: ManualLayout
-    Properties:
-      DropShadow: =DropShadow.None
-      Fill: =RGBA(0, 0, 0, 0.45)
-      Height: =Parent.Height
-      Visible: =locSubModalOpen
-      Width: =Parent.Width
-      X: =0
-      Y: =0
-    Children:
-      - btn_SmScrim_Details:
-          Control: ModernButton@1.0.0
-          Properties:
-            AccessibleLabel: ="Close subline dialog"
-            Appearance: =ButtonAppearance.Transparent
-            Height: =Parent.Height
-            OnSelect: |-
-              =UpdateContext({locSubModalOpen: false})
-            Text: =""
-            Width: =Parent.Width
-            X: =0
-            Y: =0
-      - con_SubModal_Details:
-          Control: GroupContainer@1.5.0
-          Variant: AutoLayout
-          Properties:
-            BorderColor: =RGBA(0, 0, 0, 0.12)
-            BorderStyle: =BorderStyle.Solid
-            BorderThickness: =1
-            DropShadow: =DropShadow.None
-            Fill: =RGBA(255, 255, 255, 1)
-            Height: =Min(Parent.Height - 64, 720)
-            LayoutAlignItems: =LayoutAlignItems.Stretch
-            LayoutDirection: =LayoutDirection.Vertical
-            LayoutGap: =12
-            PaddingBottom: =24
-            PaddingLeft: =24
-            PaddingRight: =24
-            PaddingTop: =24
-            RadiusBottomLeft: =12
-            RadiusBottomRight: =12
-            RadiusTopLeft: =12
-            RadiusTopRight: =12
-            Width: =Min(760, Parent.Width - 48)
-            X: =(Parent.Width - Self.Width) / 2
-            Y: =(Parent.Height - Self.Height) / 2
-          Children:
-            - lbl_SmTitle_Details:
-                Control: ModernText@1.0.0
-                Properties:
-                  Color: =nf_DHSBlue
-                  FillPortions: =0
-                  FontWeight: =FontWeight.Semibold
-                  Height: =32
-                  PaddingBottom: =0
-                  PaddingLeft: =0
-                  PaddingRight: =0
-                  PaddingTop: =0
-                  Size: =20
-                  Text: |-
-                    =If(
-                        locSubEditID = 0,
-                        "Add subline",
-                        If(gl_FormMode = FormMode.View, "Subline ", "Edit subline ") & First(colSubEdit).'Ref #'
-                    )
-                  Wrap: =false
-            - con_SmBody_Details:
-                Control: GroupContainer@1.5.0
-                Variant: AutoLayout
-                Properties:
-                  DropShadow: =DropShadow.None
-                  FillPortions: =1
-                  LayoutAlignItems: =LayoutAlignItems.Start
-                  LayoutDirection: =LayoutDirection.Vertical
-                  LayoutGap: =12
-                  LayoutMinHeight: =0
-                  LayoutOverflowY: =LayoutOverflow.Scroll
-                Children:
-                  - con_SmRow1_Details:
-                      Control: GroupContainer@1.5.0
-                      Variant: AutoLayout
-                      Properties:
-                        DropShadow: =DropShadow.None
-                        FillPortions: =0
-                        Height: =54
-                        LayoutDirection: =LayoutDirection.Horizontal
-                        LayoutGap: =12
-                        Width: =Parent.Width - 16
-                      Children:
-                        - con_SmFRef_Details:
-                            Control: GroupContainer@1.5.0
-                            Variant: AutoLayout
-                            Properties:
-                              DropShadow: =DropShadow.None
-                              FillPortions: =0
-                              Height: =54
-                              LayoutAlignItems: =LayoutAlignItems.Stretch
-                              LayoutDirection: =LayoutDirection.Vertical
-                              LayoutGap: =4
-                              LayoutMinWidth: =0
-                              Width: =110
-                            Children:
-                              - lbl_SmLRef_Details:
-                                  Control: ModernText@1.0.0
-                                  Properties:
-                                    Color: =RGBA(97, 97, 97, 1)
-                                    FontWeight: =FontWeight.Semibold
-                                    Height: =18
-                                    PaddingBottom: =0
-                                    PaddingLeft: =0
-                                    PaddingRight: =0
-                                    PaddingTop: =0
-                                    Size: =12
-                                    Text: |-
-                                      ="Ref #"
-                                    Wrap: =false
-                              - txt_SmRef_Details:
-                                  Control: ModernTextInput@1.1.2
-                                  Properties:
-                                    AccessibleLabel: ="Subline number"
-                                    AlignInContainer: =AlignInContainer.Stretch
-                                    Appearance: =Appearance.Outline
-                                    Color: =nf_DHSBlue
-                                    Default: |-
-                                      =First(colSubEdit).'Ref #'
-                                    DisplayMode: =If(gl_FormMode = FormMode.View, DisplayMode.View, DisplayMode.Edit)
-                                    Height: =32
-                                    MaxLength: =255
-                                    OnChange: |-
-                                      =Patch(
-                                          colSubEdit,
-                                          First(colSubEdit),
-                                          {'Ref #': Self.Text}
-                                      )
-                                    Placeholder: ="1.1"
-                                    Size: =14
-                                    Width: =Parent.Width
-                        - con_SmFDesc_Details:
-                            Control: GroupContainer@1.5.0
-                            Variant: AutoLayout
-                            Properties:
-                              DropShadow: =DropShadow.None
-                              FillPortions: =1
-                              Height: =54
-                              LayoutAlignItems: =LayoutAlignItems.Stretch
-                              LayoutDirection: =LayoutDirection.Vertical
-                              LayoutGap: =4
-                              LayoutMinWidth: =0
-                            Children:
-                              - lbl_SmLDesc_Details:
-                                  Control: ModernText@1.0.0
-                                  Properties:
-                                    Color: =RGBA(97, 97, 97, 1)
-                                    FontWeight: =FontWeight.Semibold
-                                    Height: =18
-                                    PaddingBottom: =0
-                                    PaddingLeft: =0
-                                    PaddingRight: =0
-                                    PaddingTop: =0
-                                    Size: =12
-                                    Text: ="Description"
-                                    Wrap: =false
-                              - txt_SmDesc_Details:
-                                  Control: ModernTextInput@1.1.2
-                                  Properties:
-                                    AccessibleLabel: ="Subline description"
-                                    AlignInContainer: =AlignInContainer.Stretch
-                                    Appearance: =Appearance.Outline
-                                    Color: =nf_DHSBlue
-                                    Default: =First(colSubEdit).Title
-                                    DisplayMode: =If(gl_FormMode = FormMode.View, DisplayMode.View, DisplayMode.Edit)
-                                    Height: =32
-                                    MaxLength: =255
-                                    OnChange: |-
-                                      =Patch(
-                                          colSubEdit,
-                                          First(colSubEdit),
-                                          {Title: Self.Text}
-                                      )
-                                    Placeholder: ="Describe this subline"
-                                    Size: =14
-                                    Width: =Parent.Width
-                  - con_SmRow2_Details:
-                      Control: GroupContainer@1.5.0
-                      Variant: AutoLayout
-                      Properties:
-                        DropShadow: =DropShadow.None
-                        FillPortions: =0
-                        Height: =54
-                        LayoutDirection: =LayoutDirection.Horizontal
-                        LayoutGap: =12
-                        Width: =Parent.Width - 16
-                      Children:
-                        - con_SmFType_Details:
-                            Control: GroupContainer@1.5.0
-                            Variant: AutoLayout
-                            Properties:
-                              DropShadow: =DropShadow.None
-                              FillPortions: =0
-                              Height: =54
-                              LayoutAlignItems: =LayoutAlignItems.Stretch
-                              LayoutDirection: =LayoutDirection.Vertical
-                              LayoutGap: =4
-                              LayoutMinWidth: =0
-                              Width: =180
-                            Children:
-                              - lbl_SmLType_Details:
-                                  Control: ModernText@1.0.0
-                                  Properties:
-                                    Color: =RGBA(97, 97, 97, 1)
-                                    FontWeight: =FontWeight.Semibold
-                                    Height: =18
-                                    PaddingBottom: =0
-                                    PaddingLeft: =0
-                                    PaddingRight: =0
-                                    PaddingTop: =0
-                                    Size: =12
-                                    Text: ="Subline type"
-                                    Wrap: =false
-                              - cmb_SmType_Details:
-                                  Control: ModernCombobox@1.1.2
-                                  Properties:
-                                    AccessibleLabel: ="Subline type"
-                                    AlignInContainer: =AlignInContainer.Stretch
-                                    AllowExternalSelectedItems: =false
-                                    Appearance: =Appearance.Outline
-                                    Color: =nf_DHSBlue
-                                    DefaultSelectedItems: =Filter(Choices([@IGCESubLine_IGCE_SPList].SublineType), Value = First(colSubEdit).SublineType.Value)
-                                    DisplayMode: =If(gl_FormMode = FormMode.View, DisplayMode.View, DisplayMode.Edit)
-                                    Height: =32
-                                    InputTextPlaceholder: ="Select"
-                                    IsSearchable: =false
-                                    ItemDisplayText: =ThisItem.Value
-                                    Items: =Choices([@IGCESubLine_IGCE_SPList].SublineType)
-                                    OnChange: |-
-                                      =Patch(
-                                          colSubEdit,
-                                          First(colSubEdit),
-                                          {SublineType: {Value: Self.Selected.Value}}
-                                      )
-                                    SelectMultiple: =false
-                                    Size: =14
-                                    Width: =Parent.Width
-                        - con_SmFUnits_Details:
-                            Control: GroupContainer@1.5.0
-                            Variant: AutoLayout
-                            Properties:
-                              DropShadow: =DropShadow.None
-                              FillPortions: =0
-                              Height: =54
-                              LayoutAlignItems: =LayoutAlignItems.Stretch
-                              LayoutDirection: =LayoutDirection.Vertical
-                              LayoutGap: =4
-                              LayoutMinWidth: =0
-                              Visible: =lbl_HdrUnits_Details.Visible
-                              Width: =150
-                            Children:
-                              - lbl_SmLUnits_Details:
-                                  Control: ModernText@1.0.0
-                                  Properties:
-                                    Color: =RGBA(97, 97, 97, 1)
-                                    FontWeight: =FontWeight.Semibold
-                                    Height: =18
-                                    PaddingBottom: =0
-                                    PaddingLeft: =0
-                                    PaddingRight: =0
-                                    PaddingTop: =0
-                                    Size: =12
-                                    Text: ="Units"
-                                    Wrap: =false
-                              - cmb_SmUnits_Details:
-                                  Control: ModernCombobox@1.1.2
-                                  Properties:
-                                    AccessibleLabel: ="Units"
-                                    AlignInContainer: =AlignInContainer.Stretch
-                                    AllowExternalSelectedItems: =false
-                                    Appearance: =Appearance.Outline
-                                    Color: =nf_DHSBlue
-                                    DefaultSelectedItems: =Filter(Choices([@IGCESubLine_IGCE_SPList].Units), Value = First(colSubEdit).Units.Value)
-                                    DisplayMode: =If(gl_FormMode = FormMode.View, DisplayMode.View, DisplayMode.Edit)
-                                    Height: =32
-                                    InputTextPlaceholder: ="Select"
-                                    IsSearchable: =false
-                                    ItemDisplayText: =ThisItem.Value
-                                    Items: =Choices([@IGCESubLine_IGCE_SPList].Units)
-                                    OnChange: |-
-                                      =Patch(
-                                          colSubEdit,
-                                          First(colSubEdit),
-                                          {Units: {Value: Self.Selected.Value}}
-                                      )
-                                    SelectMultiple: =false
-                                    Size: =14
-                                    Width: =Parent.Width
-                        - con_SmFCalc_Details:
-                            Control: GroupContainer@1.5.0
-                            Variant: AutoLayout
-                            Properties:
-                              DropShadow: =DropShadow.None
-                              FillPortions: =0
-                              Height: =54
-                              LayoutAlignItems: =LayoutAlignItems.Stretch
-                              LayoutDirection: =LayoutDirection.Vertical
-                              LayoutGap: =4
-                              LayoutMinWidth: =0
-                              Visible: =lbl_HdrCalcOPs_Details.Visible
-                              Width: =280
-                            Children:
-                              - lbl_SmLCalc_Details:
-                                  Control: ModernText@1.0.0
-                                  Properties:
-                                    Color: =RGBA(97, 97, 97, 1)
-                                    FontWeight: =FontWeight.Semibold
-                                    Height: =18
-                                    PaddingBottom: =0
-                                    PaddingLeft: =0
-                                    PaddingRight: =0
-                                    PaddingTop: =0
-                                    Size: =12
-                                    Text: ="Calculate option periods from base year"
-                                    Wrap: =false
-                              - rad_SmCalc_Details:
-                                  Control: ModernRadio@1.0.2
-                                  Properties:
-                                    AccessibleLabel: ="Calculate option periods from base year"
-                                    AlignInContainer: =AlignInContainer.Stretch
-                                    Color: =nf_DHSBlue
-                                    Default: |-
-                                      =LookUp(
-                                          Table({Nm: "Yes", V: true}, {Nm: "No", V: false}),
-                                          V = Coalesce(First(colSubEdit).'Calc OPs', false)
-                                      )
-                                    DisplayMode: =If(gl_FormMode = FormMode.View, DisplayMode.View, DisplayMode.Edit)
-                                    Height: =32
-                                    ItemDisplayText: =ThisItem.Nm
-                                    Items: |-
-                                      =Table({Nm: "Yes", V: true}, {Nm: "No", V: false})
-                                    Layout: =OptionLayout.Horizontal
-                                    OnChange: |-
-                                      =Patch(
-                                          colSubEdit,
-                                          First(colSubEdit),
-                                          {'Calc OPs': Self.Selected.V}
-                                      )
-                                    Size: =14
-                                    Width: =Parent.Width
-                  - con_SmRow3_Details:
-                      Control: GroupContainer@1.5.0
-                      Variant: AutoLayout
-                      Properties:
-                        DropShadow: =DropShadow.None
-                        FillPortions: =0
-                        Height: =54
-                        LayoutDirection: =LayoutDirection.Horizontal
-                        LayoutGap: =12
-                        Visible: =lbl_HdrODCCategory_Details.Visible || lbl_HdrSoftware_Details.Visible || lbl_HdrIncludesProperty_Details.Visible
-                        Width: =Parent.Width - 16
-                      Children:
-                        - con_SmFOdc_Details:
-                            Control: GroupContainer@1.5.0
-                            Variant: AutoLayout
-                            Properties:
-                              DropShadow: =DropShadow.None
-                              FillPortions: =0
-                              Height: =54
-                              LayoutAlignItems: =LayoutAlignItems.Stretch
-                              LayoutDirection: =LayoutDirection.Vertical
-                              LayoutGap: =4
-                              LayoutMinWidth: =0
-                              Visible: =lbl_HdrODCCategory_Details.Visible
-                              Width: =220
-                            Children:
-                              - lbl_SmLOdc_Details:
-                                  Control: ModernText@1.0.0
-                                  Properties:
-                                    Color: =RGBA(97, 97, 97, 1)
-                                    FontWeight: =FontWeight.Semibold
-                                    Height: =18
-                                    PaddingBottom: =0
-                                    PaddingLeft: =0
-                                    PaddingRight: =0
-                                    PaddingTop: =0
-                                    Size: =12
-                                    Text: ="ODC category"
-                                    Wrap: =false
-                              - cmb_SmOdc_Details:
-                                  Control: ModernCombobox@1.1.2
-                                  Properties:
-                                    AccessibleLabel: ="ODC category"
-                                    AlignInContainer: =AlignInContainer.Stretch
-                                    AllowExternalSelectedItems: =false
-                                    Appearance: =Appearance.Outline
-                                    Color: =nf_DHSBlue
-                                    DefaultSelectedItems: =Filter(Choices([@IGCESubLine_IGCE_SPList].ODCCategory), Value = First(colSubEdit).ODCCategory.Value)
-                                    DisplayMode: =If(gl_FormMode = FormMode.View, DisplayMode.View, DisplayMode.Edit)
-                                    Height: =32
-                                    InputTextPlaceholder: ="Select"
-                                    IsSearchable: =false
-                                    ItemDisplayText: =ThisItem.Value
-                                    Items: =Choices([@IGCESubLine_IGCE_SPList].ODCCategory)
-                                    OnChange: |-
-                                      =Patch(
-                                          colSubEdit,
-                                          First(colSubEdit),
-                                          {ODCCategory: {Value: Self.Selected.Value}}
-                                      )
-                                    SelectMultiple: =false
-                                    Size: =14
-                                    Width: =Parent.Width
-                        - con_SmFSoftware_Details:
-                            Control: GroupContainer@1.5.0
-                            Variant: AutoLayout
-                            Properties:
-                              DropShadow: =DropShadow.None
-                              FillPortions: =0
-                              Height: =54
-                              LayoutAlignItems: =LayoutAlignItems.Stretch
-                              LayoutDirection: =LayoutDirection.Vertical
-                              LayoutGap: =4
-                              LayoutMinWidth: =0
-                              Visible: =lbl_HdrSoftware_Details.Visible
-                              Width: =230
-                            Children:
-                              - lbl_SmLSoftware_Details:
-                                  Control: ModernText@1.0.0
-                                  Properties:
-                                    Color: =RGBA(97, 97, 97, 1)
-                                    FontWeight: =FontWeight.Semibold
-                                    Height: =18
-                                    PaddingBottom: =0
-                                    PaddingLeft: =0
-                                    PaddingRight: =0
-                                    PaddingTop: =0
-                                    Size: =12
-                                    Text: ="Software license or subscription"
-                                    Wrap: =false
-                              - rad_SmSoftware_Details:
-                                  Control: ModernRadio@1.0.2
-                                  Properties:
-                                    AccessibleLabel: ="Software license or subscription"
-                                    AlignInContainer: =AlignInContainer.Stretch
-                                    Color: =nf_DHSBlue
-                                    Default: |-
-                                      =LookUp(
-                                          Table({Nm: "Yes", V: true}, {Nm: "No", V: false}),
-                                          V = Coalesce(First(colSubEdit).'Software License/Subscription', false)
-                                      )
-                                    DisplayMode: =If(gl_FormMode = FormMode.View, DisplayMode.View, DisplayMode.Edit)
-                                    Height: =32
-                                    ItemDisplayText: =ThisItem.Nm
-                                    Items: |-
-                                      =Table({Nm: "Yes", V: true}, {Nm: "No", V: false})
-                                    Layout: =OptionLayout.Horizontal
-                                    OnChange: |-
-                                      =Patch(
-                                          colSubEdit,
-                                          First(colSubEdit),
-                                          {'Software License/Subscription': Self.Selected.V}
-                                      )
-                                    Size: =14
-                                    Width: =Parent.Width
-                        - con_SmFIncludes_Details:
-                            Control: GroupContainer@1.5.0
-                            Variant: AutoLayout
-                            Properties:
-                              DropShadow: =DropShadow.None
-                              FillPortions: =0
-                              Height: =54
-                              LayoutAlignItems: =LayoutAlignItems.Stretch
-                              LayoutDirection: =LayoutDirection.Vertical
-                              LayoutGap: =4
-                              LayoutMinWidth: =0
-                              Visible: =lbl_HdrIncludesProperty_Details.Visible
-                              Width: =160
-                            Children:
-                              - lbl_SmLIncludes_Details:
-                                  Control: ModernText@1.0.0
-                                  Properties:
-                                    Color: =RGBA(97, 97, 97, 1)
-                                    FontWeight: =FontWeight.Semibold
-                                    Height: =18
-                                    PaddingBottom: =0
-                                    PaddingLeft: =0
-                                    PaddingRight: =0
-                                    PaddingTop: =0
-                                    Size: =12
-                                    Text: ="Includes property"
-                                    Wrap: =false
-                              - rad_SmIncludes_Details:
-                                  Control: ModernRadio@1.0.2
-                                  Properties:
-                                    AccessibleLabel: ="Includes property"
-                                    AlignInContainer: =AlignInContainer.Stretch
-                                    Color: =nf_DHSBlue
-                                    Default: |-
-                                      =LookUp(
-                                          Table({Nm: "Yes", V: true}, {Nm: "No", V: false}),
-                                          V = If(gl_IGCELine.Category.Value in ["Capitalized Equipment", "Accountable Property"], true, Coalesce(First(colSubEdit).IncludesProperty, false))
-                                      )
-                                    DisplayMode: |-
-                                      =If(
-                                          gl_FormMode = FormMode.View || gl_IGCELine.Category.Value in ["Capitalized Equipment", "Accountable Property"],
-                                          DisplayMode.View,
-                                          DisplayMode.Edit
-                                      )
-                                    Height: =32
-                                    ItemDisplayText: =ThisItem.Nm
-                                    Items: |-
-                                      =Table({Nm: "Yes", V: true}, {Nm: "No", V: false})
-                                    Layout: =OptionLayout.Horizontal
-                                    OnChange: |-
-                                      =Patch(
-                                          colSubEdit,
-                                          First(colSubEdit),
-                                          {IncludesProperty: Self.Selected.V}
-                                      )
-                                    Size: =14
-                                    Width: =Parent.Width
-                  - con_SmRow4_Details:
-                      Control: GroupContainer@1.5.0
-                      Variant: AutoLayout
-                      Properties:
-                        DropShadow: =DropShadow.None
-                        FillPortions: =0
-                        Height: =54
-                        LayoutDirection: =LayoutDirection.Horizontal
-                        LayoutGap: =12
-                        Visible: =lbl_HdrPropertyType_Details.Visible || lbl_HdrSerialNumber_Details.Visible
-                        Width: =Parent.Width - 16
-                      Children:
-                        - con_SmFPropType_Details:
-                            Control: GroupContainer@1.5.0
-                            Variant: AutoLayout
-                            Properties:
-                              DropShadow: =DropShadow.None
-                              FillPortions: =0
-                              Height: =54
-                              LayoutAlignItems: =LayoutAlignItems.Stretch
-                              LayoutDirection: =LayoutDirection.Vertical
-                              LayoutGap: =4
-                              LayoutMinWidth: =0
-                              Visible: =lbl_HdrPropertyType_Details.Visible
-                              Width: =220
-                            Children:
-                              - lbl_SmLPropType_Details:
-                                  Control: ModernText@1.0.0
-                                  Properties:
-                                    Color: =RGBA(97, 97, 97, 1)
-                                    FontWeight: =FontWeight.Semibold
-                                    Height: =18
-                                    PaddingBottom: =0
-                                    PaddingLeft: =0
-                                    PaddingRight: =0
-                                    PaddingTop: =0
-                                    Size: =12
-                                    Text: ="Property type"
-                                    Wrap: =false
-                              - cmb_SmPropType_Details:
-                                  Control: ModernCombobox@1.1.2
-                                  Properties:
-                                    AccessibleLabel: ="Property type"
-                                    AlignInContainer: =AlignInContainer.Stretch
-                                    AllowExternalSelectedItems: =false
-                                    Appearance: =Appearance.Outline
-                                    Color: =nf_DHSBlue
-                                    DefaultSelectedItems: |-
-                                      =Filter(
-                                          Choices([@IGCESubLine_IGCE_SPList].PropertyType),
-                                          Value = If(gl_IGCELine.Category.Value in ["Capitalized Equipment", "Accountable Property"], "Accountable", First(colSubEdit).PropertyType.Value)
-                                      )
-                                    DisplayMode: |-
-                                      =If(
-                                          gl_FormMode = FormMode.View || gl_IGCELine.Category.Value in ["Capitalized Equipment", "Accountable Property"],
-                                          DisplayMode.View,
-                                          DisplayMode.Edit
-                                      )
-                                    Height: =32
-                                    InputTextPlaceholder: ="Select"
-                                    IsSearchable: =false
-                                    ItemDisplayText: =ThisItem.Value
-                                    Items: =Choices([@IGCESubLine_IGCE_SPList].PropertyType)
-                                    OnChange: |-
-                                      =Patch(
-                                          colSubEdit,
-                                          First(colSubEdit),
-                                          {PropertyType: {Value: Self.Selected.Value}}
-                                      )
-                                    SelectMultiple: =false
-                                    Size: =14
-                                    Width: =Parent.Width
-                        - con_SmFSerial_Details:
-                            Control: GroupContainer@1.5.0
-                            Variant: AutoLayout
-                            Properties:
-                              DropShadow: =DropShadow.None
-                              FillPortions: =0
-                              Height: =54
-                              LayoutAlignItems: =LayoutAlignItems.Stretch
-                              LayoutDirection: =LayoutDirection.Vertical
-                              LayoutGap: =4
-                              LayoutMinWidth: =0
-                              Visible: =lbl_HdrSerialNumber_Details.Visible
-                              Width: =220
-                            Children:
-                              - lbl_SmLSerial_Details:
-                                  Control: ModernText@1.0.0
-                                  Properties:
-                                    Color: =RGBA(97, 97, 97, 1)
-                                    FontWeight: =FontWeight.Semibold
-                                    Height: =18
-                                    PaddingBottom: =0
-                                    PaddingLeft: =0
-                                    PaddingRight: =0
-                                    PaddingTop: =0
-                                    Size: =12
-                                    Text: ="Serial number"
-                                    Wrap: =false
-                              - txt_SmSerial_Details:
-                                  Control: ModernTextInput@1.1.2
-                                  Properties:
-                                    AccessibleLabel: ="Serial number"
-                                    AlignInContainer: =AlignInContainer.Stretch
-                                    Appearance: =Appearance.Outline
-                                    Color: =nf_DHSBlue
-                                    Default: =First(colSubEdit).SerialNumber
-                                    DisplayMode: =If(gl_FormMode = FormMode.View, DisplayMode.View, DisplayMode.Edit)
-                                    Height: =32
-                                    MaxLength: =255
-                                    OnChange: |-
-                                      =Patch(
-                                          colSubEdit,
-                                          First(colSubEdit),
-                                          {SerialNumber: Self.Text}
-                                      )
-                                    Placeholder: ="Serial, if known"
-                                    Size: =14
-                                    Width: =Parent.Width
-                  - con_SmPerHdr_Details:
-                      Control: GroupContainer@1.5.0
-                      Variant: ManualLayout
-                      Properties:
-                        DropShadow: =DropShadow.None
-                        FillPortions: =0
-                        Height: =24
-                        Width: =680
-                      Children:
-                        - lbl_SmHPer_Details:
-                            Control: ModernText@1.0.0
-                            Properties:
-                              Align: =Align.Left
-                              Color: =RGBA(97, 97, 97, 1)
-                              FontWeight: =FontWeight.Semibold
-                              Height: =24
-                              PaddingBottom: =0
-                              PaddingLeft: =4
-                              PaddingRight: =4
-                              PaddingTop: =0
-                              Size: =11
-                              Text: ="PERIOD"
-                              Width: =130
-                              Wrap: =false
-                              X: =0
-                        - lbl_SmHQty_Details:
-                            Control: ModernText@1.0.0
-                            Properties:
-                              Align: =Align.Left
-                              Color: =RGBA(97, 97, 97, 1)
-                              FontWeight: =FontWeight.Semibold
-                              Height: =24
-                              PaddingBottom: =0
-                              PaddingLeft: =4
-                              PaddingRight: =4
-                              PaddingTop: =0
-                              Size: =11
-                              Text: =If(cmp_Labor_Details.Value, "HOURS", If(gl_IGCELine.Category.Value = "Travel", "TRIPS", "QUANTITY"))
-                              Width: =130
-                              Wrap: =false
-                              X: =130
-                        - lbl_SmHRate_Details:
-                            Control: ModernText@1.0.0
-                            Properties:
-                              Align: =Align.Left
-                              Color: =RGBA(97, 97, 97, 1)
-                              FontWeight: =FontWeight.Semibold
-                              Height: =24
-                              PaddingBottom: =0
-                              PaddingLeft: =4
-                              PaddingRight: =4
-                              PaddingTop: =0
-                              Size: =11
-                              Text: =If(cmp_Labor_Details.Value, "HOURLY RATE", If(gl_IGCELine.Category.Value = "Travel", "NTE", "UNIT PRICE"))
-                              Width: =130
-                              Wrap: =false
-                              X: =270
-                        - lbl_SmHCost_Details:
-                            Control: ModernText@1.0.0
-                            Properties:
-                              Align: =Align.Right
-                              Color: =RGBA(97, 97, 97, 1)
-                              FontWeight: =FontWeight.Semibold
-                              Height: =24
-                              PaddingBottom: =0
-                              PaddingLeft: =4
-                              PaddingRight: =4
-                              PaddingTop: =0
-                              Size: =11
-                              Text: ="COST"
-                              Width: =130
-                              Wrap: =false
-                              X: =410
-                        - lbl_SmHTotal_Details:
-                            Control: ModernText@1.0.0
-                            Properties:
-                              Align: =Align.Right
-                              Color: =RGBA(97, 97, 97, 1)
-                              FontWeight: =FontWeight.Semibold
-                              Height: =24
-                              PaddingBottom: =0
-                              PaddingLeft: =4
-                              PaddingRight: =4
-                              PaddingTop: =0
-                              Size: =11
-                              Text: ="BURDENED TOTAL"
-                              Visible: =cmp_Labor_Details.Value && gl_IGCE.'IGCE Type'.Value = "Cost Reimbursement"
-                              Width: =130
-                              Wrap: =false
-                              X: =550
-                  - con_SmPer0_Details:
-                      Control: GroupContainer@1.5.0
-                      Variant: ManualLayout
-                      Properties:
-                        DropShadow: =DropShadow.None
-                        FillPortions: =0
-                        Height: =44
-                        Width: =680
-                      Children:
-                        - lbl_SmPer0_Details:
-                            Control: ModernText@1.0.0
-                            Properties:
-                              Align: =Align.Left
-                              Color: =nf_DHSBlue
-                              Height: =44
-                              PaddingBottom: =0
-                              PaddingLeft: =4
-                              PaddingRight: =4
-                              PaddingTop: =0
-                              Size: =14
-                              Text: ="Base Year"
-                              VerticalAlign: =VerticalAlign.Middle
-                              Width: =120
-                              Wrap: =false
-                              X: =0
-                        - num_SmQty0_Details:
-                            Control: ModernNumberInput@1.1.2
-                            Properties:
-                              AccessibleLabel: ="Base year quantity"
-                              Appearance: =Appearance.Outline
-                              Color: =nf_DHSBlue
-                              Default: =First(colSubEdit).BaseYearQuantity
-                              DisplayMode: =If(gl_FormMode = FormMode.View, DisplayMode.View, DisplayMode.Edit)
-                              Height: =32
-                              HintText: ="0"
-                              Max: =1000000
-                              Min: =0
-                              OnChange: |-
-                                =Patch(
-                                    colSubEdit,
-                                    First(colSubEdit),
-                                    {BaseYearQuantity: Self.Value}
-                                )
-                              Size: =14
-                              Width: =130
-                              X: =130
-                              Y: =6
-                        - num_SmRate0_Details:
-                            Control: ModernNumberInput@1.1.2
-                            Properties:
-                              AccessibleLabel: ="Base year rate"
-                              Appearance: =Appearance.Outline
-                              Color: =nf_DHSBlue
-                              Default: =First(colSubEdit).BaseYearRate
-                              DisplayMode: =If(gl_FormMode = FormMode.View, DisplayMode.View, DisplayMode.Edit)
-                              Height: =32
-                              HintText: ="0"
-                              Max: =1000000
-                              Min: =0
-                              OnChange: |-
-                                =Patch(
-                                    colSubEdit,
-                                    First(colSubEdit),
-                                    {BaseYearRate: Self.Value}
-                                )
-                              Size: =14
-                              Width: =130
-                              X: =270
-                              Y: =6
-                        - lbl_SmCost0_Details:
-                            Control: ModernText@1.0.0
-                            Properties:
-                              Align: =Align.Right
-                              Color: =nf_DHSBlue
-                              Height: =44
-                              PaddingBottom: =0
-                              PaddingLeft: =4
-                              PaddingRight: =4
-                              PaddingTop: =0
-                              Size: =14
-                              Text: |-
-                                =Text(
-                                    (Coalesce(num_SmQty0_Details.Value, 0)) *
-                                    (Coalesce(num_SmRate0_Details.Value, 0)),
-                                    "#,##0.00"
-                                )
-                              VerticalAlign: =VerticalAlign.Middle
-                              Width: =130
-                              Wrap: =false
-                              X: =410
-                        - lbl_SmTotal0_Details:
-                            Control: ModernText@1.0.0
-                            Properties:
-                              Align: =Align.Right
-                              Color: =nf_DHSBlue
-                              Height: =44
-                              PaddingBottom: =0
-                              PaddingLeft: =4
-                              PaddingRight: =4
-                              PaddingTop: =0
-                              Size: =14
-                              Text: |-
-                                =Text(
-                                    (Coalesce(num_SmQty0_Details.Value, 0)) *
-                                    (Coalesce(num_SmRate0_Details.Value, 0)) *
-                                    If(
-                                        cmp_Labor_Details.Value && gl_IGCE.'IGCE Type'.Value = "Cost Reimbursement",
-                                        nf_BurdenFactor(gl_IGCE.'Fringe Rate', gl_IGCE.'Overhead Rate', gl_IGCE.'G & A Rate', gl_IGCE.'FCCOM Rate'),
-                                        1
-                                    ),
-                                    "#,##0.00"
-                                )
-                              VerticalAlign: =VerticalAlign.Middle
-                              Visible: =cmp_Labor_Details.Value && gl_IGCE.'IGCE Type'.Value = "Cost Reimbursement"
-                              Width: =130
-                              Wrap: =false
-                              X: =550
-                  - con_SmPer1_Details:
-                      Control: GroupContainer@1.5.0
-                      Variant: ManualLayout
-                      Properties:
-                        DropShadow: =DropShadow.None
-                        FillPortions: =0
-                        Height: =44
-                        Visible: =lbl_HdrOP1Quantity_Details.Visible || lbl_HdrOP1Rate_Details.Visible
-                        Width: =680
-                      Children:
-                        - lbl_SmPer1_Details:
-                            Control: ModernText@1.0.0
-                            Properties:
-                              Align: =Align.Left
-                              Color: =nf_DHSBlue
-                              Height: =44
-                              PaddingBottom: =0
-                              PaddingLeft: =4
-                              PaddingRight: =4
-                              PaddingTop: =0
-                              Size: =14
-                              Text: ="Option Period 1"
-                              VerticalAlign: =VerticalAlign.Middle
-                              Width: =120
-                              Wrap: =false
-                              X: =0
-                        - num_SmQty1_Details:
-                            Control: ModernNumberInput@1.1.2
-                            Properties:
-                              AccessibleLabel: ="Option Period 1 quantity"
-                              Appearance: =Appearance.Outline
-                              Color: =nf_DHSBlue
-                              Default: =First(colSubEdit).OP1Quantity
-                              DisplayMode: =If(gl_FormMode = FormMode.View, DisplayMode.View, DisplayMode.Edit)
-                              Height: =32
-                              HintText: ="0"
-                              Max: =1000000
-                              Min: =0
-                              OnChange: |-
-                                =Patch(
-                                    colSubEdit,
-                                    First(colSubEdit),
-                                    {OP1Quantity: Self.Value}
-                                )
-                              Size: =14
-                              Visible: =!(Coalesce(rad_SmCalc_Details.Selected.V, false) && lbl_HdrCalcOPs_Details.Visible)
-                              Width: =130
-                              X: =130
-                              Y: =6
-                        - lbl_SmQtyCalc1_Details:
-                            Control: ModernText@1.0.0
-                            Properties:
-                              Align: =Align.Left
-                              Color: =RGBA(97, 97, 97, 1)
-                              Height: =44
-                              PaddingBottom: =0
-                              PaddingLeft: =4
-                              PaddingRight: =4
-                              PaddingTop: =0
-                              Size: =14
-                              Text: =Coalesce(num_SmQty0_Details.Value, 0)
-                              VerticalAlign: =VerticalAlign.Middle
-                              Visible: =Coalesce(rad_SmCalc_Details.Selected.V, false) && lbl_HdrCalcOPs_Details.Visible
-                              Width: =130
-                              Wrap: =false
-                              X: =130
-                        - num_SmRate1_Details:
-                            Control: ModernNumberInput@1.1.2
-                            Properties:
-                              AccessibleLabel: ="Option Period 1 rate"
-                              Appearance: =Appearance.Outline
-                              Color: =nf_DHSBlue
-                              Default: =First(colSubEdit).OP1Rate
-                              DisplayMode: =If(gl_FormMode = FormMode.View, DisplayMode.View, DisplayMode.Edit)
-                              Height: =32
-                              HintText: ="0"
-                              Max: =1000000
-                              Min: =0
-                              OnChange: |-
-                                =Patch(
-                                    colSubEdit,
-                                    First(colSubEdit),
-                                    {OP1Rate: Self.Value}
-                                )
-                              Size: =14
-                              Visible: =!(Coalesce(rad_SmCalc_Details.Selected.V, false) && lbl_HdrCalcOPs_Details.Visible)
-                              Width: =130
-                              X: =270
-                              Y: =6
-                        - lbl_SmRateCalc1_Details:
-                            Control: ModernText@1.0.0
-                            Properties:
-                              Align: =Align.Left
-                              Color: =RGBA(97, 97, 97, 1)
-                              Height: =44
-                              PaddingBottom: =0
-                              PaddingLeft: =4
-                              PaddingRight: =4
-                              PaddingTop: =0
-                              Size: =14
-                              Text: |-
-                                =Text(nf_OPRate(Coalesce(num_SmRate0_Details.Value, 0), Coalesce(gl_IGCE.'Inflation Rate', 0), 1), "#,##0.00")
-                              VerticalAlign: =VerticalAlign.Middle
-                              Visible: =Coalesce(rad_SmCalc_Details.Selected.V, false) && lbl_HdrCalcOPs_Details.Visible
-                              Width: =130
-                              Wrap: =false
-                              X: =270
-                        - lbl_SmCost1_Details:
-                            Control: ModernText@1.0.0
-                            Properties:
-                              Align: =Align.Right
-                              Color: =nf_DHSBlue
-                              Height: =44
-                              PaddingBottom: =0
-                              PaddingLeft: =4
-                              PaddingRight: =4
-                              PaddingTop: =0
-                              Size: =14
-                              Text: |-
-                                =Text(
-                                    (If(Coalesce(rad_SmCalc_Details.Selected.V, false) && lbl_HdrCalcOPs_Details.Visible, Coalesce(num_SmQty0_Details.Value, 0), Coalesce(num_SmQty1_Details.Value, 0))) *
-                                    (If(Coalesce(rad_SmCalc_Details.Selected.V, false) && lbl_HdrCalcOPs_Details.Visible, nf_OPRate(Coalesce(num_SmRate0_Details.Value, 0), Coalesce(gl_IGCE.'Inflation Rate', 0), 1), Coalesce(num_SmRate1_Details.Value, 0))),
-                                    "#,##0.00"
-                                )
-                              VerticalAlign: =VerticalAlign.Middle
-                              Width: =130
-                              Wrap: =false
-                              X: =410
-                        - lbl_SmTotal1_Details:
-                            Control: ModernText@1.0.0
-                            Properties:
-                              Align: =Align.Right
-                              Color: =nf_DHSBlue
-                              Height: =44
-                              PaddingBottom: =0
-                              PaddingLeft: =4
-                              PaddingRight: =4
-                              PaddingTop: =0
-                              Size: =14
-                              Text: |-
-                                =Text(
-                                    (If(Coalesce(rad_SmCalc_Details.Selected.V, false) && lbl_HdrCalcOPs_Details.Visible, Coalesce(num_SmQty0_Details.Value, 0), Coalesce(num_SmQty1_Details.Value, 0))) *
-                                    (If(Coalesce(rad_SmCalc_Details.Selected.V, false) && lbl_HdrCalcOPs_Details.Visible, nf_OPRate(Coalesce(num_SmRate0_Details.Value, 0), Coalesce(gl_IGCE.'Inflation Rate', 0), 1), Coalesce(num_SmRate1_Details.Value, 0))) *
-                                    If(
-                                        cmp_Labor_Details.Value && gl_IGCE.'IGCE Type'.Value = "Cost Reimbursement",
-                                        nf_BurdenFactor(gl_IGCE.'Fringe Rate', gl_IGCE.'Overhead Rate', gl_IGCE.'G & A Rate', gl_IGCE.'FCCOM Rate'),
-                                        1
-                                    ),
-                                    "#,##0.00"
-                                )
-                              VerticalAlign: =VerticalAlign.Middle
-                              Visible: =cmp_Labor_Details.Value && gl_IGCE.'IGCE Type'.Value = "Cost Reimbursement"
-                              Width: =130
-                              Wrap: =false
-                              X: =550
-                  - con_SmPer2_Details:
-                      Control: GroupContainer@1.5.0
-                      Variant: ManualLayout
-                      Properties:
-                        DropShadow: =DropShadow.None
-                        FillPortions: =0
-                        Height: =44
-                        Visible: =lbl_HdrOP2Quantity_Details.Visible || lbl_HdrOP2Rate_Details.Visible
-                        Width: =680
-                      Children:
-                        - lbl_SmPer2_Details:
-                            Control: ModernText@1.0.0
-                            Properties:
-                              Align: =Align.Left
-                              Color: =nf_DHSBlue
-                              Height: =44
-                              PaddingBottom: =0
-                              PaddingLeft: =4
-                              PaddingRight: =4
-                              PaddingTop: =0
-                              Size: =14
-                              Text: ="Option Period 2"
-                              VerticalAlign: =VerticalAlign.Middle
-                              Width: =120
-                              Wrap: =false
-                              X: =0
-                        - num_SmQty2_Details:
-                            Control: ModernNumberInput@1.1.2
-                            Properties:
-                              AccessibleLabel: ="Option Period 2 quantity"
-                              Appearance: =Appearance.Outline
-                              Color: =nf_DHSBlue
-                              Default: =First(colSubEdit).OP2Quantity
-                              DisplayMode: =If(gl_FormMode = FormMode.View, DisplayMode.View, DisplayMode.Edit)
-                              Height: =32
-                              HintText: ="0"
-                              Max: =1000000
-                              Min: =0
-                              OnChange: |-
-                                =Patch(
-                                    colSubEdit,
-                                    First(colSubEdit),
-                                    {OP2Quantity: Self.Value}
-                                )
-                              Size: =14
-                              Visible: =!(Coalesce(rad_SmCalc_Details.Selected.V, false) && lbl_HdrCalcOPs_Details.Visible)
-                              Width: =130
-                              X: =130
-                              Y: =6
-                        - lbl_SmQtyCalc2_Details:
-                            Control: ModernText@1.0.0
-                            Properties:
-                              Align: =Align.Left
-                              Color: =RGBA(97, 97, 97, 1)
-                              Height: =44
-                              PaddingBottom: =0
-                              PaddingLeft: =4
-                              PaddingRight: =4
-                              PaddingTop: =0
-                              Size: =14
-                              Text: =Coalesce(num_SmQty0_Details.Value, 0)
-                              VerticalAlign: =VerticalAlign.Middle
-                              Visible: =Coalesce(rad_SmCalc_Details.Selected.V, false) && lbl_HdrCalcOPs_Details.Visible
-                              Width: =130
-                              Wrap: =false
-                              X: =130
-                        - num_SmRate2_Details:
-                            Control: ModernNumberInput@1.1.2
-                            Properties:
-                              AccessibleLabel: ="Option Period 2 rate"
-                              Appearance: =Appearance.Outline
-                              Color: =nf_DHSBlue
-                              Default: =First(colSubEdit).OP2Rate
-                              DisplayMode: =If(gl_FormMode = FormMode.View, DisplayMode.View, DisplayMode.Edit)
-                              Height: =32
-                              HintText: ="0"
-                              Max: =1000000
-                              Min: =0
-                              OnChange: |-
-                                =Patch(
-                                    colSubEdit,
-                                    First(colSubEdit),
-                                    {OP2Rate: Self.Value}
-                                )
-                              Size: =14
-                              Visible: =!(Coalesce(rad_SmCalc_Details.Selected.V, false) && lbl_HdrCalcOPs_Details.Visible)
-                              Width: =130
-                              X: =270
-                              Y: =6
-                        - lbl_SmRateCalc2_Details:
-                            Control: ModernText@1.0.0
-                            Properties:
-                              Align: =Align.Left
-                              Color: =RGBA(97, 97, 97, 1)
-                              Height: =44
-                              PaddingBottom: =0
-                              PaddingLeft: =4
-                              PaddingRight: =4
-                              PaddingTop: =0
-                              Size: =14
-                              Text: |-
-                                =Text(nf_OPRate(Coalesce(num_SmRate0_Details.Value, 0), Coalesce(gl_IGCE.'Inflation Rate', 0), 2), "#,##0.00")
-                              VerticalAlign: =VerticalAlign.Middle
-                              Visible: =Coalesce(rad_SmCalc_Details.Selected.V, false) && lbl_HdrCalcOPs_Details.Visible
-                              Width: =130
-                              Wrap: =false
-                              X: =270
-                        - lbl_SmCost2_Details:
-                            Control: ModernText@1.0.0
-                            Properties:
-                              Align: =Align.Right
-                              Color: =nf_DHSBlue
-                              Height: =44
-                              PaddingBottom: =0
-                              PaddingLeft: =4
-                              PaddingRight: =4
-                              PaddingTop: =0
-                              Size: =14
-                              Text: |-
-                                =Text(
-                                    (If(Coalesce(rad_SmCalc_Details.Selected.V, false) && lbl_HdrCalcOPs_Details.Visible, Coalesce(num_SmQty0_Details.Value, 0), Coalesce(num_SmQty2_Details.Value, 0))) *
-                                    (If(Coalesce(rad_SmCalc_Details.Selected.V, false) && lbl_HdrCalcOPs_Details.Visible, nf_OPRate(Coalesce(num_SmRate0_Details.Value, 0), Coalesce(gl_IGCE.'Inflation Rate', 0), 2), Coalesce(num_SmRate2_Details.Value, 0))),
-                                    "#,##0.00"
-                                )
-                              VerticalAlign: =VerticalAlign.Middle
-                              Width: =130
-                              Wrap: =false
-                              X: =410
-                        - lbl_SmTotal2_Details:
-                            Control: ModernText@1.0.0
-                            Properties:
-                              Align: =Align.Right
-                              Color: =nf_DHSBlue
-                              Height: =44
-                              PaddingBottom: =0
-                              PaddingLeft: =4
-                              PaddingRight: =4
-                              PaddingTop: =0
-                              Size: =14
-                              Text: |-
-                                =Text(
-                                    (If(Coalesce(rad_SmCalc_Details.Selected.V, false) && lbl_HdrCalcOPs_Details.Visible, Coalesce(num_SmQty0_Details.Value, 0), Coalesce(num_SmQty2_Details.Value, 0))) *
-                                    (If(Coalesce(rad_SmCalc_Details.Selected.V, false) && lbl_HdrCalcOPs_Details.Visible, nf_OPRate(Coalesce(num_SmRate0_Details.Value, 0), Coalesce(gl_IGCE.'Inflation Rate', 0), 2), Coalesce(num_SmRate2_Details.Value, 0))) *
-                                    If(
-                                        cmp_Labor_Details.Value && gl_IGCE.'IGCE Type'.Value = "Cost Reimbursement",
-                                        nf_BurdenFactor(gl_IGCE.'Fringe Rate', gl_IGCE.'Overhead Rate', gl_IGCE.'G & A Rate', gl_IGCE.'FCCOM Rate'),
-                                        1
-                                    ),
-                                    "#,##0.00"
-                                )
-                              VerticalAlign: =VerticalAlign.Middle
-                              Visible: =cmp_Labor_Details.Value && gl_IGCE.'IGCE Type'.Value = "Cost Reimbursement"
-                              Width: =130
-                              Wrap: =false
-                              X: =550
-                  - con_SmPer3_Details:
-                      Control: GroupContainer@1.5.0
-                      Variant: ManualLayout
-                      Properties:
-                        DropShadow: =DropShadow.None
-                        FillPortions: =0
-                        Height: =44
-                        Visible: =lbl_HdrOP3Quantity_Details.Visible || lbl_HdrOP3Rate_Details.Visible
-                        Width: =680
-                      Children:
-                        - lbl_SmPer3_Details:
-                            Control: ModernText@1.0.0
-                            Properties:
-                              Align: =Align.Left
-                              Color: =nf_DHSBlue
-                              Height: =44
-                              PaddingBottom: =0
-                              PaddingLeft: =4
-                              PaddingRight: =4
-                              PaddingTop: =0
-                              Size: =14
-                              Text: ="Option Period 3"
-                              VerticalAlign: =VerticalAlign.Middle
-                              Width: =120
-                              Wrap: =false
-                              X: =0
-                        - num_SmQty3_Details:
-                            Control: ModernNumberInput@1.1.2
-                            Properties:
-                              AccessibleLabel: ="Option Period 3 quantity"
-                              Appearance: =Appearance.Outline
-                              Color: =nf_DHSBlue
-                              Default: =First(colSubEdit).OP3Quantity
-                              DisplayMode: =If(gl_FormMode = FormMode.View, DisplayMode.View, DisplayMode.Edit)
-                              Height: =32
-                              HintText: ="0"
-                              Max: =1000000
-                              Min: =0
-                              OnChange: |-
-                                =Patch(
-                                    colSubEdit,
-                                    First(colSubEdit),
-                                    {OP3Quantity: Self.Value}
-                                )
-                              Size: =14
-                              Visible: =!(Coalesce(rad_SmCalc_Details.Selected.V, false) && lbl_HdrCalcOPs_Details.Visible)
-                              Width: =130
-                              X: =130
-                              Y: =6
-                        - lbl_SmQtyCalc3_Details:
-                            Control: ModernText@1.0.0
-                            Properties:
-                              Align: =Align.Left
-                              Color: =RGBA(97, 97, 97, 1)
-                              Height: =44
-                              PaddingBottom: =0
-                              PaddingLeft: =4
-                              PaddingRight: =4
-                              PaddingTop: =0
-                              Size: =14
-                              Text: =Coalesce(num_SmQty0_Details.Value, 0)
-                              VerticalAlign: =VerticalAlign.Middle
-                              Visible: =Coalesce(rad_SmCalc_Details.Selected.V, false) && lbl_HdrCalcOPs_Details.Visible
-                              Width: =130
-                              Wrap: =false
-                              X: =130
-                        - num_SmRate3_Details:
-                            Control: ModernNumberInput@1.1.2
-                            Properties:
-                              AccessibleLabel: ="Option Period 3 rate"
-                              Appearance: =Appearance.Outline
-                              Color: =nf_DHSBlue
-                              Default: =First(colSubEdit).OP3Rate
-                              DisplayMode: =If(gl_FormMode = FormMode.View, DisplayMode.View, DisplayMode.Edit)
-                              Height: =32
-                              HintText: ="0"
-                              Max: =1000000
-                              Min: =0
-                              OnChange: |-
-                                =Patch(
-                                    colSubEdit,
-                                    First(colSubEdit),
-                                    {OP3Rate: Self.Value}
-                                )
-                              Size: =14
-                              Visible: =!(Coalesce(rad_SmCalc_Details.Selected.V, false) && lbl_HdrCalcOPs_Details.Visible)
-                              Width: =130
-                              X: =270
-                              Y: =6
-                        - lbl_SmRateCalc3_Details:
-                            Control: ModernText@1.0.0
-                            Properties:
-                              Align: =Align.Left
-                              Color: =RGBA(97, 97, 97, 1)
-                              Height: =44
-                              PaddingBottom: =0
-                              PaddingLeft: =4
-                              PaddingRight: =4
-                              PaddingTop: =0
-                              Size: =14
-                              Text: |-
-                                =Text(nf_OPRate(Coalesce(num_SmRate0_Details.Value, 0), Coalesce(gl_IGCE.'Inflation Rate', 0), 3), "#,##0.00")
-                              VerticalAlign: =VerticalAlign.Middle
-                              Visible: =Coalesce(rad_SmCalc_Details.Selected.V, false) && lbl_HdrCalcOPs_Details.Visible
-                              Width: =130
-                              Wrap: =false
-                              X: =270
-                        - lbl_SmCost3_Details:
-                            Control: ModernText@1.0.0
-                            Properties:
-                              Align: =Align.Right
-                              Color: =nf_DHSBlue
-                              Height: =44
-                              PaddingBottom: =0
-                              PaddingLeft: =4
-                              PaddingRight: =4
-                              PaddingTop: =0
-                              Size: =14
-                              Text: |-
-                                =Text(
-                                    (If(Coalesce(rad_SmCalc_Details.Selected.V, false) && lbl_HdrCalcOPs_Details.Visible, Coalesce(num_SmQty0_Details.Value, 0), Coalesce(num_SmQty3_Details.Value, 0))) *
-                                    (If(Coalesce(rad_SmCalc_Details.Selected.V, false) && lbl_HdrCalcOPs_Details.Visible, nf_OPRate(Coalesce(num_SmRate0_Details.Value, 0), Coalesce(gl_IGCE.'Inflation Rate', 0), 3), Coalesce(num_SmRate3_Details.Value, 0))),
-                                    "#,##0.00"
-                                )
-                              VerticalAlign: =VerticalAlign.Middle
-                              Width: =130
-                              Wrap: =false
-                              X: =410
-                        - lbl_SmTotal3_Details:
-                            Control: ModernText@1.0.0
-                            Properties:
-                              Align: =Align.Right
-                              Color: =nf_DHSBlue
-                              Height: =44
-                              PaddingBottom: =0
-                              PaddingLeft: =4
-                              PaddingRight: =4
-                              PaddingTop: =0
-                              Size: =14
-                              Text: |-
-                                =Text(
-                                    (If(Coalesce(rad_SmCalc_Details.Selected.V, false) && lbl_HdrCalcOPs_Details.Visible, Coalesce(num_SmQty0_Details.Value, 0), Coalesce(num_SmQty3_Details.Value, 0))) *
-                                    (If(Coalesce(rad_SmCalc_Details.Selected.V, false) && lbl_HdrCalcOPs_Details.Visible, nf_OPRate(Coalesce(num_SmRate0_Details.Value, 0), Coalesce(gl_IGCE.'Inflation Rate', 0), 3), Coalesce(num_SmRate3_Details.Value, 0))) *
-                                    If(
-                                        cmp_Labor_Details.Value && gl_IGCE.'IGCE Type'.Value = "Cost Reimbursement",
-                                        nf_BurdenFactor(gl_IGCE.'Fringe Rate', gl_IGCE.'Overhead Rate', gl_IGCE.'G & A Rate', gl_IGCE.'FCCOM Rate'),
-                                        1
-                                    ),
-                                    "#,##0.00"
-                                )
-                              VerticalAlign: =VerticalAlign.Middle
-                              Visible: =cmp_Labor_Details.Value && gl_IGCE.'IGCE Type'.Value = "Cost Reimbursement"
-                              Width: =130
-                              Wrap: =false
-                              X: =550
-                  - con_SmPer4_Details:
-                      Control: GroupContainer@1.5.0
-                      Variant: ManualLayout
-                      Properties:
-                        DropShadow: =DropShadow.None
-                        FillPortions: =0
-                        Height: =44
-                        Visible: =lbl_HdrOP4Quantity_Details.Visible || lbl_HdrOP4Rate_Details.Visible
-                        Width: =680
-                      Children:
-                        - lbl_SmPer4_Details:
-                            Control: ModernText@1.0.0
-                            Properties:
-                              Align: =Align.Left
-                              Color: =nf_DHSBlue
-                              Height: =44
-                              PaddingBottom: =0
-                              PaddingLeft: =4
-                              PaddingRight: =4
-                              PaddingTop: =0
-                              Size: =14
-                              Text: ="Option Period 4"
-                              VerticalAlign: =VerticalAlign.Middle
-                              Width: =120
-                              Wrap: =false
-                              X: =0
-                        - num_SmQty4_Details:
-                            Control: ModernNumberInput@1.1.2
-                            Properties:
-                              AccessibleLabel: ="Option Period 4 quantity"
-                              Appearance: =Appearance.Outline
-                              Color: =nf_DHSBlue
-                              Default: =First(colSubEdit).OP4Quantity
-                              DisplayMode: =If(gl_FormMode = FormMode.View, DisplayMode.View, DisplayMode.Edit)
-                              Height: =32
-                              HintText: ="0"
-                              Max: =1000000
-                              Min: =0
-                              OnChange: |-
-                                =Patch(
-                                    colSubEdit,
-                                    First(colSubEdit),
-                                    {OP4Quantity: Self.Value}
-                                )
-                              Size: =14
-                              Visible: =!(Coalesce(rad_SmCalc_Details.Selected.V, false) && lbl_HdrCalcOPs_Details.Visible)
-                              Width: =130
-                              X: =130
-                              Y: =6
-                        - lbl_SmQtyCalc4_Details:
-                            Control: ModernText@1.0.0
-                            Properties:
-                              Align: =Align.Left
-                              Color: =RGBA(97, 97, 97, 1)
-                              Height: =44
-                              PaddingBottom: =0
-                              PaddingLeft: =4
-                              PaddingRight: =4
-                              PaddingTop: =0
-                              Size: =14
-                              Text: =Coalesce(num_SmQty0_Details.Value, 0)
-                              VerticalAlign: =VerticalAlign.Middle
-                              Visible: =Coalesce(rad_SmCalc_Details.Selected.V, false) && lbl_HdrCalcOPs_Details.Visible
-                              Width: =130
-                              Wrap: =false
-                              X: =130
-                        - num_SmRate4_Details:
-                            Control: ModernNumberInput@1.1.2
-                            Properties:
-                              AccessibleLabel: ="Option Period 4 rate"
-                              Appearance: =Appearance.Outline
-                              Color: =nf_DHSBlue
-                              Default: =First(colSubEdit).OP4Rate
-                              DisplayMode: =If(gl_FormMode = FormMode.View, DisplayMode.View, DisplayMode.Edit)
-                              Height: =32
-                              HintText: ="0"
-                              Max: =1000000
-                              Min: =0
-                              OnChange: |-
-                                =Patch(
-                                    colSubEdit,
-                                    First(colSubEdit),
-                                    {OP4Rate: Self.Value}
-                                )
-                              Size: =14
-                              Visible: =!(Coalesce(rad_SmCalc_Details.Selected.V, false) && lbl_HdrCalcOPs_Details.Visible)
-                              Width: =130
-                              X: =270
-                              Y: =6
-                        - lbl_SmRateCalc4_Details:
-                            Control: ModernText@1.0.0
-                            Properties:
-                              Align: =Align.Left
-                              Color: =RGBA(97, 97, 97, 1)
-                              Height: =44
-                              PaddingBottom: =0
-                              PaddingLeft: =4
-                              PaddingRight: =4
-                              PaddingTop: =0
-                              Size: =14
-                              Text: |-
-                                =Text(nf_OPRate(Coalesce(num_SmRate0_Details.Value, 0), Coalesce(gl_IGCE.'Inflation Rate', 0), 4), "#,##0.00")
-                              VerticalAlign: =VerticalAlign.Middle
-                              Visible: =Coalesce(rad_SmCalc_Details.Selected.V, false) && lbl_HdrCalcOPs_Details.Visible
-                              Width: =130
-                              Wrap: =false
-                              X: =270
-                        - lbl_SmCost4_Details:
-                            Control: ModernText@1.0.0
-                            Properties:
-                              Align: =Align.Right
-                              Color: =nf_DHSBlue
-                              Height: =44
-                              PaddingBottom: =0
-                              PaddingLeft: =4
-                              PaddingRight: =4
-                              PaddingTop: =0
-                              Size: =14
-                              Text: |-
-                                =Text(
-                                    (If(Coalesce(rad_SmCalc_Details.Selected.V, false) && lbl_HdrCalcOPs_Details.Visible, Coalesce(num_SmQty0_Details.Value, 0), Coalesce(num_SmQty4_Details.Value, 0))) *
-                                    (If(Coalesce(rad_SmCalc_Details.Selected.V, false) && lbl_HdrCalcOPs_Details.Visible, nf_OPRate(Coalesce(num_SmRate0_Details.Value, 0), Coalesce(gl_IGCE.'Inflation Rate', 0), 4), Coalesce(num_SmRate4_Details.Value, 0))),
-                                    "#,##0.00"
-                                )
-                              VerticalAlign: =VerticalAlign.Middle
-                              Width: =130
-                              Wrap: =false
-                              X: =410
-                        - lbl_SmTotal4_Details:
-                            Control: ModernText@1.0.0
-                            Properties:
-                              Align: =Align.Right
-                              Color: =nf_DHSBlue
-                              Height: =44
-                              PaddingBottom: =0
-                              PaddingLeft: =4
-                              PaddingRight: =4
-                              PaddingTop: =0
-                              Size: =14
-                              Text: |-
-                                =Text(
-                                    (If(Coalesce(rad_SmCalc_Details.Selected.V, false) && lbl_HdrCalcOPs_Details.Visible, Coalesce(num_SmQty0_Details.Value, 0), Coalesce(num_SmQty4_Details.Value, 0))) *
-                                    (If(Coalesce(rad_SmCalc_Details.Selected.V, false) && lbl_HdrCalcOPs_Details.Visible, nf_OPRate(Coalesce(num_SmRate0_Details.Value, 0), Coalesce(gl_IGCE.'Inflation Rate', 0), 4), Coalesce(num_SmRate4_Details.Value, 0))) *
-                                    If(
-                                        cmp_Labor_Details.Value && gl_IGCE.'IGCE Type'.Value = "Cost Reimbursement",
-                                        nf_BurdenFactor(gl_IGCE.'Fringe Rate', gl_IGCE.'Overhead Rate', gl_IGCE.'G & A Rate', gl_IGCE.'FCCOM Rate'),
-                                        1
-                                    ),
-                                    "#,##0.00"
-                                )
-                              VerticalAlign: =VerticalAlign.Middle
-                              Visible: =cmp_Labor_Details.Value && gl_IGCE.'IGCE Type'.Value = "Cost Reimbursement"
-                              Width: =130
-                              Wrap: =false
-                              X: =550
-            - con_SmFoot_Details:
-                Control: GroupContainer@1.5.0
-                Variant: AutoLayout
-                Properties:
-                  DropShadow: =DropShadow.None
-                  FillPortions: =0
-                  Height: =40
-                  LayoutAlignItems: =LayoutAlignItems.Center
-                  LayoutDirection: =LayoutDirection.Horizontal
-                  LayoutGap: =12
-                  LayoutJustifyContent: =LayoutJustifyContent.End
-                Children:
-                  - btn_SmCancel_Details:
-                      Control: ModernButton@1.0.0
-                      Properties:
-                        AccessibleLabel: =Self.Text
-                        Appearance: =ButtonAppearance.Secondary
-                        Color: =nf_DHSBlue
-                        FillPortions: =0
-                        FontWeight: =FontWeight.Semibold
-                        Height: =32
-                        OnSelect: |-
-                          =UpdateContext({locSubModalOpen: false})
-                        Text: =If(gl_FormMode = FormMode.View, "Close", "Cancel")
-                        Width: =120
-                  - btn_SmSave_Details:
-                      Control: ModernButton@1.0.0
-                      Properties:
-                        AccessibleLabel: =Self.Text
-                        DisplayMode: |-
-                          =If(
-                              IsBlank(Trim(txt_SmDesc_Details.Text)) || IsBlank(num_SmQty0_Details.Value) || IsBlank(num_SmRate0_Details.Value),
-                              DisplayMode.Disabled,
-                              DisplayMode.Edit
-                          )
-                        FillPortions: =0
-                        FontWeight: =FontWeight.Semibold
-                        Height: =32
-                        OnSelect: |-
-                          =With(
-                              {
-                                  wS: First(colSubEdit),
-                                  wCalc: Coalesce(First(colSubEdit).'Calc OPs', false) && lbl_HdrCalcOPs_Details.Visible,
-                                  wForced: gl_IGCELine.Category.Value in ["Capitalized Equipment", "Accountable Property"]
-                              },
-                              Patch(
-                                  [@IGCESubLine_IGCE_SPList],
-                                  If(locSubEditID = 0, Defaults([@IGCESubLine_IGCE_SPList]), LookUp([@IGCESubLine_IGCE_SPList], ID = locSubEditID)),
-                                  {
-                                      'Ref #': wS.'Ref #',
-                                      Title: wS.Title,
-                                      SublineType: wS.SublineType,
-                                      Units: If(cmp_Labor_Details.Value, {Value: "HR"}, wS.Units),
-                                      ODCCategory: wS.ODCCategory,
-                                      'Software License/Subscription': Coalesce(wS.'Software License/Subscription', false),
-                                      IncludesProperty: If(wForced, true, Coalesce(wS.IncludesProperty, false)),
-                                      PropertyType: If(wForced, {Value: "Accountable"}, wS.PropertyType),
-                                      SerialNumber: wS.SerialNumber,
-                                      BaseYearQuantity: Coalesce(wS.BaseYearQuantity, 0),
-                                      BaseYearRate: Coalesce(wS.BaseYearRate, 0),
-                                      'Calc OPs': wCalc,
-                                      OP1Quantity: If(!con_SmPer1_Details.Visible, 0, wCalc, Coalesce(wS.BaseYearQuantity, 0), Coalesce(wS.OP1Quantity, 0)),
-                                      OP1Rate: If(!con_SmPer1_Details.Visible, 0, wCalc, nf_OPRate(Coalesce(wS.BaseYearRate, 0), Coalesce(gl_IGCE.'Inflation Rate', 0), 1), Coalesce(wS.OP1Rate, 0)),
-                                      OP2Quantity: If(!con_SmPer2_Details.Visible, 0, wCalc, Coalesce(wS.BaseYearQuantity, 0), Coalesce(wS.OP2Quantity, 0)),
-                                      OP2Rate: If(!con_SmPer2_Details.Visible, 0, wCalc, nf_OPRate(Coalesce(wS.BaseYearRate, 0), Coalesce(gl_IGCE.'Inflation Rate', 0), 2), Coalesce(wS.OP2Rate, 0)),
-                                      OP3Quantity: If(!con_SmPer3_Details.Visible, 0, wCalc, Coalesce(wS.BaseYearQuantity, 0), Coalesce(wS.OP3Quantity, 0)),
-                                      OP3Rate: If(!con_SmPer3_Details.Visible, 0, wCalc, nf_OPRate(Coalesce(wS.BaseYearRate, 0), Coalesce(gl_IGCE.'Inflation Rate', 0), 3), Coalesce(wS.OP3Rate, 0)),
-                                      OP4Quantity: If(!con_SmPer4_Details.Visible, 0, wCalc, Coalesce(wS.BaseYearQuantity, 0), Coalesce(wS.OP4Quantity, 0)),
-                                      OP4Rate: If(!con_SmPer4_Details.Visible, 0, wCalc, nf_OPRate(Coalesce(wS.BaseYearRate, 0), Coalesce(gl_IGCE.'Inflation Rate', 0), 4), Coalesce(wS.OP4Rate, 0)),
-                                      IGCELine: {
-                                          '@odata.type': "#Microsoft.Azure.Connectors.SharePoint.SPListExpandedReference",
-                                          Id: gl_IGCELine.ID,
-                                          Value: gl_IGCELine.Title
-                                      },
-                                      IGCELineID: gl_IGCELine.ID
-                                  }
-                              )
-                          );
-                          nf_RecalcLine(cmp_Labor_Details.Value);
-                          If(
-                              IsEmpty(Errors([@IGCESubLine_IGCE_SPList])) && IsEmpty(Errors([@IGCELine_IGCE_SPList])),
-                              Notify("Subline saved", NotificationType.Success);
-                              UpdateContext({locSubModalOpen: false}),
-                              Notify("The subline was not saved. Check the fields and try again.", NotificationType.Error)
-                          )
-                        Text: ="Save"
-                        Visible: =gl_FormMode <> FormMode.View
-                        Width: =120
+// =============================================================================
+//  START UP
+//  Loads the estimates from SharePoint into working copies. Screens and the
+//  calculation chain read these; every save writes back through nfIgceSpSync.
+//  Reference data (choices, settings, tracker, people) is in named formulas.
+//
+//  Column names differ in three places, mapped here and in nfIgceSpSync only:
+//      IGCEHeader.GAndARate      colIGCEHeader.GARate
+//      IGCESubLine.CLIN          colIGCESubLine.Ref
+//      RequirementTracker.Title  nfIgceTracker.RequirementName
+//  Rates are fractions in SharePoint (0.32) and whole numbers here (32).
+//
+//  Delegation: each list is read in full, up to the data row limit (2000).
+// =============================================================================
+
+ClearCollect(
+    colIGCEHeader,
+    ForAll(
+        IGCEHeader As h,
+        {
+          ID: h.ID,
+          Title: h.Title,
+          Revision: Coalesce(h.Revision, 1),
+          PRTrackerID: { Id: h.PRTrackerID.Id, Value: h.PRTrackerID.Value },
+          PRTrackerNumber: h.Title,
+          PRID: h.PRID,
+          IGCEType: { Value: h.IGCEType.Value },
+          PointOfContact: { Claims: h.PointOfContact.Claims, DisplayName: h.PointOfContact.DisplayName, Email: Lower(h.PointOfContact.Email), Department: h.PointOfContact.Department, JobTitle: h.PointOfContact.JobTitle },
+          COR: { Claims: h.COR.Claims, DisplayName: h.COR.DisplayName, Email: Lower(h.COR.Email), Department: h.COR.Department, JobTitle: h.COR.JobTitle },
+          BasePeriodStart: h.BasePeriodStart,
+          BasePeriodEnd: h.BasePeriodEnd,
+          OptionPeriods: Coalesce(h.OptionPeriods, 0),
+          InflationRate: Round(Coalesce(h.InflationRate, 0) * 100, 6),
+          FringeRate: Round(Coalesce(h.FringeRate, 0) * 100, 6),
+          OverheadRate: Round(Coalesce(h.OverheadRate, 0) * 100, 6),
+          GARate: Round(Coalesce(h.GAndARate, 0) * 100, 6),
+          FCCOMRate: Round(Coalesce(h.FCCOMRate, 0) * 100, 6),
+          ProfitFeeRate: Round(Coalesce(h.ProfitFeeRate, 0) * 100, 6),
+          ContractAccessFeeRate: Round(Coalesce(h.ContractAccessFeeRate, 0) * 100, 6),
+          IndirectBurdenRate: Round(Coalesce(h.IndirectBurdenRate, 0) * 100, 6),
+          AccountablePropertyTotal: Coalesce(h.AccountablePropertyTotal, 0),
+          Status: { Value: Coalesce(h.Status.Value, "Draft") },
+          ContainsGFP: Coalesce(h.ContainsGFP, false),
+          SubmittedBy: Coalesce(h.SubmittedBy, ""),
+          SubmittedOn: h.SubmittedOn,
+          Modified: h.Modified,
+          Assumptions: Coalesce(h.Assumptions, ""),
+          InformationToolsUsed: Coalesce(h.InformationToolsUsed, ""),
+          InformationObtainedFrom: Coalesce(h.InformationObtainedFrom, ""),
+          PreviousContracts: Coalesce(h.PreviousContracts, ""),
+          LaborBasis: Coalesce(h.LaborBasis, ""),
+          LaborCategoriesBasis: Coalesce(h.LaborCategoriesBasis, ""),
+          LaborRatesBasis: Coalesce(h.LaborRatesBasis, ""),
+          HoursBasis: Coalesce(h.HoursBasis, ""),
+          UnburdenedDirectLaborBasis: Coalesce(h.UnburdenedDirectLaborBasis, ""),
+          ODCBasis: Coalesce(h.ODCBasis, ""),
+          DirectMaterialBasis: Coalesce(h.DirectMaterialBasis, ""),
+          ProductsSuppliesBasis: Coalesce(h.ProductsSuppliesBasis, ""),
+          SubcontractsBasis: Coalesce(h.SubcontractsBasis, ""),
+          TravelBasis: Coalesce(h.TravelBasis, ""),
+          IndirectRatesBasis: Coalesce(h.IndirectRatesBasis, ""),
+          IndirectBurdenBasis: Coalesce(h.IndirectBurdenBasis, ""),
+          GAndABasis: Coalesce(h.GAndABasis, ""),
+          FCCOMBasis: Coalesce(h.FCCOMBasis, ""),
+          FixedFeeBasis: Coalesce(h.FixedFeeBasis, ""),
+          gfpJustifiQues1: Coalesce(h.gfpJustifiQues1, ""),
+          gfpJustifiQues2: Coalesce(h.gfpJustifiQues2, ""),
+          gfpJustifiQues3: Coalesce(h.gfpJustifiQues3, ""),
+          gfpJustifiQues4: Coalesce(h.gfpJustifiQues4, ""),
+          gfpJustifiQues5: Coalesce(h.gfpJustifiQues5, ""),
+          gfpJustifiQues6: Coalesce(h.gfpJustifiQues6, "")
+        }
+    )
+);
+
+ClearCollect(
+    colIGCELine,
+    ForAll(
+        IGCELine As l,
+        {
+          ID: l.ID,
+          IGCEHeaderID: l.IGCEHeaderID,
+          Title: l.Title,
+          LineNumber: l.LineNumber,
+          Labor: Coalesce(l.Labor, false),
+          Category: { Value: l.Category.Value },
+          BaseYearCost: Coalesce(l.BaseYearCost, 0),
+          OP1Cost: Coalesce(l.OP1Cost, 0),
+          OP2Cost: Coalesce(l.OP2Cost, 0),
+          OP3Cost: Coalesce(l.OP3Cost, 0),
+          OP4Cost: Coalesce(l.OP4Cost, 0),
+          AccountablePropertyTotal: Coalesce(l.AccountablePropertyTotal, 0)
+        }
+    )
+);
+
+ClearCollect(
+    colIGCESubLine,
+    ForAll(
+        IGCESubLine As s,
+        {
+          ID: s.ID,
+          IGCELineID: s.IGCELineID,
+          Title: s.Title,
+          Ref: s.CLIN,
+          SerialNumber: Coalesce(s.SerialNumber, ""),
+          SublineType: { Value: s.SublineType.Value },
+          IncludesProperty: Coalesce(s.IncludesProperty, false),
+          PropertyType: { Value: s.PropertyType.Value },
+          LaborCategories: Coalesce(s.LaborCategories, ""),
+          ODCCategory: { Value: s.ODCCategory.Value },
+          Units: { Value: s.Units.Value },
+          Software: Coalesce(s.Software, false),
+          CalculateOptionPeriods: Coalesce(s.CalculateOptionPeriods, false),
+          BaseYearQuantity: Coalesce(s.BaseYearQuantity, 0),
+          BaseYearRate: Coalesce(s.BaseYearRate, 0),
+          BaseYearFringe: Coalesce(s.BaseYearFringe, 0),
+          BaseYearOverhead: Coalesce(s.BaseYearOverhead, 0),
+          BaseYearGAndA: Coalesce(s.BaseYearGAndA, 0),
+          BaseYearFCCOM: Coalesce(s.BaseYearFCCOM, 0),
+          BaseYearCost: Coalesce(s.BaseYearCost, 0),
+          BaseYearBurden: Coalesce(s.BaseYearBurden, 0),
+          BaseYearTotalCost: Coalesce(s.BaseYearTotalCost, 0),
+          OP1Quantity: Coalesce(s.OP1Quantity, 0),
+          OP1Rate: Coalesce(s.OP1Rate, 0),
+          OP1Fringe: Coalesce(s.OP1Fringe, 0),
+          OP1Overhead: Coalesce(s.OP1Overhead, 0),
+          OP1GAndA: Coalesce(s.OP1GAndA, 0),
+          OP1FCCOM: Coalesce(s.OP1FCCOM, 0),
+          OP1Cost: Coalesce(s.OP1Cost, 0),
+          OP1Burden: Coalesce(s.OP1Burden, 0),
+          OP1TotalCost: Coalesce(s.OP1TotalCost, 0),
+          OP2Quantity: Coalesce(s.OP2Quantity, 0),
+          OP2Rate: Coalesce(s.OP2Rate, 0),
+          OP2Fringe: Coalesce(s.OP2Fringe, 0),
+          OP2Overhead: Coalesce(s.OP2Overhead, 0),
+          OP2GAndA: Coalesce(s.OP2GAndA, 0),
+          OP2FCCOM: Coalesce(s.OP2FCCOM, 0),
+          OP2Cost: Coalesce(s.OP2Cost, 0),
+          OP2Burden: Coalesce(s.OP2Burden, 0),
+          OP2TotalCost: Coalesce(s.OP2TotalCost, 0),
+          OP3Quantity: Coalesce(s.OP3Quantity, 0),
+          OP3Rate: Coalesce(s.OP3Rate, 0),
+          OP3Fringe: Coalesce(s.OP3Fringe, 0),
+          OP3Overhead: Coalesce(s.OP3Overhead, 0),
+          OP3GAndA: Coalesce(s.OP3GAndA, 0),
+          OP3FCCOM: Coalesce(s.OP3FCCOM, 0),
+          OP3Cost: Coalesce(s.OP3Cost, 0),
+          OP3Burden: Coalesce(s.OP3Burden, 0),
+          OP3TotalCost: Coalesce(s.OP3TotalCost, 0),
+          OP4Quantity: Coalesce(s.OP4Quantity, 0),
+          OP4Rate: Coalesce(s.OP4Rate, 0),
+          OP4Fringe: Coalesce(s.OP4Fringe, 0),
+          OP4Overhead: Coalesce(s.OP4Overhead, 0),
+          OP4GAndA: Coalesce(s.OP4GAndA, 0),
+          OP4FCCOM: Coalesce(s.OP4FCCOM, 0),
+          OP4Cost: Coalesce(s.OP4Cost, 0),
+          OP4Burden: Coalesce(s.OP4Burden, 0),
+          OP4TotalCost: Coalesce(s.OP4TotalCost, 0),
+          TotalCost: Coalesce(s.TotalCost, 0)
+        }
+    )
+);
+
+// Rebuild line and subline totals from what was loaded. Not nfIGCERecalcHeader,
+// which would stamp every estimate as just modified.
+ClearCollect(colTmpIds, ShowColumns(colIGCELine, ID));
+ForAll(colTmpIds As t, nfIGCERecalcLine(t.ID));
+Clear(colTmpIds);
+
+// =============================================================================
+//  EDIT STAGING ROWS
+//  One row each: the columns a screen may edit. A screen patches the row, then
+//  calls the save routine, which owns rollups, calculated columns and Status.
+// =============================================================================
+
+ClearCollect(colIGCEHeaderEdit,
+    {
+        Title: "",
+        Revision: 1,
+        PRTrackerID: { Id: 0, Value: "" },
+        PRTrackerNumber: "",
+        PRID: "",
+        IGCEType: { Value: "" },
+        PointOfContact: nfSignedIn,
+        COR: nfSignedIn,
+        // A date typed blank: Blank() alone would type the column as Blank.
+        BasePeriodStart: If(false, Today()),
+        BasePeriodEnd: If(false, Today()),
+        OptionPeriods: 0,
+        InflationRate: 0,
+        FringeRate: 0,
+        OverheadRate: 0,
+        GARate: 0,
+        FCCOMRate: 0,
+        ProfitFeeRate: 0,
+        ContractAccessFeeRate: 0,
+        IndirectBurdenRate: 0,
+        ContainsGFP: false
+    }
+);
+
+ClearCollect(colIGCELineEdit,
+    {
+        IGCEHeaderID: 0,
+        Title: "",
+        LineNumber: 0,
+        Labor: false,
+        Category: { Value: "" }
+    }
+);
+
+ClearCollect(colIGCESubLineEdit,
+    {
+        IGCELineID: 0,
+        Title: "",
+        Ref: "",
+        SerialNumber: "",
+        SublineType: { Value: "FFP" },
+        IncludesProperty: false,
+        PropertyType: { Value: "" },
+        LaborCategories: "",
+        ODCCategory: { Value: "" },
+        Units: { Value: "EA" },
+        Software: false,
+        CalculateOptionPeriods: true,
+        BaseYearQuantity: 0, OP1Quantity: 0, OP2Quantity: 0,
+        OP3Quantity: 0, OP4Quantity: 0,
+        BaseYearRate: 0, OP1Rate: 0, OP2Rate: 0, OP3Rate: 0, OP4Rate: 0
+    }
+);
+
+// The estimate being viewed, the PR for the requirement and compare screens, the
+// two revisions being compared, and the stepper component's app scope output.
+Set(gblIgceHeaderID, 0);
+Set(gblIgcePRID, "");
+Set(gblIgceCmpA, 0);
+Set(gblIgceCmpB, 0);
+Set(_stepSel, 0);
