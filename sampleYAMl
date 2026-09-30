@@ -685,13 +685,13 @@ Screens:
                                           AllowExternalSelectedItems: =false
                                           Appearance: =Appearance.Outline
                                           Color: =nfColor.Ink
-                                          DefaultSelectedItems: =Filter(colChoiceIGCEType, Value = First(colIGCEHeaderEdit).IGCEType.Value)
+                                          DefaultSelectedItems: =Filter(nfChoiceIGCEType, Value = First(colIGCEHeaderEdit).IGCEType.Value)
                                           DisplayMode: =If(nfIgceIsReadOnly(gblIgceHeaderID), DisplayMode.View, DisplayMode.Edit)
                                           Height: =nfHeights.input
                                           InputTextPlaceholder: ="Select a type"
                                           IsSearchable: =false
                                           ItemDisplayText: =ThisItem.Value
-                                          Items: =colChoiceIGCEType
+                                          Items: =nfChoiceIGCEType
                                           OnChange: |-
                                             =Patch(
                                                 colIGCEHeaderEdit,
@@ -742,12 +742,12 @@ Screens:
                                           AllowExternalSelectedItems: =false
                                           Appearance: =Appearance.Outline
                                           Color: =nfColor.Ink
-                                          DefaultSelectedItems: =Filter(colPeople, Email = First(colIGCEHeaderEdit).PointOfContact.Email)
+                                          DefaultSelectedItems: =Filter(nfPeople, Email = First(colIGCEHeaderEdit).PointOfContact.Email)
                                           DisplayMode: =If(nfIgceIsReadOnly(gblIgceHeaderID), DisplayMode.View, DisplayMode.Edit)
                                           Height: =nfHeights.input
                                           InputTextPlaceholder: ="Search for a person"
                                           ItemDisplayText: =ThisItem.DisplayName
-                                          Items: =colPeople
+                                          Items: =nfPeople
                                           OnChange: |-
                                             =Patch(
                                                 colIGCEHeaderEdit,
@@ -799,12 +799,12 @@ Screens:
                                           AllowExternalSelectedItems: =false
                                           Appearance: =Appearance.Outline
                                           Color: =nfColor.Ink
-                                          DefaultSelectedItems: =Filter(colPeople, Email = First(colIGCEHeaderEdit).COR.Email)
+                                          DefaultSelectedItems: =Filter(nfPeople, Email = First(colIGCEHeaderEdit).COR.Email)
                                           DisplayMode: =If(nfIgceIsReadOnly(gblIgceHeaderID), DisplayMode.View, DisplayMode.Edit)
                                           Height: =nfHeights.input
                                           InputTextPlaceholder: ="Search for a person"
                                           ItemDisplayText: =ThisItem.DisplayName
-                                          Items: =colPeople
+                                          Items: =nfPeople
                                           OnChange: |-
                                             =Patch(
                                                 colIGCEHeaderEdit,
