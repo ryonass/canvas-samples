@@ -23,19 +23,16 @@ Screens:
                   ActiveKey: ="overview"
                   AlignInContainer: =AlignInContainer.Stretch
                   Height: =nfSize.Header
-                  HelpUrl: =nfApp.HelpUrl
-                  HubUrl: =nfApp.HubUrl
                   IsStaff: =gblIsStaff
                   Items: =nfNavMain
                   Layout: =nfLayout
                   LayoutMinHeight: =0
                   LayoutMinWidth: =0
+                  Links: =nfHeaderLinks
                   Logo: =nfLogo
                   LogoWidth: =nfApp.LogoWidth
-                  OnHelpSelect: =Launch(nfApp.HelpUrl)
-                  OnHubSelect: =Launch(nfApp.HubUrl)
+                  OnLinkSelect: =Launch(Self.SelectedUrl)
                   OnNavSelect: =nfGo(Self.SelectedKey)
-                  ShowHubLink: =!IsBlank(nfApp.HubUrl)
                   Theme: =nfColor
                   Title: =nfApp.Name
                   UserImage: =User().Image
@@ -766,7 +763,7 @@ Screens:
                               OnPrimary: =nfGo("form")
                               OnSecondary: =false
                               PrimaryText: ="New " & nfItem
-                              SecondaryText: =""
+                              SecondaryText: =
                               Theme: =nfColor
                               Title: ="No " & nfItems & " yet"
                               Variant: ="Empty"
@@ -867,8 +864,8 @@ Screens:
                         Width: =120
 
 
+/----
 
-/--
 
 Screens:
   scrList:
@@ -897,19 +894,16 @@ Screens:
                   ActiveKey: ="list"
                   AlignInContainer: =AlignInContainer.Stretch
                   Height: =nfSize.Header
-                  HelpUrl: =nfApp.HelpUrl
-                  HubUrl: =nfApp.HubUrl
                   IsStaff: =gblIsStaff
                   Items: =nfNavMain
                   Layout: =nfLayout
                   LayoutMinHeight: =0
                   LayoutMinWidth: =0
+                  Links: =nfHeaderLinks
                   Logo: =nfLogo
                   LogoWidth: =nfApp.LogoWidth
-                  OnHelpSelect: =Launch(nfApp.HelpUrl)
-                  OnHubSelect: =Launch(nfApp.HubUrl)
+                  OnLinkSelect: =Launch(Self.SelectedUrl)
                   OnNavSelect: =nfGo(Self.SelectedKey)
-                  ShowHubLink: =!IsBlank(nfApp.HubUrl)
                   Theme: =nfColor
                   Title: =nfApp.Name
                   UserImage: =User().Image
@@ -1527,7 +1521,7 @@ Screens:
                                 )
                               OnSecondary: =false
                               PrimaryText: =If(IsEmpty(nfMyRequests), "New " & nfItem, "Clear filters")
-                              SecondaryText: =""
+                              SecondaryText: =
                               Theme: =nfColor
                               Title: =If(IsEmpty(nfMyRequests), "No " & nfItems & " yet", "No " & nfItems & " match")
                               Variant: ="Empty"
