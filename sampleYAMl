@@ -1,25 +1,12 @@
 Screens:
-  scrDetail:
+  scrOverview:
     Properties:
       Fill: =nfColor.Page
       OnVisible: |-
         =UpdateContext({ locLoading: true });
-        UpdateContext({ locItem: LookUp(colRequests, ID = locId), locConfirm: Blank() });
-        UpdateContext({ locActions: ForAll(
-            Distinct(
-                Filter(
-                    nfTransitions,
-                    ";" & locItem.Status & ";" in From,
-                    (Role = "Staff" && gblIsStaff) || (Role = "Owner" && locItem.RequesterEmail = nfUserEmail),
-                    !OnlyIfUnassigned || IsBlank(locItem.AssignedTo)
-                ),
-                Key
-            ) As k,
-            LookUp(nfTransitions, Key = k.Value)
-        ) });
         UpdateContext({ locLoading: false })
     Children:
-      - conDtlRoot:
+      - conOvwRoot:
           Control: GroupContainer@1.5.0
           Variant: AutoLayout
           Properties:
@@ -29,13 +16,14 @@ Screens:
             LayoutDirection: =LayoutDirection.Vertical
             Width: =Parent.Width
           Children:
-            - cmpDtlHeader:
+            - cmpOvwHeader:
                 Control: CanvasComponent
                 ComponentName: cmpHeader
                 Properties:
-                  ActiveKey: =If(locFrom = "queue", "queue", "list")
+                  ActiveKey: ="overview"
                   AlignInContainer: =AlignInContainer.Stretch
                   Height: =nfSize.Header
+                  HelpUrl: =nfApp.HelpUrl
                   HubUrl: =nfApp.HubUrl
                   IsStaff: =gblIsStaff
                   Items: =nfNavMain
@@ -43,16 +31,16 @@ Screens:
                   LayoutMinHeight: =0
                   LayoutMinWidth: =0
                   Logo: =nfLogo
+                  LogoWidth: =nfApp.LogoWidth
+                  OnHelpSelect: =Launch(nfApp.HelpUrl)
                   OnHubSelect: =Launch(nfApp.HubUrl)
                   OnNavSelect: =nfGo(Self.SelectedKey)
-                  OnRightAction: =false
-                  RightActionLabel: =""
                   ShowHubLink: =!IsBlank(nfApp.HubUrl)
                   Theme: =nfColor
                   Title: =nfApp.Name
                   UserImage: =User().Image
                   WelcomeName: =nfUserName
-            - conDtlHeaderRule:
+            - conOvwHeaderRule:
                 Control: GroupContainer@1.5.0
                 Variant: ManualLayout
                 Properties:
@@ -62,7 +50,7 @@ Screens:
                   Height: =1
                   LayoutMinHeight: =0
                   LayoutMinWidth: =0
-            - conDtlBody:
+            - conOvwBody:
                 Control: GroupContainer@1.5.0
                 Variant: AutoLayout
                 Properties:
@@ -79,84 +67,7 @@ Screens:
                   PaddingRight: =nfGutter
                   PaddingTop: =nfSpace.Xl
                 Children:
-                  - conDtlCrumb:
-                      Control: GroupContainer@1.5.0
-                      Variant: AutoLayout
-                      Properties:
-                        DropShadow: =DropShadow.None
-                        Fill: =nfColor.Transparent
-                        FillPortions: =0
-                        Height: =nfSize.Control
-                        LayoutAlignItems: =LayoutAlignItems.Center
-                        LayoutDirection: =LayoutDirection.Horizontal
-                        LayoutMinHeight: =0
-                        LayoutMinWidth: =0
-                        Width: =Min(Parent.Width - 2 * nfGutter, nfPageMaxW)
-                      Children:
-                        - btnDtlBack:
-                            Control: ModernButton@1.0.0
-                            Properties:
-                              AccessibleLabel: ="Back to " & nfNavLabel(If(locFrom = "queue", "queue", "list"))
-                              Appearance: =ButtonAppearance.Transparent
-                              Color: =nfColor.Primary
-                              Height: =nfSize.Control
-                              Icon: ="ArrowLeft"
-                              OnSelect: |-
-                                =If(locFrom = "queue", Navigate(scrQueue, ScreenTransition.None), Navigate(scrList, ScreenTransition.None, { locStatusFilter: "all" }))
-                              Size: =nfType.Body
-                              Text: =nfNavLabel(If(locFrom = "queue", "queue", "list"))
-                              Width: =150
-                  - conDtlMissing:
-                      Control: GroupContainer@1.5.0
-                      Variant: AutoLayout
-                      Properties:
-                        BorderColor: =nfColor.Line
-                        BorderThickness: =1
-                        DropShadow: =DropShadow.None
-                        Fill: =nfColor.Surface
-                        FillPortions: =0
-                        Height: =96
-                        LayoutDirection: =LayoutDirection.Vertical
-                        LayoutGap: =nfSpace.Sm
-                        LayoutMinHeight: =0
-                        LayoutMinWidth: =0
-                        PaddingBottom: =nfSpace.Xl
-                        PaddingLeft: =nfSpace.Xl
-                        PaddingRight: =nfSpace.Xl
-                        PaddingTop: =nfSpace.Xl
-                        RadiusBottomLeft: =nfRadius.Md
-                        RadiusBottomRight: =nfRadius.Md
-                        RadiusTopLeft: =nfRadius.Md
-                        RadiusTopRight: =nfRadius.Md
-                        Visible: =IsBlank(locItem)
-                        Width: =Min(Parent.Width - 2 * nfGutter, nfPageMaxW)
-                      Children:
-                        - lblDtlMissingTitle:
-                            Control: ModernText@1.0.0
-                            Properties:
-                              AlignInContainer: =AlignInContainer.Stretch
-                              AutoHeight: =true
-                              Color: =nfColor.Ink
-                              FontWeight: =FontWeight.Semibold
-                              PaddingBottom: =0
-                              PaddingLeft: =0
-                              PaddingRight: =0
-                              PaddingTop: =0
-                              Size: =nfType.H2
-                              Text: =nfItemCap & " not found"
-                        - lblDtlMissingBody:
-                            Control: ModernText@1.0.0
-                            Properties:
-                              AlignInContainer: =AlignInContainer.Stretch
-                              AutoHeight: =true
-                              Color: =nfColor.Ink2
-                              PaddingBottom: =0
-                              PaddingLeft: =0
-                              PaddingRight: =0
-                              PaddingTop: =0
-                              Size: =nfType.Body
-                              Text: ="It may have been removed, or the link is out of date."
-                  - conDtlHead:
+                  - conOvwHead:
                       Control: GroupContainer@1.5.0
                       Variant: AutoLayout
                       Properties:
@@ -169,10 +80,9 @@ Screens:
                         LayoutGap: =nfSpace.Md
                         LayoutMinHeight: =0
                         LayoutMinWidth: =0
-                        Visible: =!IsBlank(locItem)
                         Width: =Min(Parent.Width - 2 * nfGutter, nfPageMaxW)
                       Children:
-                        - conDtlTitleText:
+                        - conOvwTitleText:
                             Control: GroupContainer@1.5.0
                             Variant: AutoLayout
                             Properties:
@@ -184,7 +94,7 @@ Screens:
                               LayoutMinHeight: =0
                               LayoutMinWidth: =0
                             Children:
-                              - lblDtlTitle:
+                              - lblOvwTitle:
                                   Control: ModernText@1.0.0
                                   Properties:
                                     AlignInContainer: =AlignInContainer.Stretch
@@ -196,9 +106,9 @@ Screens:
                                     PaddingRight: =0
                                     PaddingTop: =0
                                     Size: =nfType.H1
-                                    Text: =locItem.Title
+                                    Text: =nfGreeting & ", " & nfFirstName
                                     Wrap: =false
-                              - lblDtlSub:
+                              - lblOvwSub:
                                   Control: ModernText@1.0.0
                                   Properties:
                                     AlignInContainer: =AlignInContainer.Stretch
@@ -209,530 +119,443 @@ Screens:
                                     PaddingRight: =0
                                     PaddingTop: =0
                                     Size: =nfType.Body
-                                    Text: =nfItemCap & " " & locItem.ID & " · Submitted by " & locItem.RequesterName
+                                    Text: =nfApp.Tagline
                                     Wrap: =false
-                        - conDtlPill:
-                            Control: GroupContainer@1.5.0
-                            Variant: ManualLayout
+                        - btnOvwNew:
+                            Control: ModernButton@1.0.0
                             Properties:
-                              AlignInContainer: =AlignInContainer.Center
-                              DropShadow: =DropShadow.None
-                              Fill: =nfColor.Transparent
-                              FillPortions: =0
-                              Height: =24
-                              LayoutMinHeight: =0
+                              AccessibleLabel: ="New " & nfItem
+                              Height: =nfSize.Control
+                              Icon: ="Add"
+                              OnSelect: =nfGo("form")
+                              Size: =nfType.Body
+                              Text: ="New " & nfItem
+                              Visible: =!nfIsPhone
+                              Width: =140
+                  - conOvwNotice:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Fill: =nfColor.PrimarySoft
+                        FillPortions: =0
+                        Height: =56
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingLeft: =nfSpace.Lg
+                        PaddingRight: =nfSpace.Lg
+                        RadiusBottomLeft: =nfRadius.Md
+                        RadiusBottomRight: =nfRadius.Md
+                        RadiusTopLeft: =nfRadius.Md
+                        RadiusTopRight: =nfRadius.Md
+                        Visible: =!IsBlank(nfApp.Notice)
+                        Width: =Min(Parent.Width - 2 * nfGutter, nfPageMaxW)
+                      Children:
+                        - lblOvwNotice:
+                            Control: ModernText@1.0.0
+                            Properties:
+                              AutoHeight: =true
+                              Color: =nfColor.InfoInk
+                              FillPortions: =1
                               LayoutMinWidth: =0
-                              Width: =nfSize.Pill
-                            Children:
-                              - cmpDtlPill:
-                                  Control: CanvasComponent
-                                  ComponentName: cmpStatusPill
-                                  Properties:
-                                    Height: =Parent.Height
-                                    Label: =nfStatusLabel(locItem.Status)
-                                    Theme: =nfColor
-                                    Tone: =nfStatusTone(locItem.Status)
-                                    Width: =Parent.Width
-                  - conDtlActions:
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =nfType.Body
+                              Text: =nfApp.Notice
+                  - conOvwTiles:
                       Control: GroupContainer@1.5.0
                       Variant: AutoLayout
                       Properties:
                         DropShadow: =DropShadow.None
                         Fill: =nfColor.Transparent
                         FillPortions: =0
-                        Height: =nfSize.Control + nfSpace.Sm
-                        LayoutDirection: =LayoutDirection.Horizontal
-                        LayoutGap: =nfSpace.Sm
+                        Height: =If(nfIsDesktop, nfSize.Tile, 2 * nfSize.Tile + nfSpace.Md)
+                        LayoutDirection: =If(nfIsDesktop, LayoutDirection.Horizontal, LayoutDirection.Vertical)
+                        LayoutGap: =nfSpace.Md
                         LayoutMinHeight: =0
                         LayoutMinWidth: =0
-                        LayoutOverflowX: =LayoutOverflow.Scroll
-                        Visible: =!IsBlank(locItem)
                         Width: =Min(Parent.Width - 2 * nfGutter, nfPageMaxW)
                       Children:
-                        - btnDtlEdit:
-                            Control: ModernButton@1.0.0
-                            Properties:
-                              AccessibleLabel: ="Edit"
-                              Appearance: =ButtonAppearance.Secondary
-                              Height: =nfSize.Control
-                              Icon: ="Edit"
-                              OnSelect: |-
-                                =Navigate(scrForm, ScreenTransition.None, { locId: locId })
-                              Size: =nfType.Body
-                              Text: ="Edit"
-                              Visible: =locItem.RequesterEmail = nfUserEmail && LookUp(nfStatus, Key = locItem.Status).Editable
-                        - btnDtlAct1:
-                            Control: ModernButton@1.0.0
-                            Properties:
-                              AccessibleLabel: =Last(FirstN(locActions, 1)).Label
-                              Appearance: =If(Last(FirstN(locActions, 1)).Primary, ButtonAppearance.Primary, ButtonAppearance.Secondary)
-                              BasePaletteColor: =If(Last(FirstN(locActions, 1)).Danger, nfColor.Danger, nfColor.Primary)
-                              Height: =nfSize.Control
-                              OnSelect: |-
-                                =With({ t: Last(FirstN(locActions, 1)) }, UpdateContext({ locConfirm: { Action: t.Key, Title: t.ConfirmTitle, Message: t.ConfirmMessage, Label: t.Label, Danger: t.Danger } }))
-                              Size: =nfType.Body
-                              Text: =Last(FirstN(locActions, 1)).Label
-                              Visible: =CountRows(locActions) >= 1
-                              Width: =Len(Last(FirstN(locActions, 1)).Label) * 8 + 40
-                        - btnDtlAct2:
-                            Control: ModernButton@1.0.0
-                            Properties:
-                              AccessibleLabel: =Last(FirstN(locActions, 2)).Label
-                              Appearance: =If(Last(FirstN(locActions, 2)).Primary, ButtonAppearance.Primary, ButtonAppearance.Secondary)
-                              BasePaletteColor: =If(Last(FirstN(locActions, 2)).Danger, nfColor.Danger, nfColor.Primary)
-                              Height: =nfSize.Control
-                              OnSelect: |-
-                                =With({ t: Last(FirstN(locActions, 2)) }, UpdateContext({ locConfirm: { Action: t.Key, Title: t.ConfirmTitle, Message: t.ConfirmMessage, Label: t.Label, Danger: t.Danger } }))
-                              Size: =nfType.Body
-                              Text: =Last(FirstN(locActions, 2)).Label
-                              Visible: =CountRows(locActions) >= 2
-                              Width: =Len(Last(FirstN(locActions, 2)).Label) * 8 + 40
-                        - btnDtlAct3:
-                            Control: ModernButton@1.0.0
-                            Properties:
-                              AccessibleLabel: =Last(FirstN(locActions, 3)).Label
-                              Appearance: =If(Last(FirstN(locActions, 3)).Primary, ButtonAppearance.Primary, ButtonAppearance.Secondary)
-                              BasePaletteColor: =If(Last(FirstN(locActions, 3)).Danger, nfColor.Danger, nfColor.Primary)
-                              Height: =nfSize.Control
-                              OnSelect: |-
-                                =With({ t: Last(FirstN(locActions, 3)) }, UpdateContext({ locConfirm: { Action: t.Key, Title: t.ConfirmTitle, Message: t.ConfirmMessage, Label: t.Label, Danger: t.Danger } }))
-                              Size: =nfType.Body
-                              Text: =Last(FirstN(locActions, 3)).Label
-                              Visible: =CountRows(locActions) >= 3
-                              Width: =Len(Last(FirstN(locActions, 3)).Label) * 8 + 40
-                        - btnDtlAct4:
-                            Control: ModernButton@1.0.0
-                            Properties:
-                              AccessibleLabel: =Last(FirstN(locActions, 4)).Label
-                              Appearance: =If(Last(FirstN(locActions, 4)).Primary, ButtonAppearance.Primary, ButtonAppearance.Secondary)
-                              BasePaletteColor: =If(Last(FirstN(locActions, 4)).Danger, nfColor.Danger, nfColor.Primary)
-                              Height: =nfSize.Control
-                              OnSelect: |-
-                                =With({ t: Last(FirstN(locActions, 4)) }, UpdateContext({ locConfirm: { Action: t.Key, Title: t.ConfirmTitle, Message: t.ConfirmMessage, Label: t.Label, Danger: t.Danger } }))
-                              Size: =nfType.Body
-                              Text: =Last(FirstN(locActions, 4)).Label
-                              Visible: =CountRows(locActions) >= 4
-                              Width: =Len(Last(FirstN(locActions, 4)).Label) * 8 + 40
-                        - btnDtlAct5:
-                            Control: ModernButton@1.0.0
-                            Properties:
-                              AccessibleLabel: =Last(FirstN(locActions, 5)).Label
-                              Appearance: =If(Last(FirstN(locActions, 5)).Primary, ButtonAppearance.Primary, ButtonAppearance.Secondary)
-                              BasePaletteColor: =If(Last(FirstN(locActions, 5)).Danger, nfColor.Danger, nfColor.Primary)
-                              Height: =nfSize.Control
-                              OnSelect: |-
-                                =With({ t: Last(FirstN(locActions, 5)) }, UpdateContext({ locConfirm: { Action: t.Key, Title: t.ConfirmTitle, Message: t.ConfirmMessage, Label: t.Label, Danger: t.Danger } }))
-                              Size: =nfType.Body
-                              Text: =Last(FirstN(locActions, 5)).Label
-                              Visible: =CountRows(locActions) >= 5
-                              Width: =Len(Last(FirstN(locActions, 5)).Label) * 8 + 40
-                  - conDtlDetails:
-                      Control: GroupContainer@1.5.0
-                      Variant: AutoLayout
-                      Properties:
-                        BorderColor: =nfColor.Line
-                        BorderThickness: =1
-                        DropShadow: =DropShadow.None
-                        Fill: =nfColor.Surface
-                        FillPortions: =0
-                        Height: =3 * If(nfIsDesktop, nfSize.DetailField, 3 * nfSize.DetailField + 2 * nfSpace.Lg) + 2 * nfSpace.Lg + 2 * nfSpace.Xl
-                        LayoutDirection: =LayoutDirection.Vertical
-                        LayoutGap: =nfSpace.Lg
-                        LayoutMinHeight: =0
-                        LayoutMinWidth: =0
-                        PaddingBottom: =nfSpace.Xl
-                        PaddingLeft: =nfSpace.Xl
-                        PaddingRight: =nfSpace.Xl
-                        PaddingTop: =nfSpace.Xl
-                        RadiusBottomLeft: =nfRadius.Md
-                        RadiusBottomRight: =nfRadius.Md
-                        RadiusTopLeft: =nfRadius.Md
-                        RadiusTopRight: =nfRadius.Md
-                        Visible: =!IsBlank(locItem)
-                        Width: =Min(Parent.Width - 2 * nfGutter, nfPageMaxW)
-                      Children:
-                        - conDtlGridRow1:
+                        - conOvwTilesA:
                             Control: GroupContainer@1.5.0
                             Variant: AutoLayout
                             Properties:
                               DropShadow: =DropShadow.None
                               Fill: =nfColor.Transparent
                               FillPortions: =0
-                              Height: =If(nfIsDesktop, nfSize.DetailField, 3 * nfSize.DetailField + 2 * nfSpace.Lg)
-                              LayoutDirection: =If(nfIsDesktop, LayoutDirection.Horizontal, LayoutDirection.Vertical)
-                              LayoutGap: =nfSpace.Lg
+                              Height: =nfSize.Tile
+                              LayoutDirection: =LayoutDirection.Horizontal
+                              LayoutGap: =nfSpace.Md
                               LayoutMinHeight: =0
                               LayoutMinWidth: =0
+                              Width: =2 * (If(nfIsDesktop, (conOvwTiles.Width - 3 * nfSpace.Md) / 4, (conOvwTiles.Width - nfSpace.Md) / 2) - 1) + nfSpace.Md
                             Children:
-                              - conDtlFRequester:
+                              - conOvwTile1:
                                   Control: GroupContainer@1.5.0
-                                  Variant: AutoLayout
+                                  Variant: ManualLayout
                                   Properties:
+                                    BorderColor: =nfColor.Line
                                     DropShadow: =DropShadow.None
-                                    Fill: =nfColor.Transparent
-                                    LayoutDirection: =LayoutDirection.Vertical
-                                    LayoutGap: =nfSpace.Xs
+                                    Fill: =nfColor.Primary
+                                    FillPortions: =0
+                                    Height: =nfSize.Tile
                                     LayoutMinHeight: =0
                                     LayoutMinWidth: =0
+                                    RadiusBottomLeft: =nfRadius.Md
+                                    RadiusBottomRight: =nfRadius.Md
+                                    RadiusTopLeft: =nfRadius.Md
+                                    RadiusTopRight: =nfRadius.Md
+                                    Visible: =CountRows(nfTiles) >= 1
+                                    Width: =(If(nfIsDesktop, (conOvwTiles.Width - 3 * nfSpace.Md) / 4, (conOvwTiles.Width - nfSpace.Md) / 2) - 1)
                                   Children:
-                                    - lblDtlFRequesterL:
+                                    - lblOvwTile1Label:
                                         Control: ModernText@1.0.0
                                         Properties:
-                                          AlignInContainer: =AlignInContainer.Stretch
                                           AutoHeight: =true
-                                          Color: =nfColor.Ink3
+                                          Color: =nfColor.OnPrimary
                                           FontWeight: =FontWeight.Semibold
                                           PaddingBottom: =0
                                           PaddingLeft: =0
                                           PaddingRight: =0
                                           PaddingTop: =0
                                           Size: =nfType.Small
-                                          Text: ="REQUESTER"
+                                          Text: =Last(FirstN(nfTiles, 1)).Label
+                                          Width: =(If(nfIsDesktop, (conOvwTiles.Width - 3 * nfSpace.Md) / 4, (conOvwTiles.Width - nfSpace.Md) / 2) - 1) - 32
                                           Wrap: =false
-                                    - lblDtlFRequesterV:
+                                          X: =16
+                                          Y: =16
+                                    - lblOvwTile1Value:
                                         Control: ModernText@1.0.0
                                         Properties:
-                                          AlignInContainer: =AlignInContainer.Stretch
                                           AutoHeight: =true
-                                          Color: =nfColor.Ink
+                                          Color: =nfColor.OnPrimary
+                                          FontWeight: =FontWeight.Semibold
                                           PaddingBottom: =0
                                           PaddingLeft: =0
                                           PaddingRight: =0
                                           PaddingTop: =0
-                                          Size: =nfType.Body
-                                          Text: =locItem.RequesterName
+                                          Size: =nfType.Display
+                                          Text: =nfTileCount(Last(FirstN(nfTiles, 1)).Filter)
+                                          Width: =(If(nfIsDesktop, (conOvwTiles.Width - 3 * nfSpace.Md) / 4, (conOvwTiles.Width - nfSpace.Md) / 2) - 1) - 32
                                           Wrap: =false
-                              - conDtlFDivisionorMEO:
-                                  Control: GroupContainer@1.5.0
-                                  Variant: AutoLayout
-                                  Properties:
-                                    DropShadow: =DropShadow.None
-                                    Fill: =nfColor.Transparent
-                                    LayoutDirection: =LayoutDirection.Vertical
-                                    LayoutGap: =nfSpace.Xs
-                                    LayoutMinHeight: =0
-                                    LayoutMinWidth: =0
-                                  Children:
-                                    - lblDtlFDivisionorMEOL:
+                                          X: =16
+                                          Y: =34
+                                    - lblOvwTile1Context:
                                         Control: ModernText@1.0.0
                                         Properties:
-                                          AlignInContainer: =AlignInContainer.Stretch
                                           AutoHeight: =true
-                                          Color: =nfColor.Ink3
+                                          Color: =nfColor.OnPrimary
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =nfType.Small
+                                          Text: =Last(FirstN(nfTiles, 1)).Context
+                                          Width: =(If(nfIsDesktop, (conOvwTiles.Width - 3 * nfSpace.Md) / 4, (conOvwTiles.Width - nfSpace.Md) / 2) - 1) - 32
+                                          Wrap: =false
+                                          X: =16
+                                          Y: =80
+                                    - btnOvwTile1:
+                                        Control: Classic/Button@2.2.0
+                                        Properties:
+                                          BorderStyle: =BorderStyle.None
+                                          BorderThickness: =0
+                                          Fill: =nfColor.Transparent
+                                          FocusedBorderThickness: =2
+                                          Height: =nfSize.Tile
+                                          HoverBorderColor: =nfColor.Transparent
+                                          HoverFill: =nfColor.Hover
+                                          OnSelect: |-
+                                            =Navigate(scrList, ScreenTransition.None, { locStatusFilter: Last(FirstN(nfTiles, 1)).Filter })
+                                          PressedBorderColor: =nfColor.Transparent
+                                          PressedFill: =nfColor.Pressed
+                                          RadiusBottomLeft: =nfRadius.Md
+                                          RadiusBottomRight: =nfRadius.Md
+                                          RadiusTopLeft: =nfRadius.Md
+                                          RadiusTopRight: =nfRadius.Md
+                                          Text: =""
+                                          Tooltip: ="Show " & Lower(Last(FirstN(nfTiles, 1)).Label) & " " & nfItems & ", " & nfTileCount(Last(FirstN(nfTiles, 1)).Filter)
+                                          Width: =(If(nfIsDesktop, (conOvwTiles.Width - 3 * nfSpace.Md) / 4, (conOvwTiles.Width - nfSpace.Md) / 2) - 1)
+                              - conOvwTile2:
+                                  Control: GroupContainer@1.5.0
+                                  Variant: ManualLayout
+                                  Properties:
+                                    BorderColor: =nfColor.Line
+                                    BorderThickness: =1
+                                    DropShadow: =DropShadow.None
+                                    Fill: =nfColor.Surface
+                                    FillPortions: =0
+                                    Height: =nfSize.Tile
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    RadiusBottomLeft: =nfRadius.Md
+                                    RadiusBottomRight: =nfRadius.Md
+                                    RadiusTopLeft: =nfRadius.Md
+                                    RadiusTopRight: =nfRadius.Md
+                                    Visible: =CountRows(nfTiles) >= 2
+                                    Width: =(If(nfIsDesktop, (conOvwTiles.Width - 3 * nfSpace.Md) / 4, (conOvwTiles.Width - nfSpace.Md) / 2) - 1)
+                                  Children:
+                                    - lblOvwTile2Label:
+                                        Control: ModernText@1.0.0
+                                        Properties:
+                                          AutoHeight: =true
+                                          Color: =nfColor.Ink2
                                           FontWeight: =FontWeight.Semibold
                                           PaddingBottom: =0
                                           PaddingLeft: =0
                                           PaddingRight: =0
                                           PaddingTop: =0
                                           Size: =nfType.Small
-                                          Text: ="DIVISION OR MEO"
+                                          Text: =Last(FirstN(nfTiles, 2)).Label
+                                          Width: =(If(nfIsDesktop, (conOvwTiles.Width - 3 * nfSpace.Md) / 4, (conOvwTiles.Width - nfSpace.Md) / 2) - 1) - 32
                                           Wrap: =false
-                                    - lblDtlFDivisionorMEOV:
+                                          X: =16
+                                          Y: =16
+                                    - lblOvwTile2Value:
                                         Control: ModernText@1.0.0
                                         Properties:
-                                          AlignInContainer: =AlignInContainer.Stretch
                                           AutoHeight: =true
                                           Color: =nfColor.Ink
-                                          PaddingBottom: =0
-                                          PaddingLeft: =0
-                                          PaddingRight: =0
-                                          PaddingTop: =0
-                                          Size: =nfType.Body
-                                          Text: =locItem.DivisionMEO.Value
-                                          Wrap: =false
-                              - conDtlFLocation:
-                                  Control: GroupContainer@1.5.0
-                                  Variant: AutoLayout
-                                  Properties:
-                                    DropShadow: =DropShadow.None
-                                    Fill: =nfColor.Transparent
-                                    LayoutDirection: =LayoutDirection.Vertical
-                                    LayoutGap: =nfSpace.Xs
-                                    LayoutMinHeight: =0
-                                    LayoutMinWidth: =0
-                                  Children:
-                                    - lblDtlFLocationL:
-                                        Control: ModernText@1.0.0
-                                        Properties:
-                                          AlignInContainer: =AlignInContainer.Stretch
-                                          AutoHeight: =true
-                                          Color: =nfColor.Ink3
                                           FontWeight: =FontWeight.Semibold
                                           PaddingBottom: =0
                                           PaddingLeft: =0
                                           PaddingRight: =0
                                           PaddingTop: =0
-                                          Size: =nfType.Small
-                                          Text: ="LOCATION"
+                                          Size: =nfType.Display
+                                          Text: =nfTileCount(Last(FirstN(nfTiles, 2)).Filter)
+                                          Width: =(If(nfIsDesktop, (conOvwTiles.Width - 3 * nfSpace.Md) / 4, (conOvwTiles.Width - nfSpace.Md) / 2) - 1) - 32
                                           Wrap: =false
-                                    - lblDtlFLocationV:
+                                          X: =16
+                                          Y: =34
+                                    - lblOvwTile2Context:
                                         Control: ModernText@1.0.0
                                         Properties:
-                                          AlignInContainer: =AlignInContainer.Stretch
                                           AutoHeight: =true
-                                          Color: =nfColor.Ink
+                                          Color: =nfColor.Ink2
                                           PaddingBottom: =0
                                           PaddingLeft: =0
                                           PaddingRight: =0
                                           PaddingTop: =0
-                                          Size: =nfType.Body
-                                          Text: =Coalesce(locItem.Location.Value, "Not set")
+                                          Size: =nfType.Small
+                                          Text: =Last(FirstN(nfTiles, 2)).Context
+                                          Width: =(If(nfIsDesktop, (conOvwTiles.Width - 3 * nfSpace.Md) / 4, (conOvwTiles.Width - nfSpace.Md) / 2) - 1) - 32
                                           Wrap: =false
-                        - conDtlGridRow2:
+                                          X: =16
+                                          Y: =80
+                                    - btnOvwTile2:
+                                        Control: Classic/Button@2.2.0
+                                        Properties:
+                                          BorderStyle: =BorderStyle.None
+                                          BorderThickness: =0
+                                          Fill: =nfColor.Transparent
+                                          FocusedBorderThickness: =2
+                                          Height: =nfSize.Tile
+                                          HoverBorderColor: =nfColor.Transparent
+                                          HoverFill: =nfColor.Hover
+                                          OnSelect: |-
+                                            =Navigate(scrList, ScreenTransition.None, { locStatusFilter: Last(FirstN(nfTiles, 2)).Filter })
+                                          PressedBorderColor: =nfColor.Transparent
+                                          PressedFill: =nfColor.Pressed
+                                          RadiusBottomLeft: =nfRadius.Md
+                                          RadiusBottomRight: =nfRadius.Md
+                                          RadiusTopLeft: =nfRadius.Md
+                                          RadiusTopRight: =nfRadius.Md
+                                          Text: =""
+                                          Tooltip: ="Show " & Lower(Last(FirstN(nfTiles, 2)).Label) & " " & nfItems & ", " & nfTileCount(Last(FirstN(nfTiles, 2)).Filter)
+                                          Width: =(If(nfIsDesktop, (conOvwTiles.Width - 3 * nfSpace.Md) / 4, (conOvwTiles.Width - nfSpace.Md) / 2) - 1)
+                        - conOvwTilesB:
                             Control: GroupContainer@1.5.0
                             Variant: AutoLayout
                             Properties:
                               DropShadow: =DropShadow.None
                               Fill: =nfColor.Transparent
                               FillPortions: =0
-                              Height: =If(nfIsDesktop, nfSize.DetailField, 3 * nfSize.DetailField + 2 * nfSpace.Lg)
-                              LayoutDirection: =If(nfIsDesktop, LayoutDirection.Horizontal, LayoutDirection.Vertical)
-                              LayoutGap: =nfSpace.Lg
+                              Height: =nfSize.Tile
+                              LayoutDirection: =LayoutDirection.Horizontal
+                              LayoutGap: =nfSpace.Md
                               LayoutMinHeight: =0
                               LayoutMinWidth: =0
+                              Width: =2 * (If(nfIsDesktop, (conOvwTiles.Width - 3 * nfSpace.Md) / 4, (conOvwTiles.Width - nfSpace.Md) / 2) - 1) + nfSpace.Md
                             Children:
-                              - conDtlFService:
+                              - conOvwTile3:
                                   Control: GroupContainer@1.5.0
-                                  Variant: AutoLayout
+                                  Variant: ManualLayout
                                   Properties:
+                                    BorderColor: =nfColor.Line
+                                    BorderThickness: =1
                                     DropShadow: =DropShadow.None
-                                    Fill: =nfColor.Transparent
-                                    LayoutDirection: =LayoutDirection.Vertical
-                                    LayoutGap: =nfSpace.Xs
+                                    Fill: =nfColor.Surface
+                                    FillPortions: =0
+                                    Height: =nfSize.Tile
                                     LayoutMinHeight: =0
                                     LayoutMinWidth: =0
+                                    RadiusBottomLeft: =nfRadius.Md
+                                    RadiusBottomRight: =nfRadius.Md
+                                    RadiusTopLeft: =nfRadius.Md
+                                    RadiusTopRight: =nfRadius.Md
+                                    Visible: =CountRows(nfTiles) >= 3
+                                    Width: =(If(nfIsDesktop, (conOvwTiles.Width - 3 * nfSpace.Md) / 4, (conOvwTiles.Width - nfSpace.Md) / 2) - 1)
                                   Children:
-                                    - lblDtlFServiceL:
+                                    - lblOvwTile3Label:
                                         Control: ModernText@1.0.0
                                         Properties:
-                                          AlignInContainer: =AlignInContainer.Stretch
                                           AutoHeight: =true
-                                          Color: =nfColor.Ink3
+                                          Color: =nfColor.Ink2
                                           FontWeight: =FontWeight.Semibold
                                           PaddingBottom: =0
                                           PaddingLeft: =0
                                           PaddingRight: =0
                                           PaddingTop: =0
                                           Size: =nfType.Small
-                                          Text: ="SERVICE"
+                                          Text: =Last(FirstN(nfTiles, 3)).Label
+                                          Width: =(If(nfIsDesktop, (conOvwTiles.Width - 3 * nfSpace.Md) / 4, (conOvwTiles.Width - nfSpace.Md) / 2) - 1) - 32
                                           Wrap: =false
-                                    - lblDtlFServiceV:
+                                          X: =16
+                                          Y: =16
+                                    - lblOvwTile3Value:
                                         Control: ModernText@1.0.0
                                         Properties:
-                                          AlignInContainer: =AlignInContainer.Stretch
                                           AutoHeight: =true
                                           Color: =nfColor.Ink
+                                          FontWeight: =FontWeight.Semibold
                                           PaddingBottom: =0
                                           PaddingLeft: =0
                                           PaddingRight: =0
                                           PaddingTop: =0
-                                          Size: =nfType.Body
-                                          Text: =nfServiceTitle(locItem.ServiceKey)
+                                          Size: =nfType.Display
+                                          Text: =nfTileCount(Last(FirstN(nfTiles, 3)).Filter)
+                                          Width: =(If(nfIsDesktop, (conOvwTiles.Width - 3 * nfSpace.Md) / 4, (conOvwTiles.Width - nfSpace.Md) / 2) - 1) - 32
                                           Wrap: =false
-                              - conDtlFAssettag:
-                                  Control: GroupContainer@1.5.0
-                                  Variant: AutoLayout
-                                  Properties:
-                                    DropShadow: =DropShadow.None
-                                    Fill: =nfColor.Transparent
-                                    LayoutDirection: =LayoutDirection.Vertical
-                                    LayoutGap: =nfSpace.Xs
-                                    LayoutMinHeight: =0
-                                    LayoutMinWidth: =0
-                                  Children:
-                                    - lblDtlFAssettagL:
+                                          X: =16
+                                          Y: =34
+                                    - lblOvwTile3Context:
                                         Control: ModernText@1.0.0
                                         Properties:
-                                          AlignInContainer: =AlignInContainer.Stretch
                                           AutoHeight: =true
-                                          Color: =nfColor.Ink3
+                                          Color: =nfColor.Ink2
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =nfType.Small
+                                          Text: =Last(FirstN(nfTiles, 3)).Context
+                                          Width: =(If(nfIsDesktop, (conOvwTiles.Width - 3 * nfSpace.Md) / 4, (conOvwTiles.Width - nfSpace.Md) / 2) - 1) - 32
+                                          Wrap: =false
+                                          X: =16
+                                          Y: =80
+                                    - btnOvwTile3:
+                                        Control: Classic/Button@2.2.0
+                                        Properties:
+                                          BorderStyle: =BorderStyle.None
+                                          BorderThickness: =0
+                                          Fill: =nfColor.Transparent
+                                          FocusedBorderThickness: =2
+                                          Height: =nfSize.Tile
+                                          HoverBorderColor: =nfColor.Transparent
+                                          HoverFill: =nfColor.Hover
+                                          OnSelect: |-
+                                            =Navigate(scrList, ScreenTransition.None, { locStatusFilter: Last(FirstN(nfTiles, 3)).Filter })
+                                          PressedBorderColor: =nfColor.Transparent
+                                          PressedFill: =nfColor.Pressed
+                                          RadiusBottomLeft: =nfRadius.Md
+                                          RadiusBottomRight: =nfRadius.Md
+                                          RadiusTopLeft: =nfRadius.Md
+                                          RadiusTopRight: =nfRadius.Md
+                                          Text: =""
+                                          Tooltip: ="Show " & Lower(Last(FirstN(nfTiles, 3)).Label) & " " & nfItems & ", " & nfTileCount(Last(FirstN(nfTiles, 3)).Filter)
+                                          Width: =(If(nfIsDesktop, (conOvwTiles.Width - 3 * nfSpace.Md) / 4, (conOvwTiles.Width - nfSpace.Md) / 2) - 1)
+                              - conOvwTile4:
+                                  Control: GroupContainer@1.5.0
+                                  Variant: ManualLayout
+                                  Properties:
+                                    BorderColor: =nfColor.Line
+                                    BorderThickness: =1
+                                    DropShadow: =DropShadow.None
+                                    Fill: =nfColor.Surface
+                                    FillPortions: =0
+                                    Height: =nfSize.Tile
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    RadiusBottomLeft: =nfRadius.Md
+                                    RadiusBottomRight: =nfRadius.Md
+                                    RadiusTopLeft: =nfRadius.Md
+                                    RadiusTopRight: =nfRadius.Md
+                                    Visible: =CountRows(nfTiles) >= 4
+                                    Width: =(If(nfIsDesktop, (conOvwTiles.Width - 3 * nfSpace.Md) / 4, (conOvwTiles.Width - nfSpace.Md) / 2) - 1)
+                                  Children:
+                                    - lblOvwTile4Label:
+                                        Control: ModernText@1.0.0
+                                        Properties:
+                                          AutoHeight: =true
+                                          Color: =nfColor.Ink2
                                           FontWeight: =FontWeight.Semibold
                                           PaddingBottom: =0
                                           PaddingLeft: =0
                                           PaddingRight: =0
                                           PaddingTop: =0
                                           Size: =nfType.Small
-                                          Text: ="ASSET TAG"
+                                          Text: =Last(FirstN(nfTiles, 4)).Label
+                                          Width: =(If(nfIsDesktop, (conOvwTiles.Width - 3 * nfSpace.Md) / 4, (conOvwTiles.Width - nfSpace.Md) / 2) - 1) - 32
                                           Wrap: =false
-                                    - lblDtlFAssettagV:
+                                          X: =16
+                                          Y: =16
+                                    - lblOvwTile4Value:
                                         Control: ModernText@1.0.0
                                         Properties:
-                                          AlignInContainer: =AlignInContainer.Stretch
                                           AutoHeight: =true
                                           Color: =nfColor.Ink
-                                          PaddingBottom: =0
-                                          PaddingLeft: =0
-                                          PaddingRight: =0
-                                          PaddingTop: =0
-                                          Size: =nfType.Body
-                                          Text: =Coalesce(locItem.AssetTag, "Not set")
-                                          Wrap: =false
-                              - conDtlFAssignedto:
-                                  Control: GroupContainer@1.5.0
-                                  Variant: AutoLayout
-                                  Properties:
-                                    DropShadow: =DropShadow.None
-                                    Fill: =nfColor.Transparent
-                                    LayoutDirection: =LayoutDirection.Vertical
-                                    LayoutGap: =nfSpace.Xs
-                                    LayoutMinHeight: =0
-                                    LayoutMinWidth: =0
-                                  Children:
-                                    - lblDtlFAssignedtoL:
-                                        Control: ModernText@1.0.0
-                                        Properties:
-                                          AlignInContainer: =AlignInContainer.Stretch
-                                          AutoHeight: =true
-                                          Color: =nfColor.Ink3
                                           FontWeight: =FontWeight.Semibold
                                           PaddingBottom: =0
                                           PaddingLeft: =0
                                           PaddingRight: =0
                                           PaddingTop: =0
-                                          Size: =nfType.Small
-                                          Text: ="ASSIGNED TO"
+                                          Size: =nfType.Display
+                                          Text: =nfTileCount(Last(FirstN(nfTiles, 4)).Filter)
+                                          Width: =(If(nfIsDesktop, (conOvwTiles.Width - 3 * nfSpace.Md) / 4, (conOvwTiles.Width - nfSpace.Md) / 2) - 1) - 32
                                           Wrap: =false
-                                    - lblDtlFAssignedtoV:
+                                          X: =16
+                                          Y: =34
+                                    - lblOvwTile4Context:
                                         Control: ModernText@1.0.0
                                         Properties:
-                                          AlignInContainer: =AlignInContainer.Stretch
                                           AutoHeight: =true
-                                          Color: =nfColor.Ink
-                                          PaddingBottom: =0
-                                          PaddingLeft: =0
-                                          PaddingRight: =0
-                                          PaddingTop: =0
-                                          Size: =nfType.Body
-                                          Text: =Coalesce(locItem.AssignedTo, "Unassigned")
-                                          Wrap: =false
-                        - conDtlGridRow3:
-                            Control: GroupContainer@1.5.0
-                            Variant: AutoLayout
-                            Properties:
-                              DropShadow: =DropShadow.None
-                              Fill: =nfColor.Transparent
-                              FillPortions: =0
-                              Height: =If(nfIsDesktop, nfSize.DetailField, 3 * nfSize.DetailField + 2 * nfSpace.Lg)
-                              LayoutDirection: =If(nfIsDesktop, LayoutDirection.Horizontal, LayoutDirection.Vertical)
-                              LayoutGap: =nfSpace.Lg
-                              LayoutMinHeight: =0
-                              LayoutMinWidth: =0
-                            Children:
-                              - conDtlFExternalreference:
-                                  Control: GroupContainer@1.5.0
-                                  Variant: AutoLayout
-                                  Properties:
-                                    DropShadow: =DropShadow.None
-                                    Fill: =nfColor.Transparent
-                                    LayoutDirection: =LayoutDirection.Vertical
-                                    LayoutGap: =nfSpace.Xs
-                                    LayoutMinHeight: =0
-                                    LayoutMinWidth: =0
-                                  Children:
-                                    - lblDtlFExternalreferenceL:
-                                        Control: ModernText@1.0.0
-                                        Properties:
-                                          AlignInContainer: =AlignInContainer.Stretch
-                                          AutoHeight: =true
-                                          Color: =nfColor.Ink3
-                                          FontWeight: =FontWeight.Semibold
+                                          Color: =nfColor.Ink2
                                           PaddingBottom: =0
                                           PaddingLeft: =0
                                           PaddingRight: =0
                                           PaddingTop: =0
                                           Size: =nfType.Small
-                                          Text: ="EXTERNAL REFERENCE"
+                                          Text: =Last(FirstN(nfTiles, 4)).Context
+                                          Width: =(If(nfIsDesktop, (conOvwTiles.Width - 3 * nfSpace.Md) / 4, (conOvwTiles.Width - nfSpace.Md) / 2) - 1) - 32
                                           Wrap: =false
-                                    - lblDtlFExternalreferenceV:
-                                        Control: ModernText@1.0.0
+                                          X: =16
+                                          Y: =80
+                                    - btnOvwTile4:
+                                        Control: Classic/Button@2.2.0
                                         Properties:
-                                          AlignInContainer: =AlignInContainer.Stretch
-                                          AutoHeight: =true
-                                          Color: =nfColor.Ink
-                                          PaddingBottom: =0
-                                          PaddingLeft: =0
-                                          PaddingRight: =0
-                                          PaddingTop: =0
-                                          Size: =nfType.Body
-                                          Text: =Coalesce(locItem.ExternalRef, "Not set")
-                                          Wrap: =false
-                              - conDtlFSubmitted:
-                                  Control: GroupContainer@1.5.0
-                                  Variant: AutoLayout
-                                  Properties:
-                                    DropShadow: =DropShadow.None
-                                    Fill: =nfColor.Transparent
-                                    LayoutDirection: =LayoutDirection.Vertical
-                                    LayoutGap: =nfSpace.Xs
-                                    LayoutMinHeight: =0
-                                    LayoutMinWidth: =0
-                                  Children:
-                                    - lblDtlFSubmittedL:
-                                        Control: ModernText@1.0.0
-                                        Properties:
-                                          AlignInContainer: =AlignInContainer.Stretch
-                                          AutoHeight: =true
-                                          Color: =nfColor.Ink3
-                                          FontWeight: =FontWeight.Semibold
-                                          PaddingBottom: =0
-                                          PaddingLeft: =0
-                                          PaddingRight: =0
-                                          PaddingTop: =0
-                                          Size: =nfType.Small
-                                          Text: ="SUBMITTED"
-                                          Wrap: =false
-                                    - lblDtlFSubmittedV:
-                                        Control: ModernText@1.0.0
-                                        Properties:
-                                          AlignInContainer: =AlignInContainer.Stretch
-                                          AutoHeight: =true
-                                          Color: =nfColor.Ink
-                                          PaddingBottom: =0
-                                          PaddingLeft: =0
-                                          PaddingRight: =0
-                                          PaddingTop: =0
-                                          Size: =nfType.Body
-                                          Text: =Text(locItem.Created, "mmm d, yyyy")
-                                          Wrap: =false
-                              - conDtlFUpdated:
-                                  Control: GroupContainer@1.5.0
-                                  Variant: AutoLayout
-                                  Properties:
-                                    DropShadow: =DropShadow.None
-                                    Fill: =nfColor.Transparent
-                                    LayoutDirection: =LayoutDirection.Vertical
-                                    LayoutGap: =nfSpace.Xs
-                                    LayoutMinHeight: =0
-                                    LayoutMinWidth: =0
-                                  Children:
-                                    - lblDtlFUpdatedL:
-                                        Control: ModernText@1.0.0
-                                        Properties:
-                                          AlignInContainer: =AlignInContainer.Stretch
-                                          AutoHeight: =true
-                                          Color: =nfColor.Ink3
-                                          FontWeight: =FontWeight.Semibold
-                                          PaddingBottom: =0
-                                          PaddingLeft: =0
-                                          PaddingRight: =0
-                                          PaddingTop: =0
-                                          Size: =nfType.Small
-                                          Text: ="UPDATED"
-                                          Wrap: =false
-                                    - lblDtlFUpdatedV:
-                                        Control: ModernText@1.0.0
-                                        Properties:
-                                          AlignInContainer: =AlignInContainer.Stretch
-                                          AutoHeight: =true
-                                          Color: =nfColor.Ink
-                                          PaddingBottom: =0
-                                          PaddingLeft: =0
-                                          PaddingRight: =0
-                                          PaddingTop: =0
-                                          Size: =nfType.Body
-                                          Text: =Text(locItem.Modified, "mmm d, yyyy h:mm AM/PM")
-                                          Wrap: =false
-                  - conDtlHistHead:
+                                          BorderStyle: =BorderStyle.None
+                                          BorderThickness: =0
+                                          Fill: =nfColor.Transparent
+                                          FocusedBorderThickness: =2
+                                          Height: =nfSize.Tile
+                                          HoverBorderColor: =nfColor.Transparent
+                                          HoverFill: =nfColor.Hover
+                                          OnSelect: |-
+                                            =Navigate(scrList, ScreenTransition.None, { locStatusFilter: Last(FirstN(nfTiles, 4)).Filter })
+                                          PressedBorderColor: =nfColor.Transparent
+                                          PressedFill: =nfColor.Pressed
+                                          RadiusBottomLeft: =nfRadius.Md
+                                          RadiusBottomRight: =nfRadius.Md
+                                          RadiusTopLeft: =nfRadius.Md
+                                          RadiusTopRight: =nfRadius.Md
+                                          Text: =""
+                                          Tooltip: ="Show " & Lower(Last(FirstN(nfTiles, 4)).Label) & " " & nfItems & ", " & nfTileCount(Last(FirstN(nfTiles, 4)).Filter)
+                                          Width: =(If(nfIsDesktop, (conOvwTiles.Width - 3 * nfSpace.Md) / 4, (conOvwTiles.Width - nfSpace.Md) / 2) - 1)
+                  - conOvwRecentHead:
                       Control: GroupContainer@1.5.0
                       Variant: AutoLayout
                       Properties:
@@ -746,7 +569,7 @@ Screens:
                         LayoutMinWidth: =0
                         Width: =Min(Parent.Width - 2 * nfGutter, nfPageMaxW)
                       Children:
-                        - lblDtlHistHead:
+                        - lblOvwRecentHead:
                             Control: ModernText@1.0.0
                             Properties:
                               AutoHeight: =true
@@ -759,9 +582,18 @@ Screens:
                               PaddingRight: =0
                               PaddingTop: =0
                               Size: =nfType.H2
-                              Text: ="History"
+                              Text: ="Recent " & nfItems
                               Wrap: =false
-                  - conDtlHistory:
+                        - btnOvwAll:
+                            Control: ModernButton@1.0.0
+                            Properties:
+                              AccessibleLabel: ="View all"
+                              Appearance: =ButtonAppearance.Subtle
+                              Height: =nfSize.Control
+                              OnSelect: =nfGo("list")
+                              Size: =nfType.Body
+                              Text: ="View all"
+                  - conOvwRecent:
                       Control: GroupContainer@1.5.0
                       Variant: ManualLayout
                       Properties:
@@ -770,70 +602,131 @@ Screens:
                         DropShadow: =DropShadow.None
                         Fill: =nfColor.Surface
                         FillPortions: =0
-                        Height: =Max(1, CountRows(SortByColumns(Filter(colHistory, RequestId = locId), "Created", SortOrder.Descending))) * nfSize.ListRow
+                        Height: =If(IsEmpty(nfMyRecent), If(nfIsPhone, 200, 176), CountRows(nfMyRecent) * nfSize.ListRow)
                         LayoutMinHeight: =0
                         LayoutMinWidth: =0
                         RadiusBottomLeft: =nfRadius.Md
                         RadiusBottomRight: =nfRadius.Md
                         RadiusTopLeft: =nfRadius.Md
                         RadiusTopRight: =nfRadius.Md
-                        Visible: =!IsBlank(locItem)
                         Width: =Min(Parent.Width - 2 * nfGutter, nfPageMaxW)
                       Children:
-                        - galDtlHistory:
+                        - galOvwRecent:
                             Control: Gallery@2.15.0
                             Variant: Vertical
                             Properties:
-                              AccessibleLabel: ="History"
+                              AccessibleLabel: ="Recent " & nfItems
                               Height: =Parent.Height
-                              Items: =SortByColumns(Filter(colHistory, RequestId = locId), "Created", SortOrder.Descending)
+                              Items: =nfMyRecent
                               ShowScrollbar: =false
                               TemplatePadding: =0
                               TemplateSize: =nfSize.ListRow
                               Width: =Parent.Width
                             Children:
-                              - conDtlHistRow:
+                              - conOvwRecRow:
                                   Control: GroupContainer@1.5.0
                                   Variant: AutoLayout
                                   Properties:
                                     DropShadow: =DropShadow.None
                                     Fill: =nfColor.Transparent
                                     Height: =Parent.TemplateHeight - 1
-                                    LayoutDirection: =LayoutDirection.Vertical
-                                    LayoutGap: =2
-                                    LayoutJustifyContent: =LayoutJustifyContent.Center
+                                    LayoutAlignItems: =LayoutAlignItems.Center
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =nfSpace.Md
                                     PaddingLeft: =nfSpace.Lg
                                     PaddingRight: =nfSpace.Lg
                                     Width: =Parent.TemplateWidth
                                   Children:
-                                    - lblDtlHistAction:
-                                        Control: ModernText@1.0.0
+                                    - conOvwRecText:
+                                        Control: GroupContainer@1.5.0
+                                        Variant: AutoLayout
                                         Properties:
-                                          AlignInContainer: =AlignInContainer.Stretch
-                                          AutoHeight: =true
-                                          Color: =nfColor.Ink
-                                          FontWeight: =FontWeight.Semibold
-                                          PaddingBottom: =0
-                                          PaddingLeft: =0
-                                          PaddingRight: =0
-                                          PaddingTop: =0
-                                          Size: =nfType.Body
-                                          Text: =ThisItem.Action
-                                          Wrap: =false
-                                    - lblDtlHistMeta:
-                                        Control: ModernText@1.0.0
+                                          AlignInContainer: =AlignInContainer.Center
+                                          DropShadow: =DropShadow.None
+                                          Fill: =nfColor.Transparent
+                                          Height: =40
+                                          LayoutDirection: =LayoutDirection.Vertical
+                                          LayoutGap: =2
+                                          LayoutJustifyContent: =LayoutJustifyContent.Center
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                        Children:
+                                          - lblOvwRecTitle:
+                                              Control: ModernText@1.0.0
+                                              Properties:
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                AutoHeight: =true
+                                                Color: =nfColor.Ink
+                                                FontWeight: =FontWeight.Semibold
+                                                PaddingBottom: =0
+                                                PaddingLeft: =0
+                                                PaddingRight: =0
+                                                PaddingTop: =0
+                                                Size: =nfType.Body
+                                                Text: =ThisItem.Title
+                                                Wrap: =false
+                                          - lblOvwRecMeta:
+                                              Control: ModernText@1.0.0
+                                              Properties:
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                AutoHeight: =true
+                                                Color: =nfColor.Ink2
+                                                PaddingBottom: =0
+                                                PaddingLeft: =0
+                                                PaddingRight: =0
+                                                PaddingTop: =0
+                                                Size: =nfType.Small
+                                                Text: =nfServiceTitle(ThisItem.ServiceKey) & " · Updated " & Text(ThisItem.Modified, "mmm d")
+                                                Wrap: =false
+                                    - conOvwRecPill:
+                                        Control: GroupContainer@1.5.0
+                                        Variant: ManualLayout
                                         Properties:
-                                          AlignInContainer: =AlignInContainer.Stretch
-                                          AutoHeight: =true
-                                          Color: =nfColor.Ink2
-                                          PaddingBottom: =0
-                                          PaddingLeft: =0
-                                          PaddingRight: =0
-                                          PaddingTop: =0
-                                          Size: =nfType.Small
-                                          Text: =ThisItem.ActorName & " · " & Text(ThisItem.Created, "mmm d, yyyy h:mm AM/PM")
-                                          Wrap: =false
-                              - conDtlHistRule:
+                                          AlignInContainer: =AlignInContainer.Center
+                                          DropShadow: =DropShadow.None
+                                          Fill: =nfColor.Transparent
+                                          FillPortions: =0
+                                          Height: =24
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          Width: =nfSize.Pill
+                                        Children:
+                                          - conOvwRecPillShape:
+                                              Control: GroupContainer@1.5.0
+                                              Variant: ManualLayout
+                                              Properties:
+                                                DropShadow: =DropShadow.None
+                                                Fill: =LookUp(nfTone, Tone = nfStatusTone(ThisItem.Status)).Fill
+                                                Height: =24
+                                                RadiusBottomLeft: =12
+                                                RadiusBottomRight: =12
+                                                RadiusTopLeft: =12
+                                                RadiusTopRight: =12
+                                                Width: =Min(Parent.Width, Len(nfStatusLabel(ThisItem.Status)) * 7 + 24)
+                                              Children:
+                                                - lblOvwRecPill:
+                                                    Control: ModernText@1.0.0
+                                                    Properties:
+                                                      Align: =Align.Center
+                                                      AutoHeight: =true
+                                                      Color: =LookUp(nfTone, Tone = nfStatusTone(ThisItem.Status)).Ink
+                                                      FontWeight: =FontWeight.Semibold
+                                                      PaddingBottom: =0
+                                                      PaddingLeft: =8
+                                                      PaddingRight: =8
+                                                      PaddingTop: =0
+                                                      Size: =nfType.Small
+                                                      Text: =nfStatusLabel(ThisItem.Status)
+                                                      Width: =Parent.Width
+                                                      Wrap: =false
+                                                      Y: =(Parent.Height - Self.Height) / 2
+                                    - imgOvwRecGo:
+                                        Control: Image@2.2.3
+                                        Properties:
+                                          Height: =16
+                                          Image: ="data:image/svg+xml;utf8," & EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='#5A5B5D' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='m9 18 6-6-6-6'/></svg>")
+                                          Width: =16
+                              - conOvwRecRule:
                                   Control: GroupContainer@1.5.0
                                   Variant: ManualLayout
                                   Properties:
@@ -842,22 +735,56 @@ Screens:
                                     Height: =1
                                     Width: =Parent.TemplateWidth
                                     Y: =Parent.TemplateHeight - 1
-                        - lblDtlHistEmpty:
-                            Control: ModernText@1.0.0
+                              - btnOvwRecOpen:
+                                  Control: Classic/Button@2.2.0
+                                  Properties:
+                                    BorderStyle: =BorderStyle.None
+                                    BorderThickness: =0
+                                    Fill: =nfColor.Transparent
+                                    FocusedBorderThickness: =2
+                                    Height: =Parent.TemplateHeight - 1
+                                    HoverBorderColor: =nfColor.Transparent
+                                    HoverFill: =nfColor.Hover
+                                    OnSelect: |-
+                                      =Navigate(scrDetail, ScreenTransition.None, { locId: ThisItem.ID, locFrom: "list" })
+                                    PressedBorderColor: =nfColor.Transparent
+                                    PressedFill: =nfColor.Pressed
+                                    RadiusBottomLeft: =0
+                                    RadiusBottomRight: =0
+                                    RadiusTopLeft: =0
+                                    RadiusTopRight: =0
+                                    Text: =""
+                                    Tooltip: ="Open " & ThisItem.Title
+                                    Width: =Parent.TemplateWidth
+                        - cmpOvwRecEmpty:
+                            Control: CanvasComponent
+                            ComponentName: cmpStatePanel
                             Properties:
-                              Align: =Align.Center
-                              AutoHeight: =true
-                              Color: =nfColor.Ink3
-                              PaddingBottom: =0
-                              PaddingLeft: =0
-                              PaddingRight: =0
-                              PaddingTop: =0
-                              Size: =nfType.Body
-                              Text: ="No history yet."
-                              Visible: =IsEmpty(SortByColumns(Filter(colHistory, RequestId = locId), "Created", SortOrder.Descending))
+                              Height: =Parent.Height
+                              IsPhone: =nfIsPhone
+                              Message: ="When you submit a " & nfItem & ", it shows here."
+                              OnPrimary: =nfGo("form")
+                              OnSecondary: =false
+                              PrimaryText: ="New " & nfItem
+                              SecondaryText: =""
+                              Theme: =nfColor
+                              Title: ="No " & nfItems & " yet"
+                              Variant: ="Empty"
+                              Visible: =IsEmpty(nfMyRecent)
                               Width: =Parent.Width
-                              Y: =(Parent.Height - Self.Height) / 2
-            - conDtlBottomRule:
+                  - lblOvwVersion:
+                      Control: ModernText@1.0.0
+                      Properties:
+                        AutoHeight: =true
+                        Color: =nfColor.Ink3
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =nfType.Small
+                        Text: =nfApp.Name & " · Version " & nfApp.Version
+                        Width: =Min(Parent.Width - 2 * nfGutter, nfPageMaxW)
+            - conOvwBottomRule:
                 Control: GroupContainer@1.5.0
                 Variant: ManualLayout
                 Properties:
@@ -868,7 +795,7 @@ Screens:
                   LayoutMinHeight: =0
                   LayoutMinWidth: =0
                   Visible: =nfIsPhone
-            - conDtlBottomBar:
+            - conOvwBottomBar:
                 Control: GroupContainer@1.5.0
                 Variant: AutoLayout
                 Properties:
@@ -883,11 +810,11 @@ Screens:
                   PaddingRight: =nfSpace.Sm
                   Visible: =nfIsPhone
                 Children:
-                  - cmpDtlBottomNav:
+                  - cmpOvwBottomNav:
                       Control: CanvasComponent
                       ComponentName: cmpBottomNav
                       Properties:
-                        ActiveKey: =If(locFrom = "queue", "queue", "list")
+                        ActiveKey: ="overview"
                         AlignInContainer: =AlignInContainer.Stretch
                         FillPortions: =1
                         IsStaff: =gblIsStaff
@@ -896,43 +823,7 @@ Screens:
                         LayoutMinWidth: =0
                         OnSelect: =nfGo(Self.SelectedKey)
                         Theme: =nfColor
-      - cmpDtlConfirm:
-          Control: CanvasComponent
-          ComponentName: cmpConfirmDialog
-          Properties:
-            CancelLabel: ="Go back"
-            ConfirmLabel: =locConfirm.Label
-            Height: =Parent.Height
-            IsDanger: =locConfirm.Danger
-            IsPhone: =nfIsPhone
-            Message: =locConfirm.Message
-            OnCancel: |-
-              =UpdateContext({ locConfirm: Blank() })
-            OnConfirm: |-
-              =With(
-                  { t: LookUp(nfTransitions, Key = locConfirm.Action) },
-                  If(t.AssignToMe, nfAssignToMe(locId));
-                  If(!IsBlank(t.ToStatus), nfSetStatus(locId, t.ToStatus, t.History))
-              );
-              UpdateContext({ locConfirm: Blank(), locItem: LookUp(colRequests, ID = locId) });
-              UpdateContext({ locActions: ForAll(
-                  Distinct(
-                      Filter(
-                          nfTransitions,
-                          ";" & locItem.Status & ";" in From,
-                          (Role = "Staff" && gblIsStaff) || (Role = "Owner" && locItem.RequesterEmail = nfUserEmail),
-                          !OnlyIfUnassigned || IsBlank(locItem.AssignedTo)
-                      ),
-                      Key
-                  ) As k,
-                  LookUp(nfTransitions, Key = k.Value)
-              ) });
-              Notify(nfItemCap & " updated.", NotificationType.Success)
-            Theme: =nfColor
-            Title: =locConfirm.Title
-            Visible: =!IsBlank(locConfirm)
-            Width: =Parent.Width
-      - conDtlLoading:
+      - conOvwLoading:
           Control: GroupContainer@1.5.0
           Variant: ManualLayout
           Properties:
@@ -942,7 +833,7 @@ Screens:
             Visible: =locLoading
             Width: =Parent.Width
           Children:
-            - conDtlLoadingCard:
+            - conOvwLoadingCard:
                 Control: GroupContainer@1.5.0
                 Variant: AutoLayout
                 Properties:
@@ -960,7 +851,765 @@ Screens:
                   X: =(Parent.Width - Self.Width) / 2
                   Y: =(Parent.Height - Self.Height) / 2
                 Children:
-                  - lblDtlLoading:
+                  - lblOvwLoading:
+                      Control: ModernText@1.0.0
+                      Properties:
+                        Align: =Align.Center
+                        AutoHeight: =true
+                        Color: =nfColor.Ink
+                        FontWeight: =FontWeight.Semibold
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =nfType.Body
+                        Text: ="Loading..."
+                        Width: =120
+
+
+
+/--
+
+Screens:
+  scrList:
+    Properties:
+      Fill: =nfColor.Page
+      OnVisible: |-
+        =UpdateContext({ locLoading: true });
+        Reset(txtLstSearch);
+        Reset(drpLstStatus);
+        UpdateContext({ locLoading: false })
+    Children:
+      - conLstRoot:
+          Control: GroupContainer@1.5.0
+          Variant: AutoLayout
+          Properties:
+            DropShadow: =DropShadow.None
+            Fill: =nfColor.Page
+            Height: =Parent.Height
+            LayoutDirection: =LayoutDirection.Vertical
+            Width: =Parent.Width
+          Children:
+            - cmpLstHeader:
+                Control: CanvasComponent
+                ComponentName: cmpHeader
+                Properties:
+                  ActiveKey: ="list"
+                  AlignInContainer: =AlignInContainer.Stretch
+                  Height: =nfSize.Header
+                  HelpUrl: =nfApp.HelpUrl
+                  HubUrl: =nfApp.HubUrl
+                  IsStaff: =gblIsStaff
+                  Items: =nfNavMain
+                  Layout: =nfLayout
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  Logo: =nfLogo
+                  LogoWidth: =nfApp.LogoWidth
+                  OnHelpSelect: =Launch(nfApp.HelpUrl)
+                  OnHubSelect: =Launch(nfApp.HubUrl)
+                  OnNavSelect: =nfGo(Self.SelectedKey)
+                  ShowHubLink: =!IsBlank(nfApp.HubUrl)
+                  Theme: =nfColor
+                  Title: =nfApp.Name
+                  UserImage: =User().Image
+                  WelcomeName: =nfUserName
+            - conLstHeaderRule:
+                Control: GroupContainer@1.5.0
+                Variant: ManualLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Fill: =nfColor.Line
+                  FillPortions: =0
+                  Height: =1
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+            - conLstBody:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Fill: =nfColor.Transparent
+                  LayoutAlignItems: =LayoutAlignItems.Center
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =nfSpace.Lg
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  PaddingBottom: =nfSpace.Xl
+                  PaddingLeft: =nfGutter
+                  PaddingRight: =nfGutter
+                  PaddingTop: =nfSpace.Xl
+                Children:
+                  - conLstHead:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Fill: =nfColor.Transparent
+                        FillPortions: =0
+                        Height: =54
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =nfSpace.Md
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        Width: =Min(Parent.Width - 2 * nfGutter, nfPageMaxW)
+                      Children:
+                        - conLstTitleText:
+                            Control: GroupContainer@1.5.0
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              Fill: =nfColor.Transparent
+                              Height: =54
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =nfSpace.Xs
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                            Children:
+                              - lblLstTitle:
+                                  Control: ModernText@1.0.0
+                                  Properties:
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    AutoHeight: =true
+                                    Color: =nfColor.Ink
+                                    FontWeight: =FontWeight.Semibold
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =nfType.H1
+                                    Text: =nfNavLabel("list")
+                                    Wrap: =false
+                              - lblLstSub:
+                                  Control: ModernText@1.0.0
+                                  Properties:
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    AutoHeight: =true
+                                    Color: =nfColor.Ink2
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =nfType.Body
+                                    Text: ="Everything you have asked for, newest first."
+                                    Wrap: =false
+                        - btnLstNew:
+                            Control: ModernButton@1.0.0
+                            Properties:
+                              AccessibleLabel: ="New " & nfItem
+                              Height: =nfSize.Control
+                              Icon: ="Add"
+                              OnSelect: =nfGo("form")
+                              Size: =nfType.Body
+                              Text: ="New " & nfItem
+                              Visible: =!nfIsPhone
+                              Width: =140
+                  - conLstTools:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Fill: =nfColor.Transparent
+                        FillPortions: =0
+                        Height: =If(nfIsPhone, 2 * nfSize.Control + nfSpace.Sm, nfSize.Control)
+                        LayoutDirection: =If(nfIsPhone, LayoutDirection.Vertical, LayoutDirection.Horizontal)
+                        LayoutGap: =nfSpace.Sm
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        Width: =Min(Parent.Width - 2 * nfGutter, nfPageMaxW)
+                      Children:
+                        - txtLstSearch:
+                            Control: ModernTextInput@1.1.2
+                            Properties:
+                              AccessibleLabel: ="Search " & nfItems
+                              AlignInContainer: =AlignInContainer.Stretch
+                              Appearance: =Appearance.Outline
+                              FillPortions: =If(nfIsPhone, 0, 1)
+                              Height: =nfSize.Control
+                              LayoutMinWidth: =0
+                              Placeholder: ="Search by title or asset tag"
+                              Size: =nfType.Input
+                        - drpLstStatus:
+                            Control: ModernDropdown@1.0.3
+                            Properties:
+                              AccessibleLabel: ="Filter by status"
+                              AlignInContainer: =AlignInContainer.Stretch
+                              Appearance: =Appearance.Outline
+                              Default: =LookUp(nfStatusFilters, Key = Coalesce(locStatusFilter, "all"))
+                              Height: =nfSize.Control
+                              ItemDisplayText: =ThisItem.Label
+                              Items: =nfStatusFilters
+                              LayoutMinWidth: =0
+                              Size: =nfType.Input
+                              Width: =200
+                  - conLstTable:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        BorderColor: =nfColor.Line
+                        BorderThickness: =1
+                        DropShadow: =DropShadow.None
+                        Fill: =nfColor.Surface
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        RadiusBottomLeft: =nfRadius.Md
+                        RadiusBottomRight: =nfRadius.Md
+                        RadiusTopLeft: =nfRadius.Md
+                        RadiusTopRight: =nfRadius.Md
+                        Width: =Min(Parent.Width - 2 * nfGutter, nfPageMaxW)
+                      Children:
+                        - conLstTableHead:
+                            Control: GroupContainer@1.5.0
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              Fill: =nfColor.Sunk
+                              FillPortions: =0
+                              Height: =40
+                              LayoutAlignItems: =LayoutAlignItems.Center
+                              LayoutDirection: =LayoutDirection.Horizontal
+                              LayoutGap: =nfSpace.Md
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingLeft: =nfSpace.Lg
+                              PaddingRight: =nfSpace.Lg
+                              RadiusTopLeft: =nfRadius.Md
+                              RadiusTopRight: =nfRadius.Md
+                              Visible: =!nfIsPhone
+                            Children:
+                              - lblLstHItem:
+                                  Control: ModernText@1.0.0
+                                  Properties:
+                                    AutoHeight: =true
+                                    Color: =nfColor.Ink2
+                                    FillPortions: =1
+                                    FontWeight: =FontWeight.Semibold
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =nfType.Small
+                                    Text: =Upper(nfItemCap)
+                                    Wrap: =false
+                              - lblLstHService:
+                                  Control: ModernText@1.0.0
+                                  Properties:
+                                    AutoHeight: =true
+                                    Color: =nfColor.Ink2
+                                    FontWeight: =FontWeight.Semibold
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =nfType.Small
+                                    Text: ="SERVICE"
+                                    Width: =180
+                                    Wrap: =false
+                              - lblLstHAssettag:
+                                  Control: ModernText@1.0.0
+                                  Properties:
+                                    AutoHeight: =true
+                                    Color: =nfColor.Ink2
+                                    FontWeight: =FontWeight.Semibold
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =nfType.Small
+                                    Text: ="ASSET TAG"
+                                    Visible: =nfIsDesktop
+                                    Width: =120
+                                    Wrap: =false
+                              - lblLstHUpdated:
+                                  Control: ModernText@1.0.0
+                                  Properties:
+                                    AutoHeight: =true
+                                    Color: =nfColor.Ink2
+                                    FontWeight: =FontWeight.Semibold
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =nfType.Small
+                                    Text: ="UPDATED"
+                                    Visible: =nfIsDesktop
+                                    Width: =120
+                                    Wrap: =false
+                              - lblLstHStatus:
+                                  Control: ModernText@1.0.0
+                                  Properties:
+                                    AutoHeight: =true
+                                    Color: =nfColor.Ink2
+                                    FontWeight: =FontWeight.Semibold
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =nfType.Small
+                                    Text: ="STATUS"
+                                    Width: =nfSize.Pill
+                                    Wrap: =false
+                              - lblLstHGo:
+                                  Control: ModernText@1.0.0
+                                  Properties:
+                                    AutoHeight: =true
+                                    Color: =nfColor.Ink2
+                                    FontWeight: =FontWeight.Semibold
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =nfType.Small
+                                    Text: =""
+                                    Width: =16
+                                    Wrap: =false
+                        - galLstRows:
+                            Control: Gallery@2.15.0
+                            Variant: Vertical
+                            Properties:
+                              AccessibleLabel: =nfNavLabel("list")
+                              Items: |-
+                                =SortByColumns(
+                                    Filter(
+                                        colRequests,
+                                        RequesterEmail = nfUserEmail,
+                                        IsBlank(txtLstSearch.Text) || StartsWith(Title, txtLstSearch.Text) || StartsWith(AssetTag, txtLstSearch.Text),
+                                        drpLstStatus.Selected.Key = "all" || (drpLstStatus.Selected.Key = "open" && IsOpen = true) || Status = drpLstStatus.Selected.Key
+                                    ),
+                                    "Modified",
+                                    SortOrder.Descending
+                                )
+                              TemplatePadding: =0
+                              TemplateSize: =nfSize.Row
+                              Visible: |-
+                                =!nfIsPhone && !IsEmpty(SortByColumns(
+                                    Filter(
+                                        colRequests,
+                                        RequesterEmail = nfUserEmail,
+                                        IsBlank(txtLstSearch.Text) || StartsWith(Title, txtLstSearch.Text) || StartsWith(AssetTag, txtLstSearch.Text),
+                                        drpLstStatus.Selected.Key = "all" || (drpLstStatus.Selected.Key = "open" && IsOpen = true) || Status = drpLstStatus.Selected.Key
+                                    ),
+                                    "Modified",
+                                    SortOrder.Descending
+                                ))
+                            Children:
+                              - conLstRow:
+                                  Control: GroupContainer@1.5.0
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    Fill: =nfColor.Transparent
+                                    Height: =Parent.TemplateHeight - 1
+                                    LayoutAlignItems: =LayoutAlignItems.Center
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =nfSpace.Md
+                                    PaddingLeft: =nfSpace.Lg
+                                    PaddingRight: =nfSpace.Lg
+                                    Width: =Parent.TemplateWidth
+                                  Children:
+                                    - lblLstCTitle:
+                                        Control: ModernText@1.0.0
+                                        Properties:
+                                          AutoHeight: =true
+                                          Color: =nfColor.Ink
+                                          FillPortions: =1
+                                          FontWeight: =FontWeight.Semibold
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =nfType.Body
+                                          Text: =ThisItem.Title
+                                          Wrap: =false
+                                    - lblLstCService:
+                                        Control: ModernText@1.0.0
+                                        Properties:
+                                          AutoHeight: =true
+                                          Color: =nfColor.Ink2
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =nfType.Body
+                                          Text: =nfServiceTitle(ThisItem.ServiceKey)
+                                          Width: =180
+                                          Wrap: =false
+                                    - lblLstCAsset:
+                                        Control: ModernText@1.0.0
+                                        Properties:
+                                          AutoHeight: =true
+                                          Color: =nfColor.Ink2
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =nfType.Body
+                                          Text: =Coalesce(ThisItem.AssetTag, "None")
+                                          Visible: =nfIsDesktop
+                                          Width: =120
+                                          Wrap: =false
+                                    - lblLstCUpdated:
+                                        Control: ModernText@1.0.0
+                                        Properties:
+                                          AutoHeight: =true
+                                          Color: =nfColor.Ink2
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =nfType.Body
+                                          Text: =Text(ThisItem.Modified, "mmm d, yyyy")
+                                          Visible: =nfIsDesktop
+                                          Width: =120
+                                          Wrap: =false
+                                    - conLstPill:
+                                        Control: GroupContainer@1.5.0
+                                        Variant: ManualLayout
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.Center
+                                          DropShadow: =DropShadow.None
+                                          Fill: =nfColor.Transparent
+                                          FillPortions: =0
+                                          Height: =24
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          Width: =nfSize.Pill
+                                        Children:
+                                          - conLstPillShape:
+                                              Control: GroupContainer@1.5.0
+                                              Variant: ManualLayout
+                                              Properties:
+                                                DropShadow: =DropShadow.None
+                                                Fill: =LookUp(nfTone, Tone = nfStatusTone(ThisItem.Status)).Fill
+                                                Height: =24
+                                                RadiusBottomLeft: =12
+                                                RadiusBottomRight: =12
+                                                RadiusTopLeft: =12
+                                                RadiusTopRight: =12
+                                                Width: =Min(Parent.Width, Len(nfStatusLabel(ThisItem.Status)) * 7 + 24)
+                                              Children:
+                                                - lblLstPill:
+                                                    Control: ModernText@1.0.0
+                                                    Properties:
+                                                      Align: =Align.Center
+                                                      AutoHeight: =true
+                                                      Color: =LookUp(nfTone, Tone = nfStatusTone(ThisItem.Status)).Ink
+                                                      FontWeight: =FontWeight.Semibold
+                                                      PaddingBottom: =0
+                                                      PaddingLeft: =8
+                                                      PaddingRight: =8
+                                                      PaddingTop: =0
+                                                      Size: =nfType.Small
+                                                      Text: =nfStatusLabel(ThisItem.Status)
+                                                      Width: =Parent.Width
+                                                      Wrap: =false
+                                                      Y: =(Parent.Height - Self.Height) / 2
+                                    - imgLstGo:
+                                        Control: Image@2.2.3
+                                        Properties:
+                                          Height: =16
+                                          Image: ="data:image/svg+xml;utf8," & EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='#5A5B5D' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='m9 18 6-6-6-6'/></svg>")
+                                          Width: =16
+                              - conLstRowRule:
+                                  Control: GroupContainer@1.5.0
+                                  Variant: ManualLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    Fill: =nfColor.Line
+                                    Height: =1
+                                    Width: =Parent.TemplateWidth
+                                    Y: =Parent.TemplateHeight - 1
+                              - btnLstRowOpen:
+                                  Control: Classic/Button@2.2.0
+                                  Properties:
+                                    BorderStyle: =BorderStyle.None
+                                    BorderThickness: =0
+                                    Fill: =nfColor.Transparent
+                                    FocusedBorderThickness: =2
+                                    Height: =Parent.TemplateHeight - 1
+                                    HoverBorderColor: =nfColor.Transparent
+                                    HoverFill: =nfColor.Hover
+                                    OnSelect: |-
+                                      =Navigate(scrDetail, ScreenTransition.None, { locId: ThisItem.ID, locFrom: "list" })
+                                    PressedBorderColor: =nfColor.Transparent
+                                    PressedFill: =nfColor.Pressed
+                                    RadiusBottomLeft: =0
+                                    RadiusBottomRight: =0
+                                    RadiusTopLeft: =0
+                                    RadiusTopRight: =0
+                                    Text: =""
+                                    Tooltip: ="Open " & ThisItem.Title
+                                    Width: =Parent.TemplateWidth
+                        - galLstCards:
+                            Control: Gallery@2.15.0
+                            Variant: Vertical
+                            Properties:
+                              AccessibleLabel: =nfNavLabel("list")
+                              Items: |-
+                                =SortByColumns(
+                                    Filter(
+                                        colRequests,
+                                        RequesterEmail = nfUserEmail,
+                                        IsBlank(txtLstSearch.Text) || StartsWith(Title, txtLstSearch.Text) || StartsWith(AssetTag, txtLstSearch.Text),
+                                        drpLstStatus.Selected.Key = "all" || (drpLstStatus.Selected.Key = "open" && IsOpen = true) || Status = drpLstStatus.Selected.Key
+                                    ),
+                                    "Modified",
+                                    SortOrder.Descending
+                                )
+                              TemplatePadding: =0
+                              TemplateSize: =nfSize.CardRow
+                              Visible: |-
+                                =nfIsPhone && !IsEmpty(SortByColumns(
+                                    Filter(
+                                        colRequests,
+                                        RequesterEmail = nfUserEmail,
+                                        IsBlank(txtLstSearch.Text) || StartsWith(Title, txtLstSearch.Text) || StartsWith(AssetTag, txtLstSearch.Text),
+                                        drpLstStatus.Selected.Key = "all" || (drpLstStatus.Selected.Key = "open" && IsOpen = true) || Status = drpLstStatus.Selected.Key
+                                    ),
+                                    "Modified",
+                                    SortOrder.Descending
+                                ))
+                            Children:
+                              - conLstCard:
+                                  Control: GroupContainer@1.5.0
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    Fill: =nfColor.Transparent
+                                    Height: =Parent.TemplateHeight - 1
+                                    LayoutAlignItems: =LayoutAlignItems.Center
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =nfSpace.Md
+                                    PaddingLeft: =nfSpace.Lg
+                                    PaddingRight: =nfSpace.Lg
+                                    Width: =Parent.TemplateWidth
+                                  Children:
+                                    - conLstCardText:
+                                        Control: GroupContainer@1.5.0
+                                        Variant: AutoLayout
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.Center
+                                          DropShadow: =DropShadow.None
+                                          Fill: =nfColor.Transparent
+                                          Height: =60
+                                          LayoutDirection: =LayoutDirection.Vertical
+                                          LayoutGap: =2
+                                          LayoutJustifyContent: =LayoutJustifyContent.Center
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                        Children:
+                                          - lblLstCardTitle:
+                                              Control: ModernText@1.0.0
+                                              Properties:
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                AutoHeight: =true
+                                                Color: =nfColor.Ink
+                                                FontWeight: =FontWeight.Semibold
+                                                PaddingBottom: =0
+                                                PaddingLeft: =0
+                                                PaddingRight: =0
+                                                PaddingTop: =0
+                                                Size: =nfType.Body
+                                                Text: =ThisItem.Title
+                                                Wrap: =false
+                                          - lblLstCardMeta:
+                                              Control: ModernText@1.0.0
+                                              Properties:
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                AutoHeight: =true
+                                                Color: =nfColor.Ink2
+                                                PaddingBottom: =0
+                                                PaddingLeft: =0
+                                                PaddingRight: =0
+                                                PaddingTop: =0
+                                                Size: =nfType.Small
+                                                Text: =nfServiceTitle(ThisItem.ServiceKey) & " · " & Text(ThisItem.Modified, "mmm d")
+                                                Wrap: =false
+                                          - conLstCardPill:
+                                              Control: GroupContainer@1.5.0
+                                              Variant: ManualLayout
+                                              Properties:
+                                                AlignInContainer: =AlignInContainer.Start
+                                                DropShadow: =DropShadow.None
+                                                Fill: =nfColor.Transparent
+                                                FillPortions: =0
+                                                Height: =24
+                                                LayoutMinHeight: =0
+                                                LayoutMinWidth: =0
+                                                Width: =nfSize.Pill
+                                              Children:
+                                                - conLstCardPillShape:
+                                                    Control: GroupContainer@1.5.0
+                                                    Variant: ManualLayout
+                                                    Properties:
+                                                      DropShadow: =DropShadow.None
+                                                      Fill: =LookUp(nfTone, Tone = nfStatusTone(ThisItem.Status)).Fill
+                                                      Height: =24
+                                                      RadiusBottomLeft: =12
+                                                      RadiusBottomRight: =12
+                                                      RadiusTopLeft: =12
+                                                      RadiusTopRight: =12
+                                                      Width: =Min(Parent.Width, Len(nfStatusLabel(ThisItem.Status)) * 7 + 24)
+                                                    Children:
+                                                      - lblLstCardPill:
+                                                          Control: ModernText@1.0.0
+                                                          Properties:
+                                                            Align: =Align.Center
+                                                            AutoHeight: =true
+                                                            Color: =LookUp(nfTone, Tone = nfStatusTone(ThisItem.Status)).Ink
+                                                            FontWeight: =FontWeight.Semibold
+                                                            PaddingBottom: =0
+                                                            PaddingLeft: =8
+                                                            PaddingRight: =8
+                                                            PaddingTop: =0
+                                                            Size: =nfType.Small
+                                                            Text: =nfStatusLabel(ThisItem.Status)
+                                                            Width: =Parent.Width
+                                                            Wrap: =false
+                                                            Y: =(Parent.Height - Self.Height) / 2
+                                    - imgLstCardGo:
+                                        Control: Image@2.2.3
+                                        Properties:
+                                          Height: =16
+                                          Image: ="data:image/svg+xml;utf8," & EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='#5A5B5D' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='m9 18 6-6-6-6'/></svg>")
+                                          Width: =16
+                              - conLstCardRule:
+                                  Control: GroupContainer@1.5.0
+                                  Variant: ManualLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    Fill: =nfColor.Line
+                                    Height: =1
+                                    Width: =Parent.TemplateWidth
+                                    Y: =Parent.TemplateHeight - 1
+                              - btnLstCardOpen:
+                                  Control: Classic/Button@2.2.0
+                                  Properties:
+                                    BorderStyle: =BorderStyle.None
+                                    BorderThickness: =0
+                                    Fill: =nfColor.Transparent
+                                    FocusedBorderThickness: =2
+                                    Height: =Parent.TemplateHeight - 1
+                                    HoverBorderColor: =nfColor.Transparent
+                                    HoverFill: =nfColor.Hover
+                                    OnSelect: |-
+                                      =Navigate(scrDetail, ScreenTransition.None, { locId: ThisItem.ID, locFrom: "list" })
+                                    PressedBorderColor: =nfColor.Transparent
+                                    PressedFill: =nfColor.Pressed
+                                    RadiusBottomLeft: =0
+                                    RadiusBottomRight: =0
+                                    RadiusTopLeft: =0
+                                    RadiusTopRight: =0
+                                    Text: =""
+                                    Tooltip: ="Open " & ThisItem.Title
+                                    Width: =Parent.TemplateWidth
+                        - cmpLstEmpty:
+                            Control: CanvasComponent
+                            ComponentName: cmpStatePanel
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Stretch
+                              FillPortions: =1
+                              IsPhone: =nfIsPhone
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              Message: =If(IsEmpty(nfMyRequests), "When you submit a " & nfItem & ", it shows here.", "Clear the search, or choose another status.")
+                              OnPrimary: |-
+                                =If(
+                                    IsEmpty(nfMyRequests),
+                                    nfGo("form"),
+                                    UpdateContext({ locStatusFilter: "all" });
+                                    Reset(txtLstSearch);
+                                    Reset(drpLstStatus)
+                                )
+                              OnSecondary: =false
+                              PrimaryText: =If(IsEmpty(nfMyRequests), "New " & nfItem, "Clear filters")
+                              SecondaryText: =""
+                              Theme: =nfColor
+                              Title: =If(IsEmpty(nfMyRequests), "No " & nfItems & " yet", "No " & nfItems & " match")
+                              Variant: ="Empty"
+                              Visible: |-
+                                =IsEmpty(SortByColumns(
+                                    Filter(
+                                        colRequests,
+                                        RequesterEmail = nfUserEmail,
+                                        IsBlank(txtLstSearch.Text) || StartsWith(Title, txtLstSearch.Text) || StartsWith(AssetTag, txtLstSearch.Text),
+                                        drpLstStatus.Selected.Key = "all" || (drpLstStatus.Selected.Key = "open" && IsOpen = true) || Status = drpLstStatus.Selected.Key
+                                    ),
+                                    "Modified",
+                                    SortOrder.Descending
+                                ))
+            - conLstBottomRule:
+                Control: GroupContainer@1.5.0
+                Variant: ManualLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Fill: =nfColor.Line
+                  FillPortions: =0
+                  Height: =1
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  Visible: =nfIsPhone
+            - conLstBottomBar:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Fill: =nfColor.Surface
+                  FillPortions: =0
+                  Height: =nfSize.BottomNav
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  PaddingLeft: =nfSpace.Sm
+                  PaddingRight: =nfSpace.Sm
+                  Visible: =nfIsPhone
+                Children:
+                  - cmpLstBottomNav:
+                      Control: CanvasComponent
+                      ComponentName: cmpBottomNav
+                      Properties:
+                        ActiveKey: ="list"
+                        AlignInContainer: =AlignInContainer.Stretch
+                        FillPortions: =1
+                        IsStaff: =gblIsStaff
+                        Items: =nfNavMain
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        OnSelect: =nfGo(Self.SelectedKey)
+                        Theme: =nfColor
+      - conLstLoading:
+          Control: GroupContainer@1.5.0
+          Variant: ManualLayout
+          Properties:
+            DropShadow: =DropShadow.None
+            Fill: =nfColor.Scrim
+            Height: =Parent.Height
+            Visible: =locLoading
+            Width: =Parent.Width
+          Children:
+            - conLstLoadingCard:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Fill: =nfColor.Surface
+                  Height: =56
+                  LayoutAlignItems: =LayoutAlignItems.Center
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutJustifyContent: =LayoutJustifyContent.Center
+                  RadiusBottomLeft: =nfRadius.Md
+                  RadiusBottomRight: =nfRadius.Md
+                  RadiusTopLeft: =nfRadius.Md
+                  RadiusTopRight: =nfRadius.Md
+                  Width: =200
+                  X: =(Parent.Width - Self.Width) / 2
+                  Y: =(Parent.Height - Self.Height) / 2
+                Children:
+                  - lblLstLoading:
                       Control: ModernText@1.0.0
                       Properties:
                         Align: =Align.Center
