@@ -4,11 +4,13 @@
 // except through the collections it names, which are seeded there.
 // =====================================================================================
 
-// ---- Per app settings. Change these first for every new app. -------------------------
+// =====================================================================================
+// 1. EDIT FOR EVERY NEW APP
+// nfApp, nfLogo, nfStatus, nfTiles and the labels in nfNav. A new app changes nothing below this section.
+// =====================================================================================
+
+// ---- Per app settings ------------------------------------------------------------------
 nfApp = {
-    // Stamped on every row this app writes, and every read filters on it. Unique per app, never changed
-    // once the app is live: it is how Power BI tells the apps apart.
-    AppKey: "OCOSO-SR",
     Name: "Service Requests",
     // What one record is called, and who works them. Every button, title and message is built from these.
     Item: { Singular: "request", Plural: "requests" },
@@ -16,51 +18,100 @@ nfApp = {
     Tagline: "Request a service and follow it to completion.",
     Version: "1.0.0",
     HubUrl: "",
+    // Where the Help link in the header goes: the app's help page or guide. Blank hides the link.
+    HelpUrl: "",
     ContactEmail: "servicedesk@example.gov",
     StaffGroupId: "",
     PreviewAsStaff: false,
     Notice: "This is the OCOSO template. Replace this notice, or set it to blank to hide it.",
     FormInstructions: "Tell us what you need. Fields marked with * are required.",
-    // The app's logo as raw SVG markup, pasted as is (use single quotes inside it). Blank hides the logo.
-    // To use an image file instead, add it to the app and set nfLogo to it.
-    LogoSvg: "<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='#FFFFFF'/><path d='M9 22V12l7-4 7 4v10' fill='none' stroke='#005EA2' stroke-width='2' stroke-linejoin='round'/><path d='M13 22v-5h6v5' fill='none' stroke='#005EA2' stroke-width='2' stroke-linejoin='round'/></svg>"
+    // The header logo is drawn 32 high and this wide, fitted without stretching. Widen it for a wordmark.
+    LogoWidth: 32
 };
 
-// ---- Colour. Components take this as Theme: =nfColor ------------------------------------
+// ---- Logo -------------------------------------------------------------------------------
+// The header logo: an image added to the app under Media, SVG or PNG. Add the image, then put its name
+// here without quotes, for example nfLogo = AppLogo; (assets/AppLogo.svg in the repo is a placeholder).
+// A name that starts with a digit or has spaces goes in single quotes. Blank() shows no logo. Naming an image the app does not have is an error, so add the image first.
+nfLogo = '748336837_super';
+
+// ---- Status. Keys are stored; labels are only ever displayed ----------------------------
+// An app changes its statuses here. The buttons that move a record from one status to the next are on
+// scrDetail, one per action.
+// Tone picks the pill colours from nfTone: Neutral, Info, Warning, Success, Danger.
+// IsStart: the status a new record gets (exactly one, and it must be Open). Open: still needs work;
+// nfSetStatus copies it into the record's IsOpen column, which is what every "open" filter reads.
+// Editable: the requester may still edit it.
+nfStatus = Table(
+    { Key: "Submitted", Label: "Submitted", Tone: "Info", IsStart: true, Open: true, Editable: true },
+    { Key: "InProgress", Label: "In progress", Tone: "Warning", IsStart: false, Open: true, Editable: false },
+    { Key: "OnHold", Label: "On hold", Tone: "Neutral", IsStart: false, Open: true, Editable: false },
+    { Key: "Completed", Label: "Completed", Tone: "Success", IsStart: false, Open: false, Editable: false },
+    { Key: "Cancelled", Label: "Cancelled", Tone: "Danger", IsStart: false, Open: false, Editable: false }
+);
+
+// ---- Overview tiles, in order. The first is highlighted. Filter is a status key or "open" --------
+nfTiles = Table(
+    { Label: "Open", Filter: "open", Context: "Not yet completed" },
+    { Label: "Waiting", Filter: "Submitted", Context: "Not picked up yet" },
+    { Label: "In progress", Filter: "InProgress", Context: "Being worked on" },
+    { Label: "Completed", Filter: "Completed", Context: "Closed out" }
+);
+
+// ---- Navigation. Every tab, and every view within a tab, defined once ----------------------
+// ParentKey "" is a main tab (header and bottom nav). A row whose ParentKey names a main tab is a view
+// of that tab's list, offered in the filter dropdown on its screen, as the queue's are on scrQueue.
+// Change the labels freely. A new main tab also needs a line in nfGo, in section 2. The counts name the
+// data: see Switch to SharePoint in docs/start-a-new-app.md.
+nfNav = Table(
+    { Key: "overview", Label: "Overview", Count: 0, StaffOnly: false, ParentKey: "" },
+    { Key: "list", Label: "My " & nfItems, Count: CountRows(Filter(nfMyRequests, IsOpen = true)), StaffOnly: false, ParentKey: "" },
+    { Key: "form", Label: "New " & nfItem, Count: 0, StaffOnly: false, ParentKey: "" },
+    { Key: "queue", Label: "Queue", Count: CountRows(Filter(colRequests, IsBlank(AssignedTo), Status = nfStartStatus)), StaffOnly: true, ParentKey: "" },
+    { Key: "queue-unassigned", Label: "Unassigned", Count: CountRows(Filter(colRequests, IsBlank(AssignedTo), IsOpen = true)), StaffOnly: true, ParentKey: "queue" },
+    { Key: "queue-mine", Label: "Assigned to me", Count: CountRows(Filter(colRequests, AssignedTo = nfUserEmail, IsOpen = true)), StaffOnly: true, ParentKey: "queue" },
+    { Key: "queue-open", Label: "All open", Count: 0, StaffOnly: true, ParentKey: "queue" }
+);
+
+// =====================================================================================
+// 2. LEAVE AS IS
+// Colour, sizes, layout and the helpers the screens call. The only lines here an app ever changes are
+// nfGo, when it adds a tab, and the ones named in Switch to SharePoint in docs/start-a-new-app.md.
+// =====================================================================================
+
+// ---- Colour: the DHS palette, the same in every app. Components take it as Theme: =nfColor --
 nfColor = {
-    Primary: RGBA(0, 94, 162, 1),
-    PrimaryDark: RGBA(26, 68, 128, 1),
-    PrimarySoft: RGBA(217, 232, 246, 1),
+    Primary: RGBA(0, 82, 136, 1),
+    PrimaryDark: RGBA(0, 62, 103, 1),
+    PrimarySoft: RGBA(214, 227, 236, 1),
     OnPrimary: RGBA(255, 255, 255, 1),
-    HeaderFill: RGBA(22, 46, 81, 1),
+    HeaderFill: RGBA(0, 43, 71, 1),
     HeaderInk: RGBA(255, 255, 255, 1),
-    HeaderInk2: RGBA(217, 232, 246, 1),
-    Page: RGBA(240, 240, 240, 1),
+    HeaderInk2: RGBA(214, 227, 236, 1),
+    Page: RGBA(237, 238, 238, 1),
     Surface: RGBA(255, 255, 255, 1),
-    Sunk: RGBA(247, 249, 250, 1),
-    Line: RGBA(223, 225, 226, 1),
-    Ink: RGBA(27, 27, 27, 1),
-    Ink2: RGBA(61, 69, 81, 1),
-    Ink3: RGBA(86, 92, 101, 1),
-    Focus: RGBA(36, 145, 255, 1),
-    Danger: RGBA(181, 9, 9, 1),
-    DangerSoft: RGBA(244, 227, 219, 1),
-    NeutralInk: RGBA(61, 69, 81, 1),
-    NeutralSoft: RGBA(230, 230, 230, 1),
-    InfoInk: RGBA(26, 68, 128, 1),
-    InfoSoft: RGBA(217, 232, 246, 1),
+    Sunk: RGBA(248, 248, 249, 1),
+    Line: RGBA(222, 223, 224, 1),
+    Ink: RGBA(25, 25, 26, 1),
+    Ink2: RGBA(68, 69, 71, 1),
+    Ink3: RGBA(90, 91, 93, 1),
+    Focus: RGBA(0, 120, 174, 1),
+    Danger: RGBA(196, 18, 48, 1),
+    DangerSoft: RGBA(246, 217, 222, 1),
+    NeutralInk: RGBA(68, 69, 71, 1),
+    NeutralSoft: RGBA(229, 229, 229, 1),
+    InfoInk: RGBA(0, 62, 103, 1),
+    InfoSoft: RGBA(214, 233, 242, 1),
     WarningInk: RGBA(92, 72, 9, 1),
     WarningSoft: RGBA(250, 243, 209, 1),
-    SuccessInk: RGBA(25, 49, 30, 1),
-    SuccessSoft: RGBA(236, 243, 236, 1),
-    DangerInk: RGBA(111, 51, 49, 1),
-    Hover: RGBA(0, 94, 162, 0.08),
-    Pressed: RGBA(0, 94, 162, 0.16),
-    Scrim: RGBA(27, 27, 27, 0.5),
+    SuccessInk: RGBA(49, 79, 26, 1),
+    SuccessSoft: RGBA(229, 238, 222, 1),
+    DangerInk: RGBA(102, 9, 25, 1),
+    Hover: RGBA(0, 82, 136, 0.08),
+    Pressed: RGBA(0, 82, 136, 0.16),
+    Scrim: RGBA(25, 25, 26, 0.5),
     Transparent: RGBA(0, 0, 0, 0)
 };
-
-nfLogo = If(IsBlank(nfApp.LogoSvg), "", "data:image/svg+xml;utf8," & EncodeUrl(nfApp.LogoSvg));
 
 // ---- Type, space, sizes ---------------------------------------------------------------
 // Input is the text size of every input. 16 on phones: iOS, which the Power Apps mobile app runs on, zooms
@@ -68,7 +119,7 @@ nfLogo = If(IsBlank(nfApp.LogoSvg), "", "data:image/svg+xml;utf8," & EncodeUrl(n
 nfType = { Display: 28, H1: 22, H2: 18, Body: 14, Small: 12, Input: If(App.Width < 600, 16, 14) };
 nfSpace = { Xs: 4, Sm: 8, Md: 12, Lg: 16, Xl: 24, Xxl: 32 };
 nfRadius = { Sm: 4, Md: 8, Lg: 12 };
-nfSize = { Header: 56, SubNav: 40, BottomNav: 64, Control: 36, Row: 52, CardRow: 76, ListRow: 64, Tile: 112, Pill: 120, FieldLabel: 56, Field: 96, DetailField: 44 };
+nfSize = { Header: 56, BottomNav: 64, Control: 36, Row: 52, CardRow: 76, ListRow: 64, Tile: 112, Pill: 120, FieldLabel: 56, Field: 96, DetailField: 44 };
 nfPageMaxW = 1200;
 
 // ---- Layout. Scale to fit is OFF; everything responds to App.Width ----------------------
@@ -89,28 +140,18 @@ nfUserName = User().FullName;
 nfFirstName = First(Split(User().FullName, " ")).Value;
 nfGreeting = If(Hour(Now()) < 12, "Good morning", Hour(Now()) < 17, "Good afternoon", "Good evening");
 
-// ---- Status. Keys are stored; labels are only ever displayed ----------------------------
-// An app changes its workflow here and in nfTransitions, never in the screens.
-// Tone picks the pill colours: Neutral, Info, Warning, Success, Danger.
-// IsStart: the status a new record gets (exactly one). Open: still needs work (at most four).
-// Editable: the requester may still edit it.
-nfStatus = Table(
-    { Key: "Submitted", Label: "Submitted", Tone: "Info", IsStart: true, Open: true, Editable: true },
-    { Key: "InProgress", Label: "In progress", Tone: "Warning", IsStart: false, Open: true, Editable: false },
-    { Key: "OnHold", Label: "On hold", Tone: "Neutral", IsStart: false, Open: true, Editable: false },
-    { Key: "Completed", Label: "Completed", Tone: "Success", IsStart: false, Open: false, Editable: false },
-    { Key: "Cancelled", Label: "Cancelled", Tone: "Danger", IsStart: false, Open: false, Editable: false }
-);
+// ---- Worked out from nfStatus -------------------------------------------------------------
 nfStartStatus = LookUp(nfStatus, IsStart).Key;
-// The open statuses as four constants, repeating the last when there are fewer. Screens filter with
-// Status = nfOpen.K1 || ... || Status = nfOpen.K4, which delegates to SharePoint; reading the Open
-// flag inside a Filter would not.
-nfOpen = {
-    K1: Last(FirstN(Filter(nfStatus, Open), 1)).Key,
-    K2: Last(FirstN(Filter(nfStatus, Open), 2)).Key,
-    K3: Last(FirstN(Filter(nfStatus, Open), 3)).Key,
-    K4: Last(FirstN(Filter(nfStatus, Open), 4)).Key
-};
+// Pill colours, one row per tone. Every status pill, on the detail screen and in every list row, reads its
+// fill and text colour from here through nfStatusTone. A Tone in nfStatus must be one of these.
+nfTone = Table(
+    { Tone: "Neutral", Fill: nfColor.NeutralSoft, Ink: nfColor.NeutralInk },
+    { Tone: "Info", Fill: nfColor.InfoSoft, Ink: nfColor.InfoInk },
+    { Tone: "Warning", Fill: nfColor.WarningSoft, Ink: nfColor.WarningInk },
+    { Tone: "Success", Fill: nfColor.SuccessSoft, Ink: nfColor.SuccessInk },
+    { Tone: "Danger", Fill: nfColor.DangerSoft, Ink: nfColor.DangerInk }
+);
+// The choices in a status filter: All and Open, then every status in nfStatus. Needs no edits.
 nfStatusFilters = Ungroup(
     Table(
         { Rows: Table({ Key: "all", Label: "All statuses" }, { Key: "open", Label: "Open" }) },
@@ -119,29 +160,10 @@ nfStatusFilters = Ungroup(
     Rows
 );
 
-// ---- Status changes. One row per action button on the detail screen ---------------------
-// From: the statuses it applies to, each wrapped in semicolons. ToStatus "" leaves status alone.
-// Role: Staff or Owner (the requester). A Key may have one row per role; the button shows once.
-nfTransitions = Table(
-    { Key: "assign", Label: "Assign to me", From: ";Submitted;InProgress;OnHold;", ToStatus: "", Role: "Staff", OnlyIfUnassigned: true, AssignToMe: true, Primary: false, Danger: false, ConfirmTitle: "Assign this " & nfItem & " to you?", ConfirmMessage: "You will be shown as the person working on it.", History: "" },
-    { Key: "start", Label: "Start work", From: ";Submitted;", ToStatus: "InProgress", Role: "Staff", OnlyIfUnassigned: false, AssignToMe: false, Primary: true, Danger: false, ConfirmTitle: "Start work on this " & nfItem & "?", ConfirmMessage: "It will show as In progress.", History: "Status changed to In progress" },
-    { Key: "hold", Label: "Put on hold", From: ";InProgress;", ToStatus: "OnHold", Role: "Staff", OnlyIfUnassigned: false, AssignToMe: false, Primary: false, Danger: false, ConfirmTitle: "Put this " & nfItem & " on hold?", ConfirmMessage: "Use this while you wait on someone else.", History: "Status changed to On hold" },
-    { Key: "resume", Label: "Resume", From: ";OnHold;", ToStatus: "InProgress", Role: "Staff", OnlyIfUnassigned: false, AssignToMe: false, Primary: true, Danger: false, ConfirmTitle: "Resume work on this " & nfItem & "?", ConfirmMessage: "It goes back to In progress.", History: "Status changed to In progress" },
-    { Key: "complete", Label: "Complete", From: ";InProgress;", ToStatus: "Completed", Role: "Staff", OnlyIfUnassigned: false, AssignToMe: false, Primary: true, Danger: false, ConfirmTitle: "Mark this " & nfItem & " as completed?", ConfirmMessage: "It closes, and the requester sees that it is done.", History: "Status changed to Completed" },
-    { Key: "cancel", Label: "Cancel " & nfItem, From: ";Submitted;", ToStatus: "Cancelled", Role: "Owner", OnlyIfUnassigned: false, AssignToMe: false, Primary: false, Danger: true, ConfirmTitle: "Cancel this " & nfItem & "?", ConfirmMessage: "This cannot be undone.", History: "Cancelled" },
-    { Key: "cancel", Label: "Cancel " & nfItem, From: ";Submitted;InProgress;OnHold;", ToStatus: "Cancelled", Role: "Staff", OnlyIfUnassigned: false, AssignToMe: false, Primary: false, Danger: true, ConfirmTitle: "Cancel this " & nfItem & "?", ConfirmMessage: "This cannot be undone.", History: "Cancelled" }
-);
-
-// ---- Overview tiles, in order. The first is highlighted. Filter is a status key or "open" --------
-nfTiles = Table(
-    { Label: "Open", Filter: "open", Context: "Not yet completed" },
-    { Label: "Waiting", Filter: "Submitted", Context: "Not picked up yet" },
-    { Label: "In progress", Filter: "InProgress", Context: "Being worked on" },
-    { Label: "Completed", Filter: "Completed", Context: "Closed out" }
-);
+// ---- Helpers the screens call ----------------------------------------------------------------
 nfTileCount(f: Text): Number = If(
     f = "open",
-    CountRows(Filter(nfMyRequests, (Status = nfOpen.K1 || Status = nfOpen.K2 || Status = nfOpen.K3 || Status = nfOpen.K4))),
+    CountRows(Filter(nfMyRequests, IsOpen = true)),
     CountRows(Filter(nfMyRequests, Status = f))
 );
 nfNavLabel(key: Text): Text = LookUp(nfNav, Key = key).Label;
@@ -149,20 +171,8 @@ nfStatusLabel(key: Text): Text = Coalesce(LookUp(nfStatus, Key = key).Label, key
 nfStatusTone(key: Text): Text = Coalesce(LookUp(nfStatus, Key = key).Tone, "Neutral");
 nfServiceTitle(key: Text): Text = Coalesce(LookUp(colServices, Key = key).Title, key);
 
-// ---- Navigation. Every tab and sub-tab, defined once --------------------------------------
-// ParentKey "" is a main tab (top nav and bottom nav). A row whose ParentKey names a main tab is
-// one of its sub-tabs, shown in a second row under the top nav, or at the top of the page on a phone.
-nfNav = Table(
-    { Key: "overview", Label: "Overview", Count: 0, StaffOnly: false, ParentKey: "" },
-    { Key: "list", Label: "My " & nfItems, Count: CountRows(Filter(nfMyRequests, (Status = nfOpen.K1 || Status = nfOpen.K2 || Status = nfOpen.K3 || Status = nfOpen.K4))), StaffOnly: false, ParentKey: "" },
-    { Key: "form", Label: "New " & nfItem, Count: 0, StaffOnly: false, ParentKey: "" },
-    { Key: "queue", Label: "Queue", Count: CountRows(Filter(colRequests, AppKey = nfApp.AppKey, IsBlank(AssignedTo), Status = nfStartStatus)), StaffOnly: true, ParentKey: "" },
-    { Key: "queue-unassigned", Label: "Unassigned", Count: CountRows(Filter(colRequests, AppKey = nfApp.AppKey, IsBlank(AssignedTo), (Status = nfOpen.K1 || Status = nfOpen.K2 || Status = nfOpen.K3 || Status = nfOpen.K4))), StaffOnly: true, ParentKey: "queue" },
-    { Key: "queue-mine", Label: "Assigned to me", Count: CountRows(Filter(colRequests, AppKey = nfApp.AppKey, AssignedTo = nfUserEmail, (Status = nfOpen.K1 || Status = nfOpen.K2 || Status = nfOpen.K3 || Status = nfOpen.K4))), StaffOnly: true, ParentKey: "queue" },
-    { Key: "queue-open", Label: "All open", Count: 0, StaffOnly: true, ParentKey: "queue" },
-    { Key: "help", Label: "Help", Count: 0, StaffOnly: false, ParentKey: "" }
-);
-// The nav components take Key, Label, Count and StaffOnly only.
+// ---- Worked out from nfNav ----------------------------------------------------------------
+// The header and bottom nav take Key, Label, Count and StaffOnly only.
 nfNavMain = ShowColumns(Filter(nfNav, ParentKey = ""), Key, Label, Count, StaffOnly);
 nfNavQueue = ShowColumns(Filter(nfNav, ParentKey = "queue"), Key, Label, Count, StaffOnly);
 nfGo(key: Text): Void = {
@@ -171,38 +181,23 @@ nfGo(key: Text): Void = {
         "overview", Navigate(scrOverview, ScreenTransition.None),
         "list", Navigate(scrList, ScreenTransition.None, { locStatusFilter: "all" }),
         "form", Navigate(scrForm, ScreenTransition.None, { locId: 0 }),
-        "queue", Navigate(scrQueue, ScreenTransition.None, { locView: "queue-unassigned" }),
-        "help", Navigate(scrHelp, ScreenTransition.None)
+        "queue", Navigate(scrQueue, ScreenTransition.None, { locView: "queue-unassigned" })
     )
 };
 
-// ---- Help. The topics on scrHelp, one row each. Steps are separated by |. Go is the nfGo key that
-// Show me opens. Words are built from nfItem and nfApp.Team, so they follow the app's own names.
-nfHelpTopics = Table(
-    { Key: "around", Section: "Getting started", Title: "Get around the app", Summary: "Where everything is, on a computer and on a phone.", Steps: "On a computer or tablet, the tabs across the top are Overview, My " & nfItems & ", New " & nfItem & " and Help. Staff also see Queue.|On a phone, the same tabs are in the bar at the bottom.|Services Hub, at the top right, goes back to the hub when your app has one.|On a " & nfItem & "'s page, the link at the top goes back to the list you came from.", Go: "overview", GoLabel: "Go to Overview", StaffOnly: false },
-    { Key: "overview", Section: "Getting started", Title: "Read the overview", Summary: "Your " & nfItems & " at a glance.", Steps: "Overview counts your " & nfItems & " by status.|Select a count to see just those " & nfItems & ".|Recent " & nfItems & " lists your latest five. Select one to open it.|A notice from the " & nfApp.Team & " shows at the top when there is news.", Go: "overview", GoLabel: "Go to Overview", StaffOnly: false },
-    { Key: "new", Section: "Your " & nfItems, Title: "Submit a new " & nfItem, Summary: "Ask the " & nfApp.Team & " for something.", Steps: "Select New " & nfItem & ".|Read the instructions at the top. The contact email is there if you have a question.|Fill in the fields. Those marked * are required.|Select Submit " & nfItem & ". You go straight to its page.", Go: "form", GoLabel: "Start a new " & nfItem, StaffOnly: false },
-    { Key: "find", Section: "Your " & nfItems, Title: "Find a " & nfItem, Summary: "Search and filter your " & nfItems & ".", Steps: "Open My " & nfItems & ".|Search by title or asset tag.|Choose a status to narrow the list, or Open for everything still in progress.|Select a " & nfItem & " to open it.", Go: "list", GoLabel: "Go to My " & nfItems, StaffOnly: false },
-    { Key: "track", Section: "Your " & nfItems, Title: "Follow a " & nfItem, Summary: "See where it is and what has happened.", Steps: "Open the " & nfItem & ".|The pill next to the title shows its status.|Details show who asked, where, and who it is assigned to.|History lists every change, newest first.", Go: "list", GoLabel: "Go to My " & nfItems, StaffOnly: false },
-    { Key: "change", Section: "Your " & nfItems, Title: "Change or cancel a " & nfItem, Summary: "While it has not been picked up yet.", Steps: "Open the " & nfItem & ".|While it is still new, select Edit to change it, or Cancel " & nfItem & " to withdraw it.|You are asked to confirm before anything changes.|Once work has started, ask the " & nfApp.Team & " for any changes.", Go: "list", GoLabel: "Go to My " & nfItems, StaffOnly: false },
-    { Key: "queue", Section: "Staff", Title: "Work the queue", Summary: "Everything the " & nfApp.Team & " has to do.", Steps: "Open Queue.|Unassigned shows " & nfItems & " nobody has picked up. Assigned to me shows yours. All open shows everything still open.|The oldest are at the top.|Select a " & nfItem & " to open it.", Go: "queue", GoLabel: "Go to Queue", StaffOnly: true },
-    { Key: "act", Section: "Staff", Title: "Assign, start and complete", Summary: "Move a " & nfItem & " through its statuses.", Steps: "Open the " & nfItem & ".|Select Assign to me to take it on.|Start work, Put on hold, Resume and Complete move it on. You only see the buttons that fit its current status.|Each one asks you to confirm, and is recorded in History.", Go: "queue", GoLabel: "Go to Queue", StaffOnly: true }
-);
-nfHelpSections = ["All topics", "Getting started", "Your " & nfItems, "Staff"];
-nfHtml(t: Text): Text = Substitute(Substitute(Substitute(t, "&", "&amp;"), "<", "&lt;"), ">", "&gt;");
-
 // ---- Data the overview reads ------------------------------------------------------------
-nfMyRequests = Filter(colRequests, AppKey = nfApp.AppKey, RequesterEmail = nfUserEmail);
+nfMyRequests = Filter(colRequests, RequesterEmail = nfUserEmail);
 nfMyRecent = FirstN(SortByColumns(nfMyRequests, "Modified", SortOrder.Descending), 5);
 
 // ---- Writes. Every status change also writes a history row -------------------------------
+// IsOpen is kept in step with the status here, from nfStatus.Open, so lists can filter on IsOpen = true.
 // Modified is set here because a collection does not stamp it. Remove it from both Patch
 // calls when the app is bound to the SharePoint list, which stamps it itself.
 nfSetStatus(id: Number, status: Text, action: Text): Void = {
-    Patch(colRequests, LookUp(colRequests, ID = id), { Status: status, Modified: Now() });
-    Collect(colHistory, { AppKey: nfApp.AppKey, RequestId: id, Action: action, ActorEmail: nfUserEmail, ActorName: nfUserName, Created: Now() })
+    Patch(colRequests, LookUp(colRequests, ID = id), { Status: status, IsOpen: LookUp(nfStatus, Key = status).Open, Modified: Now() });
+    Collect(colHistory, { RequestId: id, Action: action, ActorEmail: nfUserEmail, ActorName: nfUserName, Created: Now() })
 };
 nfAssignToMe(id: Number): Void = {
     Patch(colRequests, LookUp(colRequests, ID = id), { AssignedTo: nfUserEmail, Modified: Now() });
-    Collect(colHistory, { AppKey: nfApp.AppKey, RequestId: id, Action: "Assigned to " & nfUserName, ActorEmail: nfUserEmail, ActorName: nfUserName, Created: Now() })
+    Collect(colHistory, { RequestId: id, Action: "Assigned to " & nfUserName, ActorEmail: nfUserEmail, ActorName: nfUserName, Created: Now() })
 };
