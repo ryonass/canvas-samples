@@ -6,7 +6,7 @@
 
 // =====================================================================================
 // 1. EDIT FOR EVERY NEW APP
-// nfApp, nfLogo, nfStatus, nfTiles and the labels in nfNav. A new app changes nothing below this section.
+// nfApp, nfLogo, nfHeaderLinks, nfStatus, nfTiles and the labels in nfNav. A new app changes nothing below this section.
 // =====================================================================================
 
 // ---- Per app settings ------------------------------------------------------------------
@@ -17,9 +17,6 @@ nfApp = {
     Team: "service desk",
     Tagline: "Request a service and follow it to completion.",
     Version: "1.0.0",
-    HubUrl: "",
-    // Where the Help link in the header goes: the app's help page or guide. Blank hides the link.
-    HelpUrl: "",
     ContactEmail: "servicedesk@example.gov",
     StaffGroupId: "",
     PreviewAsStaff: false,
@@ -34,6 +31,14 @@ nfApp = {
 // here without quotes, for example nfLogo = AppLogo; (assets/AppLogo.svg in the repo is a placeholder).
 // A name that starts with a digit or has spaces goes in single quotes. Blank() shows no logo. Naming an image the app does not have is an error, so add the image first.
 nfLogo = '748336837_super';
+
+// ---- Header links, in order. Each opens its Url in a new tab ----------------------------------
+// Add, remove or reorder rows. A row with a blank Url is hidden, so both are hidden until you fill them in.
+// Up to four show. A phone has room for one, the first with a Url, so put the one people need most first.
+nfHeaderLinks = Table(
+    { Label: "Help", Url: "https://www.crunchyroll.com/series/GT00385867/magic-repo-man-dumped-by-my-party-ill-cash-in-with-a-cute-support-fairy-to-become-the-strongest" },
+    { Label: "Services Hub", Url: "" }
+);
 
 // ---- Status. Keys are stored; labels are only ever displayed ----------------------------
 // An app changes its statuses here. The buttons that move a record from one status to the next are on
