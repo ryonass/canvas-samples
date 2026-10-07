@@ -1,2 +1,121 @@
+// Solution settings
+nf_SolutionSettings = SortByColumns(Filter(IGCESettings,Status="Active"),"Title");
+nf_IGCEPowerAppHelp = LookUp(nf_SolutionSettings,Title="IGCEPowerAppHelp").Value;
+nf_PowerBIURL = LookUp(nf_SolutionSettings,Title="PowerBIURL").Value;
+
+// Other settings
+nf_User = {
+        Claims:"i:0#.f|membership|" & User().Email,
+        DisplayName: User().FullName,
+        Email: User().Email
+    };
+
+// Colors
+nf_ScreenOverlay = RGBA(0,0,0,0.07);
+
 // =====================================================================================
-/
+// OCOSO template theme. Copied from the OCOSO template app; leave as is, except nfApp.
+// =====================================================================================
+nfApp = { Name: "IGCE", LogoWidth: 32 };
+nfColor = {
+    Primary: RGBA(0, 82, 136, 1),
+    PrimaryDark: RGBA(0, 62, 103, 1),
+    PrimarySoft: RGBA(214, 227, 236, 1),
+    OnPrimary: RGBA(255, 255, 255, 1),
+    HeaderFill: RGBA(0, 43, 71, 1),
+    HeaderInk: RGBA(255, 255, 255, 1),
+    HeaderInk2: RGBA(214, 227, 236, 1),
+    Page: RGBA(245, 245, 245, 1),
+    Surface: RGBA(255, 255, 255, 1),
+    Sunk: RGBA(248, 248, 249, 1),
+    Line: RGBA(222, 223, 224, 1),
+    Ink: RGBA(25, 25, 26, 1),
+    Ink2: RGBA(68, 69, 71, 1),
+    Ink3: RGBA(90, 91, 93, 1),
+    Focus: RGBA(0, 120, 174, 1),
+    Danger: RGBA(196, 18, 48, 1),
+    DangerSoft: RGBA(246, 217, 222, 1),
+    NeutralInk: RGBA(68, 69, 71, 1),
+    NeutralSoft: RGBA(229, 229, 229, 1),
+    InfoInk: RGBA(0, 62, 103, 1),
+    InfoSoft: RGBA(214, 233, 242, 1),
+    WarningInk: RGBA(92, 72, 9, 1),
+    WarningSoft: RGBA(250, 243, 209, 1),
+    SuccessInk: RGBA(49, 79, 26, 1),
+    SuccessSoft: RGBA(229, 238, 222, 1),
+    DangerInk: RGBA(102, 9, 25, 1),
+    Hover: RGBA(0, 82, 136, 0.08),
+    Pressed: RGBA(0, 82, 136, 0.16),
+    Scrim: RGBA(25, 25, 26, 0.5),
+    Transparent: RGBA(0, 0, 0, 0)
+};
+nfType = { Display: 28, H1: 22, H2: 18, Body: 14, Small: 12, Input: If(App.Width < 600, 16, 14) };
+nfSpace = { Xs: 4, Sm: 8, Md: 12, Lg: 16, Xl: 24, Xxl: 32 };
+nfRadius = { Sm: 4, Md: 8, Lg: 12 };
+nfSize = { Header: 56, Control: 36 };
+// This screen is a wide editor (the lines table has thirteen columns), so its column is wider than the
+// template's 1,200.
+nfPageMaxW = 1440;
+nfLayout = If(App.Width < 600, "Phone", App.Width < 1024, "Tablet", "Desktop");
+nfIsPhone = nfLayout = "Phone";
+nfGutter = If(nfIsPhone, nfSpace.Lg, nfSpace.Xxl);
+nfLogo = CISA_Logo;
+// The header's tabs: this app has one working screen, so there are none yet.
+nfNavMain = FirstN(Table({ Key: "", Label: "", Count: 0, StaffOnly: false }), 0);
+// The header's links. "app:help" opens scr_Help, the app's own help; any other Url opens in a new tab.
+nfHeaderLinks = Table({ Label: "Help", Url: "app:help" });
+// ---- Help. Everything scr_Help shows, one row per topic. Audience is "user" or "dev". Edit the words here.
+nfHelp = Table(
+    { Audience: "user", Title: "Find a requirement", Body: "The app opens on the Requirements list. Each row is a requirement, with its PR tracker number, its COR and where its IGCE stands: Not started, Draft, Submitted and so on.
+Type in the search box to narrow the list. It matches from the start of the PR tracker number or of the requirement name.
+Select a row to open that requirement's IGCE, or to start one if it has none." },
+    { Audience: "user", Title: "Start an IGCE and save it", Body: "A requirement with no IGCE opens as a new one. Fill in the Header card. Six fields are required before Save is available: IGCE Type, Point of Contact, COR, Base Period Start, Base Period End and Option Periods.
+Choosing option periods adds their dates. Choosing the Cost Reimbursement type adds the rate fields.
+Select Save in the toolbar. The title at the top then shows the IGCE's number and its status. Lines can be added once the IGCE has been saved." },
+    { Audience: "user", Title: "View, edit and stop editing", Body: "An IGCE opens for viewing. Select Edit to change the header and the basis of estimate, then Save.
+Stop editing goes back to viewing. It does not save, so save first if you want to keep what you typed.
+An IGCE whose status is Complete cannot be edited." },
+    { Audience: "user", Title: "Lines", Body: "The Lines card lists the lines of the estimate, with totals at the bottom. Select Add Line to create one; you do not need to select Edit first. Select a row to open a line.
+On the line's screen, set whether it is labor and its category, enter a description and select Save.
+Delete line removes the line and all of its sublines, after asking you to confirm. Only Standard Line and Products/Supplies lines can be deleted." },
+    { Audience: "user", Title: "Sublines", Body: "A line's costs come from its sublines. On the line's screen, select Add subline to open the form, fill it in and select Save subline. The form only shows the fields that apply to the kind of line.
+Tick Work out option periods from the base year to have the option period quantities and rates follow the base year, growing by the inflation rate.
+Use the pencil on a row to change a subline and the bin to delete it. Delete asks first." },
+    { Audience: "user", Title: "Government furnished property (GFP)", Body: "If the estimate includes GFP, tick Contains Government Furnished Property on the Header card. A form opens with six questions; all six need an answer before it can be saved.
+A Government furnished property card then appears on the page with the questions, your answers and where the COR's decision stands. Open GFP form on that card reopens the form.
+The COR named on the IGCE sees a signature area in the form, with Approve and Reject." },
+    { Audience: "user", Title: "What is not here yet", Body: "- Submit. An IGCE stays in Draft; Save is how work is kept.
+- Download.
+- Report opens only when a report address has been set up for this app." },
+    { Audience: "dev", Title: "Start here", Body: "This screen is a summary. The full developer guide is README.md in the app's source folder (apps/igce in the template repository), with NOTES.md for the history and UAT.md for the test script.
+The words on this screen live in one place: the nfHelp table in App.Formulas. Edit them there." },
+    { Audience: "dev", Title: "Screens and how they connect", Body: "- scr_PRList: the requirements list, and the start screen.
+- scr_IGCEOverview: one IGCE. Header fields, the GFP card, the lines table, the basis of estimate.
+- scr_IGCEDetails: one line and its sublines.
+- scr_Help: this screen.
+Selecting a row on scr_PRList opens scr_IGCEOverview. Selecting a line, or Add Line, opens scr_IGCEDetails. Back returns the same way.
+Each screen has the same shape: the cmpHeader component, a toolbar pinned under it, then cards in a centred column. Dialogs are containers or components at the bottom of the screen's tree, shown by a context variable." },
+    { Audience: "dev", Title: "Where the data lives", Body: "Five SharePoint lists:
+- RequirementTracker: one row per requirement.
+- IGCEHeader: one row per IGCE. PRTrackerID links it to its requirement.
+- IGCELine: one row per line. IGCEHeaderID links it to its IGCE.
+- IGCESubLine: one row per subline. IGCELineID links it to its line.
+- IGCESettings: settings, as Title and Value, where Status is Active.
+Filter on the ID number columns; they can be run by SharePoint itself. A lookup column is written as a record with an '@odata.type'; copy an existing Patch." },
+    { Audience: "dev", Title: "How an IGCE is opened", Body: "One formula loads everything: gal_Rows_PRList.OnSelect on scr_PRList. It sets gl_PRID, gl_PRTracker and gl_PRTrackerCOR from the requirement, gl_IGCE to the IGCE (blank when there is none), the gl_GFP variables from it, and gl_FormMode to View, or New when there is no IGCE.
+gl_IGCELine is the line open on scr_IGCEDetails. Add Line and selecting a row in the lines table set it." },
+    { Audience: "dev", Title: "Modes and who can change what", Body: "gl_FormMode is View, Edit or New. Fields can be typed in when it is not View, and the toolbar shows Edit while viewing and Save otherwise.
+Adding a line, and adding, editing or deleting a subline, do not need Edit. They are locked only when the IGCE's status is Complete, and Add Line also until the IGCE has been saved.
+There is no access check. Anyone who can open the app can edit any IGCE. The original's check is not built; the lists' own SharePoint permissions are what protect the data." },
+    { Audience: "dev", Title: "Making common changes", Body: "- A header field: add the column to IGCEHeader, put a field component in one of the four rows of the Header card, and add the column to the record in btn_TopSave_Overview.OnSelect.
+- A subline field: add the column to IGCESubLine, add a field to the subline form, and add the column to the record in btn_DlgSave_Details.OnSelect.
+- A toolbar button: it sits in con_ActionBar on each screen; its Visible says when it shows.
+- A header link: add a row to nfHeaderLinks in App.Formulas.
+While the app is still built by the build script, make the change in build.py; a change made only in Studio is overwritten by the next import." },
+    { Audience: "dev", Title: "Known gaps", Body: "- Submit is hidden and unfinished: its formula is commented out.
+- Totals in the lines and sublines tables add up the rows that have loaded, not the list.
+- A requirement can have more than one IGCE row; the app opens the first.
+- The requirements list looks up one IGCE per row, which is slow on a long list.
+- The signature area of the GFP form does not fit a phone.
+The full list is in README.md." }
+)
