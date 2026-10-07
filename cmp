@@ -1,1 +1,208 @@
-crs 
+Screens:
+  scr_Help:
+    Properties:
+      Fill: =nfColor.Page
+    Children:
+      - con_Shell_Help:
+          Control: GroupContainer@1.5.0
+          Variant: AutoLayout
+          Properties:
+            DropShadow: =DropShadow.None
+            Fill: =nfColor.Page
+            Height: =Parent.Height
+            LayoutDirection: =LayoutDirection.Vertical
+            Width: =Parent.Width
+          Children:
+            - cmp_Header_Help:
+                Control: CanvasComponent
+                ComponentName: cmpHeader
+                Properties:
+                  ActiveKey: =""
+                  AlignInContainer: =AlignInContainer.Stretch
+                  Height: =nfSize.Header
+                  IsStaff: =false
+                  Items: =nfNavMain
+                  Layout: =nfLayout
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  Links: =FirstN(nfHeaderLinks, 0)
+                  Logo: =nfLogo
+                  LogoWidth: =nfApp.LogoWidth
+                  OnLinkSelect: =false
+                  OnNavSelect: =false
+                  Theme: =nfColor
+                  Title: ="Help"
+                  UserImage: =User().Image
+                  WelcomeName: =nf_User.DisplayName
+            - con_ActionBar_Help:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Fill: =nfColor.Surface
+                  FillPortions: =0
+                  Height: =nfSize.Control + 2 * nfSpace.Sm
+                  LayoutAlignItems: =LayoutAlignItems.Center
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutGap: =nfSpace.Sm
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  PaddingLeft: =Max(nfGutter, (Parent.Width - nfPageMaxW) / 2)
+                  PaddingRight: =Max(nfGutter, (Parent.Width - nfPageMaxW) / 2)
+                Children:
+                  - btn_Back_Help:
+                      Control: ModernButton@1.0.0
+                      Properties:
+                        AccessibleLabel: ="Back"
+                        Appearance: =ButtonAppearance.Subtle
+                        Height: =nfSize.Control
+                        Icon: ="ArrowLeft"
+                        OnSelect: =Back(ScreenTransition.Fade)
+                        Size: =nfType.Body
+                        Text: ="Back"
+                        Width: =90
+                  - con_ActionGap_Help:
+                      Control: GroupContainer@1.5.0
+                      Variant: ManualLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Fill: =nfColor.Transparent
+                        Height: =1
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                  - btn_Guide_Help:
+                      Control: ModernButton@1.0.0
+                      Properties:
+                        AccessibleLabel: ="Open the online guide"
+                        Appearance: =ButtonAppearance.Secondary
+                        Height: =nfSize.Control
+                        Icon: ="Open"
+                        OnSelect: =Launch(nf_IGCEPowerAppHelp)
+                        Size: =nfType.Body
+                        Text: ="Open the online guide"
+                        Visible: =!IsBlank(nf_IGCEPowerAppHelp)
+                        Width: =210
+            - con_ActionRule_Help:
+                Control: GroupContainer@1.5.0
+                Variant: ManualLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Fill: =nfColor.Line
+                  FillPortions: =0
+                  Height: =1
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+            - con_Main_Help:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Fill: =nfColor.Transparent
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =nfSpace.Lg
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  PaddingBottom: =nfSpace.Xl
+                  PaddingLeft: =Max(nfGutter, (Parent.Width - nfPageMaxW) / 2)
+                  PaddingRight: =Max(nfGutter, (Parent.Width - nfPageMaxW) / 2)
+                  PaddingTop: =nfSpace.Xl
+                Children:
+                  - con_Tabs_Help:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Fill: =nfColor.Transparent
+                        FillPortions: =0
+                        Height: =nfSize.Control
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =nfSpace.Sm
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                      Children:
+                        - btn_TabUser_Help:
+                            Control: ModernButton@1.0.0
+                            Properties:
+                              AccessibleLabel: ="Using the app" & If(Coalesce(locHelpTab, "user") = "user", ", selected", "")
+                              Appearance: =If(Coalesce(locHelpTab, "user") = "user", ButtonAppearance.Primary, ButtonAppearance.Secondary)
+                              Height: =nfSize.Control
+                              OnSelect: |-
+                                =UpdateContext({ locHelpTab: "user" })
+                              Size: =nfType.Body
+                              Text: ="Using the app"
+                              Width: =170
+                        - btn_TabDev_Help:
+                            Control: ModernButton@1.0.0
+                            Properties:
+                              AccessibleLabel: ="For developers" & If(Coalesce(locHelpTab, "user") = "dev", ", selected", "")
+                              Appearance: =If(Coalesce(locHelpTab, "user") = "dev", ButtonAppearance.Primary, ButtonAppearance.Secondary)
+                              Height: =nfSize.Control
+                              OnSelect: |-
+                                =UpdateContext({ locHelpTab: "dev" })
+                              Size: =nfType.Body
+                              Text: ="For developers"
+                              Width: =170
+                  - con_Topics_Help:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        BorderColor: =nfColor.Line
+                        BorderThickness: =1
+                        DropShadow: =DropShadow.None
+                        Fill: =nfColor.Surface
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        RadiusBottomLeft: =nfRadius.Md
+                        RadiusBottomRight: =nfRadius.Md
+                        RadiusTopLeft: =nfRadius.Md
+                        RadiusTopRight: =nfRadius.Md
+                      Children:
+                        - gal_Topics_Help:
+                            Control: Gallery@2.15.0
+                            Variant: VariableHeight
+                            Properties:
+                              AccessibleLabel: ="Help topics"
+                              Items: =Filter(nfHelp, Audience = Coalesce(locHelpTab, "user"))
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              TemplatePadding: =0
+                              TemplateSize: =120
+                            Children:
+                              - lbl_Topic_Help:
+                                  Control: ModernText@1.0.0
+                                  Properties:
+                                    AutoHeight: =true
+                                    Color: =nfColor.Ink
+                                    FontWeight: =FontWeight.Semibold
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =nfType.H2
+                                    Text: =ThisItem.Title
+                                    Width: =Parent.TemplateWidth - 2 * nfSpace.Lg
+                                    X: =nfSpace.Lg
+                                    Y: =nfSpace.Lg
+                              - lbl_TopicBody_Help:
+                                  Control: ModernText@1.0.0
+                                  Properties:
+                                    AutoHeight: =true
+                                    Color: =nfColor.Ink
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =nfType.Body
+                                    Text: =ThisItem.Body
+                                    Width: =Parent.TemplateWidth - 2 * nfSpace.Lg
+                                    X: =nfSpace.Lg
+                                    Y: =lbl_Topic_Help.Y + lbl_Topic_Help.Height + nfSpace.Sm
+                              - rec_TopicRule_Help:
+                                  Control: Rectangle@2.3.0
+                                  Properties:
+                                    Fill: =nfColor.Line
+                                    Height: =1
+                                    Width: =Parent.TemplateWidth
+                                    Y: =lbl_TopicBody_Help.Y + lbl_TopicBody_Help.Height + nfSpace.Lg
