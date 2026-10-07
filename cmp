@@ -1,1978 +1,321 @@
-ComponentDefinitions:
-  cmp_Text:
-    DefinitionType: CanvasComponent
-    CustomProperties:
-      CustomValidationError:
-        PropertyKind: Input
-        DisplayName: Custom Validation Error
-        Description: A custom property
-        RaiseOnReset: true
-        DataType: Text
-        Default: =""
-      DefaultValue:
-        PropertyKind: Input
-        DisplayName: Default Value
-        Description: A custom property
-        RaiseOnReset: true
-        DataType: Text
-        Default: =""
-      DisplayMode:
-        PropertyKind: Input
-        DisplayName: Display Mode
-        Description: A custom property
-        DataType: Text
-        Default: ="Text"
-      IsValid:
-        PropertyKind: Output
-        DisplayName: Is Valid
-        Description: A custom property
-        DataType: Boolean
-      Label:
-        PropertyKind: Input
-        DisplayName: Label
-        Description: Control Label
-        DataType: Text
-        Default: ="Text"
-      Required:
-        PropertyKind: Input
-        DisplayName: Required
-        Description: A custom property
-        DataType: Boolean
-        Default: =false
-      Theme:
-        PropertyKind: Input
-        DisplayName: Theme
-        Description: Pass =nfColor. The default copies the template palette so the component previews on its own.
-        DataType: Record
-        Default: |-
-          ={
-              Primary: RGBA(0, 82, 136, 1),
-              PrimaryDark: RGBA(0, 62, 103, 1),
-              PrimarySoft: RGBA(214, 227, 236, 1),
-              OnPrimary: RGBA(255, 255, 255, 1),
-              HeaderFill: RGBA(0, 43, 71, 1),
-              HeaderInk: RGBA(255, 255, 255, 1),
-              HeaderInk2: RGBA(214, 227, 236, 1),
-              Page: RGBA(237, 238, 238, 1),
-              Surface: RGBA(255, 255, 255, 1),
-              Sunk: RGBA(248, 248, 249, 1),
-              Line: RGBA(222, 223, 224, 1),
-              Ink: RGBA(25, 25, 26, 1),
-              Ink2: RGBA(68, 69, 71, 1),
-              Ink3: RGBA(90, 91, 93, 1),
-              Focus: RGBA(0, 120, 174, 1),
-              Danger: RGBA(196, 18, 48, 1),
-              DangerSoft: RGBA(246, 217, 222, 1),
-              NeutralInk: RGBA(68, 69, 71, 1),
-              NeutralSoft: RGBA(229, 229, 229, 1),
-              InfoInk: RGBA(0, 62, 103, 1),
-              InfoSoft: RGBA(214, 233, 242, 1),
-              WarningInk: RGBA(92, 72, 9, 1),
-              WarningSoft: RGBA(250, 243, 209, 1),
-              SuccessInk: RGBA(49, 79, 26, 1),
-              SuccessSoft: RGBA(229, 238, 222, 1),
-              DangerInk: RGBA(102, 9, 25, 1),
-              Hover: RGBA(0, 82, 136, 0.08),
-              Pressed: RGBA(0, 82, 136, 0.16),
-              Scrim: RGBA(25, 25, 26, 0.5),
-              Transparent: RGBA(0, 0, 0, 0)
-          }
-      ValidationError:
-        PropertyKind: Output
-        DisplayName: Validation Error
-        Description: A custom property
-        DataType: Text
-      Value:
-        PropertyKind: Output
-        DisplayName: Value
-        Description: A custom property
-        DataType: Text
+Screens:
+  scr_PRList:
     Properties:
-      Height: =76
-      IsValid: =IsBlank(cmp_Text.ValidationError)
-      OnReset: =Reset(txt_TextValue)
-      ValidationError: |-
-        =If(
-            Self.Required && IsBlank(txt_TextValue.Text),
-            "Required",
-            cmp_Text.CustomValidationError
-        )
-      Value: =txt_TextValue.Text
-      Width: =150
+      Fill: =nfColor.Page
     Children:
-      - lbl_TextError:
-          Control: ModernText@1.0.0
-          Properties:
-            Color: =cmp_Text.Theme.Danger
-            Height: =22
-            PaddingBottom: =0
-            PaddingLeft: =3
-            PaddingRight: =0
-            PaddingTop: =0
-            RadiusBottomLeft: =0
-            RadiusBottomRight: =0
-            RadiusTopLeft: =0
-            RadiusTopRight: =0
-            Size: =12
-            Text: =cmp_Text.ValidationError
-            Width: =Parent.Width
-            Y: =txt_TextValue.Y+txt_TextValue.Height
-      - txt_TextValue:
-          Control: ModernTextInput@1.1.2
-          Properties:
-            Appearance: =Appearance.Outline
-            Color: |-
-              =If(
-                  cmp_Text.Required && IsBlank(Self.Text),
-                  cmp_Text.Theme.Danger,
-                  cmp_Text.Theme.Ink
-              )
-            Default: =cmp_Text.DefaultValue
-            DisplayMode: =cmp_Text.DisplayMode
-            MaxLength: =-1
-            Placeholder: =""
-            ValidationState: =If(cmp_Text.IsValid, ValidationState.None, ValidationState.Error)
-            Width: =Parent.Width
-            Y: =lbl_TextLabel.Y+lbl_TextLabel.Height
-      - lbl_TextLabel:
-          Control: ModernText@1.0.0
-          Properties:
-            Color: =cmp_Text.Theme.Ink
-            FontWeight: =FontWeight.Semibold
-            Height: =22
-            PaddingBottom: =0
-            PaddingLeft: =3
-            PaddingRight: =0
-            PaddingTop: =0
-            RadiusBottomLeft: =0
-            RadiusBottomRight: =0
-            RadiusTopLeft: =0
-            RadiusTopRight: =0
-            Size: =14
-            Text: =cmp_Text.Label
-            Width: =Parent.Width
-
-<-->
-
-ComponentDefinitions:
-  cmp_Boolean:
-    DefinitionType: CanvasComponent
-    CustomProperties:
-      DefaultValue:
-        PropertyKind: Input
-        DisplayName: Default Value
-        Description: A custom property
-        RaiseOnReset: true
-        DataType: Boolean
-        Default: =false
-      DisplayMode:
-        PropertyKind: Input
-        DisplayName: Display Mode
-        Description: A custom property
-        DataType: Text
-        Default: ="Text"
-      Label:
-        PropertyKind: Input
-        DisplayName: Label
-        Description: Control Label
-        DataType: Text
-        Default: ="Text"
-      OnCheck:
-        PropertyKind: Event
-        DisplayName: OnCheck
-        Description: A custom property
-        ReturnType: None
-        Default: =false
-      OnUncheck:
-        PropertyKind: Event
-        DisplayName: OnUncheck
-        Description: A custom property
-        ReturnType: None
-        Default: =false
-      Theme:
-        PropertyKind: Input
-        DisplayName: Theme
-        Description: Pass =nfColor. The default copies the template palette so the component previews on its own.
-        DataType: Record
-        Default: |-
-          ={
-              Primary: RGBA(0, 82, 136, 1),
-              PrimaryDark: RGBA(0, 62, 103, 1),
-              PrimarySoft: RGBA(214, 227, 236, 1),
-              OnPrimary: RGBA(255, 255, 255, 1),
-              HeaderFill: RGBA(0, 43, 71, 1),
-              HeaderInk: RGBA(255, 255, 255, 1),
-              HeaderInk2: RGBA(214, 227, 236, 1),
-              Page: RGBA(237, 238, 238, 1),
-              Surface: RGBA(255, 255, 255, 1),
-              Sunk: RGBA(248, 248, 249, 1),
-              Line: RGBA(222, 223, 224, 1),
-              Ink: RGBA(25, 25, 26, 1),
-              Ink2: RGBA(68, 69, 71, 1),
-              Ink3: RGBA(90, 91, 93, 1),
-              Focus: RGBA(0, 120, 174, 1),
-              Danger: RGBA(196, 18, 48, 1),
-              DangerSoft: RGBA(246, 217, 222, 1),
-              NeutralInk: RGBA(68, 69, 71, 1),
-              NeutralSoft: RGBA(229, 229, 229, 1),
-              InfoInk: RGBA(0, 62, 103, 1),
-              InfoSoft: RGBA(214, 233, 242, 1),
-              WarningInk: RGBA(92, 72, 9, 1),
-              WarningSoft: RGBA(250, 243, 209, 1),
-              SuccessInk: RGBA(49, 79, 26, 1),
-              SuccessSoft: RGBA(229, 238, 222, 1),
-              DangerInk: RGBA(102, 9, 25, 1),
-              Hover: RGBA(0, 82, 136, 0.08),
-              Pressed: RGBA(0, 82, 136, 0.16),
-              Scrim: RGBA(25, 25, 26, 0.5),
-              Transparent: RGBA(0, 0, 0, 0)
-          }
-      Value:
-        PropertyKind: Output
-        DisplayName: Value
-        Description: A custom property
-        DataType: Boolean
-    Properties:
-      Height: =76
-      OnReset: =Reset(chk_Boolean)
-      Value: =chk_Boolean.Checked
-      Width: =120
-    Children:
-      - chk_Boolean:
-          Control: ModernCheckbox@1.0.2
-          Properties:
-            Color: =cmp_Boolean.Theme.Ink
-            Default: =cmp_Boolean.DefaultValue
-            DisplayMode: =cmp_Boolean.DisplayMode
-            FontWeight: =FontWeight.Normal
-            Label: =""
-            OnCheck: =cmp_Boolean.OnCheck()
-            OnUncheck: =cmp_Boolean.OnUncheck()
-            Size: =14
-            Width: =Parent.Width
-            Y: =lbl_BooleanLabel.Y+lbl_BooleanLabel.Height
-      - lbl_BooleanLabel:
-          Control: ModernText@1.0.0
-          Properties:
-            Color: =cmp_Boolean.Theme.Ink
-            FontWeight: =FontWeight.Semibold
-            Height: =22
-            PaddingBottom: =0
-            PaddingLeft: =3
-            PaddingRight: =0
-            PaddingTop: =0
-            RadiusBottomLeft: =0
-            RadiusBottomRight: =0
-            RadiusTopLeft: =0
-            RadiusTopRight: =0
-            Size: =14
-            Text: =cmp_Boolean.Label
-            Width: =Parent.Width
-
-<-->
-
-
-
-ComponentDefinitions:
-  cmp_MultilineText:
-    DefinitionType: CanvasComponent
-    CustomProperties:
-      CustomValidationError:
-        PropertyKind: Input
-        DisplayName: Custom Validation Error
-        Description: A custom property
-        RaiseOnReset: true
-        DataType: Text
-        Default: =""
-      DefaultValue:
-        PropertyKind: Input
-        DisplayName: Default Value
-        Description: A custom property
-        RaiseOnReset: true
-        DataType: Text
-        Default: =""
-      Description:
-        PropertyKind: Input
-        DisplayName: Description
-        Description: A custom property
-        DataType: Text
-        Default: =""
-      DisplayMode:
-        PropertyKind: Input
-        DisplayName: Display Mode
-        Description: A custom property
-        DataType: Text
-        Default: ="Text"
-      Instructions:
-        PropertyKind: Input
-        DisplayName: Instructions
-        Description: A custom property
-        DataType: Text
-        Default: =""
-      IsValid:
-        PropertyKind: Output
-        DisplayName: Is Valid
-        Description: A custom property
-        DataType: Boolean
-      Label:
-        PropertyKind: Input
-        DisplayName: Label
-        Description: Control Label
-        DataType: Text
-        Default: ="Text"
-      Required:
-        PropertyKind: Input
-        DisplayName: Required
-        Description: A custom property
-        DataType: Boolean
-        Default: =false
-      Theme:
-        PropertyKind: Input
-        DisplayName: Theme
-        Description: Pass =nfColor. The default copies the template palette so the component previews on its own.
-        DataType: Record
-        Default: |-
-          ={
-              Primary: RGBA(0, 82, 136, 1),
-              PrimaryDark: RGBA(0, 62, 103, 1),
-              PrimarySoft: RGBA(214, 227, 236, 1),
-              OnPrimary: RGBA(255, 255, 255, 1),
-              HeaderFill: RGBA(0, 43, 71, 1),
-              HeaderInk: RGBA(255, 255, 255, 1),
-              HeaderInk2: RGBA(214, 227, 236, 1),
-              Page: RGBA(237, 238, 238, 1),
-              Surface: RGBA(255, 255, 255, 1),
-              Sunk: RGBA(248, 248, 249, 1),
-              Line: RGBA(222, 223, 224, 1),
-              Ink: RGBA(25, 25, 26, 1),
-              Ink2: RGBA(68, 69, 71, 1),
-              Ink3: RGBA(90, 91, 93, 1),
-              Focus: RGBA(0, 120, 174, 1),
-              Danger: RGBA(196, 18, 48, 1),
-              DangerSoft: RGBA(246, 217, 222, 1),
-              NeutralInk: RGBA(68, 69, 71, 1),
-              NeutralSoft: RGBA(229, 229, 229, 1),
-              InfoInk: RGBA(0, 62, 103, 1),
-              InfoSoft: RGBA(214, 233, 242, 1),
-              WarningInk: RGBA(92, 72, 9, 1),
-              WarningSoft: RGBA(250, 243, 209, 1),
-              SuccessInk: RGBA(49, 79, 26, 1),
-              SuccessSoft: RGBA(229, 238, 222, 1),
-              DangerInk: RGBA(102, 9, 25, 1),
-              Hover: RGBA(0, 82, 136, 0.08),
-              Pressed: RGBA(0, 82, 136, 0.16),
-              Scrim: RGBA(25, 25, 26, 0.5),
-              Transparent: RGBA(0, 0, 0, 0)
-          }
-      ValidationError:
-        PropertyKind: Output
-        DisplayName: Validation Error
-        Description: A custom property
-        DataType: Text
-      Value:
-        PropertyKind: Output
-        DisplayName: Value
-        Description: A custom property
-        DataType: Text
-    Properties:
-      Height: =140
-      IsValid: =IsBlank(cmp_MultilineText.ValidationError)
-      OnReset: =Reset(txt_MultilineTextValue)
-      ValidationError: |-
-        =If(
-            Self.Required && IsBlank(txt_MultilineTextValue.Text),
-            "Required",
-            cmp_MultilineText.CustomValidationError
-        )
-      Value: =txt_MultilineTextValue.Text
-      Width: =600
-    Children:
-      - lbl_MultilineTextError:
-          Control: Text@0.0.51
-          Properties:
-            FontColor: =cmp_MultilineText.Theme.Danger
-            Height: =22
-            PaddingLeft: =3
-            Text: =cmp_MultilineText.ValidationError
-            VerticalAlign: =VerticalAlign.Middle
-            Width: =Parent.Width
-            Y: =txt_MultilineTextValue.Y+txt_MultilineTextValue.Height
-      - txt_MultilineTextValue:
-          Control: ModernTextInput@1.1.2
-          Properties:
-            Appearance: =Appearance.Outline
-            Color: =If(cmp_MultilineText.Required && IsBlank(Self.Text),cmp_MultilineText.Theme.Danger,cmp_MultilineText.Theme.Ink)
-            Default: =cmp_MultilineText.DefaultValue
-            DisplayMode: =cmp_MultilineText.DisplayMode
-            Height: =Parent.Height-lbl_MultilineTextLabel.Height-lbl_MultilineTextError.Height-lbl_MultilineTextLabel.Y
-            MaxLength: =-1
-            Placeholder: =""
-            Type: =TextInputType.Multiline
-            ValidationState: =If(cmp_MultilineText.IsValid, ValidationState.None, ValidationState.Error)
-            Width: =Parent.Width
-            Y: =lbl_MultilineTextLabel.Height+lbl_MultilineTextLabel.Y
-      - lbl_MultilineTextLabel:
-          Control: ModernText@1.0.0
-          Properties:
-            Color: =cmp_MultilineText.Theme.Ink
-            FontWeight: =FontWeight.Semibold
-            Height: =22
-            PaddingBottom: =0
-            PaddingLeft: =3
-            PaddingRight: =0
-            PaddingTop: =0
-            RadiusBottomLeft: =0
-            RadiusBottomRight: =0
-            RadiusTopLeft: =0
-            RadiusTopRight: =0
-            Size: =14
-            Text: =cmp_MultilineText.Label
-            Width: =Parent.Width-If(IsBlank(cmp_MultilineText.Instructions),0,32)
-            X: =If(IsBlank(cmp_MultilineText.Instructions),0,32)
-            Y: =If(IsBlank(cmp_MultilineText.Instructions),0,10)
-      - info_MultilineText:
-          Control: InfoButton@0.0.33
-          Properties:
-            Content: =cmp_MultilineText.Instructions
-            FontColor: =cmp_MultilineText.Theme.Primary
-            FontSize: =14
-            FontWeight: =FontWeight.Normal
-            IconColor: =cmp_MultilineText.Theme.Primary
-            Visible: =Not(IsBlank(cmp_MultilineText.Instructions))
-
-<--->
-
-
-
-ComponentDefinitions:
-  cmp_Combobox:
-    DefinitionType: CanvasComponent
-    CustomProperties:
-      CustomValidationError:
-        PropertyKind: Input
-        DisplayName: Custom Validation Error
-        Description: A custom property
-        RaiseOnReset: true
-        DataType: Text
-        Default: =""
-      DefaultValue:
-        PropertyKind: Input
-        DisplayName: Default Value
-        Description: A custom property
-        RaiseOnReset: true
-        DataType: Record
-        Default: ={Value:""}
-      DisplayMode:
-        PropertyKind: Input
-        DisplayName: Display Mode
-        Description: A custom property
-        DataType: Text
-        Default: =""
-      IsValid:
-        PropertyKind: Output
-        DisplayName: Is Valid
-        Description: A custom property
-        DataType: Boolean
-      Items:
-        PropertyKind: Input
-        DisplayName: Items
-        Description: A custom property
-        DataType: Table
-        Default: =[{Value:""}]
-      Label:
-        PropertyKind: Input
-        DisplayName: Label
-        Description: Control Label
-        DataType: Text
-        Default: ="Label"
-      OnChange:
-        PropertyKind: Event
-        DisplayName: OnChange
-        Description: A custom property
-        ReturnType: None
-        Default: =false
-      Required:
-        PropertyKind: Input
-        DisplayName: Required
-        Description: A custom property
-        DataType: Boolean
-        Default: =false
-      Theme:
-        PropertyKind: Input
-        DisplayName: Theme
-        Description: Pass =nfColor. The default copies the template palette so the component previews on its own.
-        DataType: Record
-        Default: |-
-          ={
-              Primary: RGBA(0, 82, 136, 1),
-              PrimaryDark: RGBA(0, 62, 103, 1),
-              PrimarySoft: RGBA(214, 227, 236, 1),
-              OnPrimary: RGBA(255, 255, 255, 1),
-              HeaderFill: RGBA(0, 43, 71, 1),
-              HeaderInk: RGBA(255, 255, 255, 1),
-              HeaderInk2: RGBA(214, 227, 236, 1),
-              Page: RGBA(237, 238, 238, 1),
-              Surface: RGBA(255, 255, 255, 1),
-              Sunk: RGBA(248, 248, 249, 1),
-              Line: RGBA(222, 223, 224, 1),
-              Ink: RGBA(25, 25, 26, 1),
-              Ink2: RGBA(68, 69, 71, 1),
-              Ink3: RGBA(90, 91, 93, 1),
-              Focus: RGBA(0, 120, 174, 1),
-              Danger: RGBA(196, 18, 48, 1),
-              DangerSoft: RGBA(246, 217, 222, 1),
-              NeutralInk: RGBA(68, 69, 71, 1),
-              NeutralSoft: RGBA(229, 229, 229, 1),
-              InfoInk: RGBA(0, 62, 103, 1),
-              InfoSoft: RGBA(214, 233, 242, 1),
-              WarningInk: RGBA(92, 72, 9, 1),
-              WarningSoft: RGBA(250, 243, 209, 1),
-              SuccessInk: RGBA(49, 79, 26, 1),
-              SuccessSoft: RGBA(229, 238, 222, 1),
-              DangerInk: RGBA(102, 9, 25, 1),
-              Hover: RGBA(0, 82, 136, 0.08),
-              Pressed: RGBA(0, 82, 136, 0.16),
-              Scrim: RGBA(25, 25, 26, 0.5),
-              Transparent: RGBA(0, 0, 0, 0)
-          }
-      ValidationError:
-        PropertyKind: Output
-        DisplayName: Validation Error
-        Description: A custom property
-        DataType: Text
-      Value:
-        PropertyKind: Output
-        DisplayName: Value
-        Description: A custom property
-        DataType: Record
-    Properties:
-      Height: =76
-      IsValid: =IsBlank(cmp_Combobox.ValidationError)
-      ValidationError: |-
-        =If(
-            Self.Required && IsBlank(cmb_ComboboxValue.Selected.Value),
-            "Required",
-            cmp_Combobox.CustomValidationError
-        )
-      Value: =cmb_ComboboxValue.Selected
-      Width: =150
-    Children:
-      - lbl_ComboboxError:
-          Control: ModernText@1.0.0
-          Properties:
-            Color: =cmp_Combobox.Theme.Danger
-            Height: =22
-            PaddingBottom: =0
-            PaddingLeft: =3
-            PaddingRight: =0
-            PaddingTop: =0
-            RadiusBottomLeft: =0
-            RadiusBottomRight: =0
-            RadiusTopLeft: =0
-            RadiusTopRight: =0
-            Size: =12
-            Text: =cmp_Combobox.ValidationError
-            Width: =Parent.Width
-            Y: =cmb_ComboboxValue.Y+cmb_ComboboxValue.Height
-      - cmb_ComboboxValue:
-          Control: ModernCombobox@1.1.2
-          Properties:
-            Appearance: =Appearance.Outline
-            Color: =If(cmp_Combobox.Required && IsBlank(Self.Selected.Value),cmp_Combobox.Theme.Danger,cmp_Combobox.Theme.Ink)
-            DefaultSelectedItems: |-
-              =/*If(
-                  !IsBlank(cmp_Combobox.DefaultValue),
-                  [cmp_Combobox.DefaultValue],
-                  []
-              )*/cmp_Combobox.DefaultValue
-            DisplayMode: =cmp_Combobox.DisplayMode
-            InputTextPlaceholder: ="Select items"
-            IsSearchable: =false
-            ItemDisplayText: =ThisItem.Value
-            Items: =cmp_Combobox.Items
-            OnChange: =cmp_Combobox.OnChange()
-            SelectMultiple: =0
-            ValidationState: =If(cmp_Combobox.IsValid, ValidationState.None, ValidationState.Error)
-            Width: =Parent.Width
-            Y: =lbl_ComboboxLabel.Y+lbl_ComboboxLabel.Height
-      - lbl_ComboboxLabel:
-          Control: ModernText@1.0.0
-          Properties:
-            Color: =cmp_Combobox.Theme.Ink
-            FontWeight: =FontWeight.Semibold
-            Height: =22
-            PaddingBottom: =0
-            PaddingLeft: =3
-            PaddingRight: =0
-            PaddingTop: =0
-            RadiusBottomLeft: =0
-            RadiusBottomRight: =0
-            RadiusTopLeft: =0
-            RadiusTopRight: =0
-            Size: =14
-            Text: =cmp_Combobox.Label
-            Width: =Parent.Width
-
-<-->
-
-
-ComponentDefinitions:
-  cmp_Person:
-    DefinitionType: CanvasComponent
-    CustomProperties:
-      CustomValidationError:
-        PropertyKind: Input
-        DisplayName: Custom Validation Error
-        Description: A custom property
-        RaiseOnReset: true
-        DataType: Text
-        Default: =""
-      DefaultValue:
-        PropertyKind: Input
-        DisplayName: Default Value
-        Description: A custom property
-        RaiseOnReset: true
-        DataType: Record
-        Default: ={Value:""}
-      DisplayMode:
-        PropertyKind: Input
-        DisplayName: Display Mode
-        Description: A custom property
-        DataType: Text
-        Default: =""
-      IsValid:
-        PropertyKind: Output
-        DisplayName: Is Valid
-        Description: A custom property
-        DataType: Boolean
-      Items:
-        PropertyKind: Input
-        DisplayName: Items
-        Description: A custom property
-        DataType: Table
-        Default: =[{Value:""}]
-      Label:
-        PropertyKind: Input
-        DisplayName: Label
-        Description: Control Label
-        DataType: Text
-        Default: ="Label"
-      OnChange:
-        PropertyKind: Event
-        DisplayName: OnChange
-        Description: A custom property
-        ReturnType: None
-        Default: =false
-      Required:
-        PropertyKind: Input
-        DisplayName: Required
-        Description: A custom property
-        DataType: Boolean
-        Default: =false
-      Theme:
-        PropertyKind: Input
-        DisplayName: Theme
-        Description: Pass =nfColor. The default copies the template palette so the component previews on its own.
-        DataType: Record
-        Default: |-
-          ={
-              Primary: RGBA(0, 82, 136, 1),
-              PrimaryDark: RGBA(0, 62, 103, 1),
-              PrimarySoft: RGBA(214, 227, 236, 1),
-              OnPrimary: RGBA(255, 255, 255, 1),
-              HeaderFill: RGBA(0, 43, 71, 1),
-              HeaderInk: RGBA(255, 255, 255, 1),
-              HeaderInk2: RGBA(214, 227, 236, 1),
-              Page: RGBA(237, 238, 238, 1),
-              Surface: RGBA(255, 255, 255, 1),
-              Sunk: RGBA(248, 248, 249, 1),
-              Line: RGBA(222, 223, 224, 1),
-              Ink: RGBA(25, 25, 26, 1),
-              Ink2: RGBA(68, 69, 71, 1),
-              Ink3: RGBA(90, 91, 93, 1),
-              Focus: RGBA(0, 120, 174, 1),
-              Danger: RGBA(196, 18, 48, 1),
-              DangerSoft: RGBA(246, 217, 222, 1),
-              NeutralInk: RGBA(68, 69, 71, 1),
-              NeutralSoft: RGBA(229, 229, 229, 1),
-              InfoInk: RGBA(0, 62, 103, 1),
-              InfoSoft: RGBA(214, 233, 242, 1),
-              WarningInk: RGBA(92, 72, 9, 1),
-              WarningSoft: RGBA(250, 243, 209, 1),
-              SuccessInk: RGBA(49, 79, 26, 1),
-              SuccessSoft: RGBA(229, 238, 222, 1),
-              DangerInk: RGBA(102, 9, 25, 1),
-              Hover: RGBA(0, 82, 136, 0.08),
-              Pressed: RGBA(0, 82, 136, 0.16),
-              Scrim: RGBA(25, 25, 26, 0.5),
-              Transparent: RGBA(0, 0, 0, 0)
-          }
-      ValidationError:
-        PropertyKind: Output
-        DisplayName: Validation Error
-        Description: A custom property
-        DataType: Text
-      Value:
-        PropertyKind: Output
-        DisplayName: Value
-        Description: A custom property
-        DataType: Record
-    Properties:
-      Height: =76
-      IsValid: =IsBlank(cmp_Person.ValidationError)
-      ValidationError: |-
-        =If(
-            Self.Required && IsBlank(cmb_PersonValue.Selected.Value),
-            "Required",
-            cmp_Person.CustomValidationError
-        )
-      Value: =cmb_PersonValue.Selected
-      Width: =150
-    Children:
-      - lbl_PersonError:
-          Control: Text@0.0.51
-          Properties:
-            FontColor: =cmp_Person.Theme.Danger
-            Height: =22
-            PaddingLeft: =3
-            Text: =cmp_Person.ValidationError
-            VerticalAlign: =VerticalAlign.Middle
-            Width: =Parent.Width
-            Y: =cmb_PersonValue.Y+cmb_PersonValue.Height
-      - cmb_PersonValue:
-          Control: ModernCombobox@1.1.2
-          Properties:
-            Appearance: =Appearance.Outline
-            Color: =If(cmp_Person.Required && IsBlank(Self.Selected.Value),cmp_Person.Theme.Danger,cmp_Person.Theme.Ink)
-            DefaultSelectedItems: |-
-              =/*If(
-                  !IsBlank(cmp_Person.DefaultValue),
-                  [cmp_Person.DefaultValue],
-                  []
-              )*/cmp_Person.DefaultValue
-            DisplayMode: =cmp_Person.DisplayMode
-            InputTextPlaceholder: ="Select a person..."
-            IsSearchable: =false
-            ItemDisplayText: =ThisItem.Value
-            Items: =cmp_Person.Items
-            OnChange: =cmp_Person.OnChange()
-            SelectMultiple: =0
-            ValidationState: =If(cmp_Person.IsValid, ValidationState.None, ValidationState.Error)
-            Width: =Parent.Width
-            Y: =lbl_PersonLabel.Y+lbl_PersonLabel.Height
-      - lbl_PersonLabel:
-          Control: Text@0.0.51
-          Properties:
-            FontColor: =cmp_Person.Theme.Ink
-            Height: =22
-            PaddingLeft: =3
-            Text: =cmp_Person.Label
-            VerticalAlign: =VerticalAlign.Middle
-            Weight: ='TextCanvas.Weight'.Semibold
-            Width: =Parent.Width
-
-
-<-->
-
-ComponentDefinitions:
-  cmp_Number:
-    DefinitionType: CanvasComponent
-    CustomProperties:
-      CustomValidationError:
-        PropertyKind: Input
-        DisplayName: Custom Validation Error
-        Description: A custom property
-        RaiseOnReset: true
-        DataType: Text
-        Default: =""
-      DefaultValue:
-        PropertyKind: Input
-        DisplayName: Default Value
-        Description: A custom property
-        RaiseOnReset: true
-        DataType: Number
-        Default: =Blank()
-      DisplayMode:
-        PropertyKind: Input
-        DisplayName: Display Mode
-        Description: A custom property
-        DataType: Text
-        Default: ="Text"
-      IsValid:
-        PropertyKind: Output
-        DisplayName: Is Valid
-        Description: A custom property
-        DataType: Boolean
-      Label:
-        PropertyKind: Input
-        DisplayName: Label
-        Description: Control Label
-        DataType: Text
-        Default: ="Text"
-      MaxValue:
-        PropertyKind: Input
-        DisplayName: Max Value
-        Description: A custom property
-        DataType: Number
-        Default: =1
-      MinValue:
-        PropertyKind: Input
-        DisplayName: Min Value
-        Description: A custom property
-        DataType: Number
-        Default: =0
-      Required:
-        PropertyKind: Input
-        DisplayName: Required
-        Description: A custom property
-        DataType: Boolean
-        Default: =false
-      Theme:
-        PropertyKind: Input
-        DisplayName: Theme
-        Description: Pass =nfColor. The default copies the template palette so the component previews on its own.
-        DataType: Record
-        Default: |-
-          ={
-              Primary: RGBA(0, 82, 136, 1),
-              PrimaryDark: RGBA(0, 62, 103, 1),
-              PrimarySoft: RGBA(214, 227, 236, 1),
-              OnPrimary: RGBA(255, 255, 255, 1),
-              HeaderFill: RGBA(0, 43, 71, 1),
-              HeaderInk: RGBA(255, 255, 255, 1),
-              HeaderInk2: RGBA(214, 227, 236, 1),
-              Page: RGBA(237, 238, 238, 1),
-              Surface: RGBA(255, 255, 255, 1),
-              Sunk: RGBA(248, 248, 249, 1),
-              Line: RGBA(222, 223, 224, 1),
-              Ink: RGBA(25, 25, 26, 1),
-              Ink2: RGBA(68, 69, 71, 1),
-              Ink3: RGBA(90, 91, 93, 1),
-              Focus: RGBA(0, 120, 174, 1),
-              Danger: RGBA(196, 18, 48, 1),
-              DangerSoft: RGBA(246, 217, 222, 1),
-              NeutralInk: RGBA(68, 69, 71, 1),
-              NeutralSoft: RGBA(229, 229, 229, 1),
-              InfoInk: RGBA(0, 62, 103, 1),
-              InfoSoft: RGBA(214, 233, 242, 1),
-              WarningInk: RGBA(92, 72, 9, 1),
-              WarningSoft: RGBA(250, 243, 209, 1),
-              SuccessInk: RGBA(49, 79, 26, 1),
-              SuccessSoft: RGBA(229, 238, 222, 1),
-              DangerInk: RGBA(102, 9, 25, 1),
-              Hover: RGBA(0, 82, 136, 0.08),
-              Pressed: RGBA(0, 82, 136, 0.16),
-              Scrim: RGBA(25, 25, 26, 0.5),
-              Transparent: RGBA(0, 0, 0, 0)
-          }
-      ValidationError:
-        PropertyKind: Output
-        DisplayName: Validation Error
-        Description: A custom property
-        DataType: Text
-      Value:
-        PropertyKind: Output
-        DisplayName: Value
-        Description: A custom property
-        DataType: Number
-    Properties:
-      Height: =76
-      IsValid: =IsBlank(cmp_Number.ValidationError)
-      OnReset: =Reset(txt_NumberValue)
-      ValidationError: |-
-        =If(
-            Self.Required && IsBlank(txt_NumberValue.Text), "Required",
-            !IsNumeric(txt_NumberValue.Text) && !IsBlank(txt_NumberValue.Text), "Invalid number",
-            Value(txt_NumberValue.Text) < cmp_Number.MinValue, $"Must be greater than {cmp_Number.MinValue}.",
-            Value(txt_NumberValue.Text) > cmp_Number.MaxValue, $"Must be less than {cmp_Number.MaxValue}.",
-            cmp_Number.CustomValidationError
-        )
-      Value: =txt_NumberValue.Text/*IfError(Value(txt_NumberValue.Text),Blank())*/
-      Width: =150
-    Children:
-      - lbl_NumberError:
-          Control: ModernText@1.0.0
-          Properties:
-            Color: =cmp_Number.Theme.Danger
-            Height: =22
-            PaddingBottom: =0
-            PaddingLeft: =3
-            PaddingRight: =0
-            PaddingTop: =0
-            RadiusBottomLeft: =0
-            RadiusBottomRight: =0
-            RadiusTopLeft: =0
-            RadiusTopRight: =0
-            Size: =12
-            Text: =cmp_Number.ValidationError
-            Width: =Parent.Width
-            Y: =txt_NumberValue.Y+txt_NumberValue.Height
-      - txt_NumberValue:
-          Control: ModernTextInput@1.1.2
-          Properties:
-            Align: =Align.Right
-            Appearance: =Appearance.Outline
-            Color: |-
-              =If(
-                  cmp_Number.Required && IsBlank(Self.Text),
-                  cmp_Number.Theme.Danger,
-                  cmp_Number.Theme.Ink
-              )
-            Default: |-
-              =cmp_Number.DefaultValue/*If(
-                  IsBlank(cmp_Number.DefaultValue),
-                  "0",
-                  cmp_Number.DefaultValue
-              )*/
-            DisplayMode: =cmp_Number.DisplayMode
-            MaxLength: =-1
-            Placeholder: =""
-            ValidationState: =If(cmp_Number.IsValid, ValidationState.None, ValidationState.Error)
-            Width: =Parent.Width
-            Y: =lbl_NumberLabel.Y+lbl_NumberLabel.Height
-      - lbl_NumberLabel:
-          Control: ModernText@1.0.0
-          Properties:
-            Color: =cmp_Number.Theme.Ink
-            FontWeight: =FontWeight.Semibold
-            Height: =22
-            PaddingBottom: =0
-            PaddingLeft: =3
-            PaddingRight: =0
-            PaddingTop: =0
-            RadiusBottomLeft: =0
-            RadiusBottomRight: =0
-            RadiusTopLeft: =0
-            RadiusTopRight: =0
-            Size: =14
-            Text: =cmp_Number.Label
-            Width: =Parent.Width
-
-
-<-->
-
-ComponentDefinitions:
-  cmp_Date:
-    DefinitionType: CanvasComponent
-    CustomProperties:
-      CustomValidationError:
-        PropertyKind: Input
-        DisplayName: Custom Validation Error
-        Description: A custom property
-        DataType: Text
-        Default: =""
-      DefaultValue:
-        PropertyKind: Input
-        DisplayName: Default Value
-        Description: A custom property
-        RaiseOnReset: true
-        DataType: DateAndTime
-        Default: =DateTime(2000, 1, 1, 0, 0, 0)
-      DisplayMode:
-        PropertyKind: Input
-        DisplayName: Display Mode
-        Description: A custom property
-        DataType: Text
-        Default: ="Text"
-      IsValid:
-        PropertyKind: Output
-        DisplayName: Is Valid
-        Description: A custom property
-        DataType: Boolean
-      Label:
-        PropertyKind: Input
-        DisplayName: Label
-        Description: Control Label
-        DataType: Text
-        Default: ="Text"
-      Required:
-        PropertyKind: Input
-        DisplayName: Required
-        Description: A custom property
-        DataType: Boolean
-        Default: =false
-      StartDate:
-        PropertyKind: Input
-        DisplayName: Start Date
-        Description: A custom property
-        DataType: DateAndTime
-        Default: =DateTime(2000, 1, 1, 0, 0, 0)
-      Theme:
-        PropertyKind: Input
-        DisplayName: Theme
-        Description: Pass =nfColor. The default copies the template palette so the component previews on its own.
-        DataType: Record
-        Default: |-
-          ={
-              Primary: RGBA(0, 82, 136, 1),
-              PrimaryDark: RGBA(0, 62, 103, 1),
-              PrimarySoft: RGBA(214, 227, 236, 1),
-              OnPrimary: RGBA(255, 255, 255, 1),
-              HeaderFill: RGBA(0, 43, 71, 1),
-              HeaderInk: RGBA(255, 255, 255, 1),
-              HeaderInk2: RGBA(214, 227, 236, 1),
-              Page: RGBA(237, 238, 238, 1),
-              Surface: RGBA(255, 255, 255, 1),
-              Sunk: RGBA(248, 248, 249, 1),
-              Line: RGBA(222, 223, 224, 1),
-              Ink: RGBA(25, 25, 26, 1),
-              Ink2: RGBA(68, 69, 71, 1),
-              Ink3: RGBA(90, 91, 93, 1),
-              Focus: RGBA(0, 120, 174, 1),
-              Danger: RGBA(196, 18, 48, 1),
-              DangerSoft: RGBA(246, 217, 222, 1),
-              NeutralInk: RGBA(68, 69, 71, 1),
-              NeutralSoft: RGBA(229, 229, 229, 1),
-              InfoInk: RGBA(0, 62, 103, 1),
-              InfoSoft: RGBA(214, 233, 242, 1),
-              WarningInk: RGBA(92, 72, 9, 1),
-              WarningSoft: RGBA(250, 243, 209, 1),
-              SuccessInk: RGBA(49, 79, 26, 1),
-              SuccessSoft: RGBA(229, 238, 222, 1),
-              DangerInk: RGBA(102, 9, 25, 1),
-              Hover: RGBA(0, 82, 136, 0.08),
-              Pressed: RGBA(0, 82, 136, 0.16),
-              Scrim: RGBA(25, 25, 26, 0.5),
-              Transparent: RGBA(0, 0, 0, 0)
-          }
-      ValidationError:
-        PropertyKind: Output
-        DisplayName: Validation Error
-        Description: A custom property
-        DataType: Text
-      Value:
-        PropertyKind: Output
-        DisplayName: Value
-        Description: A custom property
-        DataType: DateAndTime
-    Properties:
-      Height: =76
-      IsValid: =IsBlank(cmp_Date.ValidationError)
-      OnReset: =Reset(dte_DateValue)
-      ValidationError: |-
-        =If(
-            Self.Required && IsBlank(dte_DateValue.SelectedDate),
-            "Required",
-            cmp_Date.CustomValidationError
-        )
-      Value: =dte_DateValue.SelectedDate
-      Width: =120
-    Children:
-      - lbl_DateError:
-          Control: ModernText@1.0.0
-          Properties:
-            Color: =cmp_Date.Theme.Danger
-            Height: =22
-            PaddingBottom: =0
-            PaddingLeft: =3
-            PaddingRight: =0
-            PaddingTop: =0
-            RadiusBottomLeft: =0
-            RadiusBottomRight: =0
-            RadiusTopLeft: =0
-            RadiusTopRight: =0
-            Size: =12
-            Text: =cmp_Date.ValidationError
-            Width: =Parent.Width
-            Y: =dte_DateValue.Y+dte_DateValue.Height
-      - dte_DateValue:
-          Control: ModernDatePicker@1.0.2
-          Properties:
-            Appearance: =Appearance.Outline
-            BorderStyle: =""
-            Color: |-
-              =If(
-                  cmp_Date.Required && (IsBlank(Self.SelectedDate) || cmp_Date.CustomValidationError = "Must be after start."),
-                  cmp_Date.Theme.Danger,
-                  cmp_Date.Theme.Ink
-              )
-            DefaultDate: =cmp_Date.DefaultValue
-            DisplayMode: =cmp_Date.DisplayMode
-            Font: =""
-            FontWeight: =FontWeight.Normal
-            Format: =DatePickerFormat.Short
-            IsEditable: =true
-            Placeholder: ="Select a date..."
-            StartDate: =cmp_Date.StartDate
-            ValidationState: =If(cmp_Date.IsValid, ValidationState.None, ValidationState.Error)
-            Width: =Parent.Width
-            Y: =lbl_DateLabel.Y+lbl_DateLabel.Height
-      - lbl_DateLabel:
-          Control: ModernText@1.0.0
-          Properties:
-            Color: =cmp_Date.Theme.Ink
-            FontWeight: =FontWeight.Semibold
-            Height: =22
-            PaddingBottom: =0
-            PaddingLeft: =3
-            PaddingRight: =0
-            PaddingTop: =0
-            RadiusBottomLeft: =0
-            RadiusBottomRight: =0
-            RadiusTopLeft: =0
-            RadiusTopRight: =0
-            Size: =14
-            Text: =cmp_Date.Label
-            Width: =Parent.Width
-
-<-->
-
-ComponentDefinitions:
-  cmpHeader:
-    DefinitionType: CanvasComponent
-    CustomProperties:
-      ActiveKey:
-        PropertyKind: Input
-        DisplayName: ActiveKey
-        Description: Key of the main tab to show as active.
-        DataType: Text
-        Default: ="home"
-      IsStaff:
-        PropertyKind: Input
-        DisplayName: IsStaff
-        Description: Pass =gblIsStaff. StaffOnly tabs are hidden when false.
-        DataType: Boolean
-        Default: =false
-      Items:
-        PropertyKind: Input
-        DisplayName: Items
-        Description: Main tabs. Pass =nfNavMain. Same columns as cmpBottomNav.
-        DataType: Table
-        Default: |-
-          =Table({ Key: "home", Label: "Home", Count: 0, StaffOnly: false }, { Key: "list", Label: "List", Count: 3, StaffOnly: false })
-      Layout:
-        PropertyKind: Input
-        DisplayName: Layout
-        Description: Pass =nfLayout. Phone, Tablet or Desktop.
-        DataType: Text
-        Default: ="Desktop"
-      Links:
-        PropertyKind: Input
-        DisplayName: Links
-        Description: Links on the right, in order. Pass =nfHeaderLinks. Columns Label and Url. A row with a blank Url is hidden. Up to four show, and only the first on a phone.
-        DataType: Table
-        Default: |-
-          =Table({ Label: "Help", Url: "https://example.gov/help" })
-      Logo:
-        PropertyKind: Input
-        DisplayName: Logo
-        Description: Logo, drawn 32 high. Pass =nfLogo, an image added to the app under Media (SVG or PNG). Hidden when blank.
-        DataType: Image
-        Default: =Blank()
-      LogoWidth:
-        PropertyKind: Input
-        DisplayName: LogoWidth
-        Description: Logo width. Pass =nfApp.LogoWidth. The image is fitted inside it, never stretched.
-        DataType: Number
-        Default: =32
-      OnLinkSelect:
-        PropertyKind: Event
-        DisplayName: OnLinkSelect
-        Description: A link was selected. The screen opens it, for example =Launch(Self.SelectedUrl).
-        ReturnType: None
-        Default: =false
-      OnNavSelect:
-        PropertyKind: Event
-        DisplayName: OnNavSelect
-        Description: A tab was selected. The screen navigates, for example =nfGo(Self.SelectedKey).
-        ReturnType: None
-        Default: =false
-      SelectedKey:
-        PropertyKind: Output
-        DisplayName: SelectedKey
-        Description: Key of the tab the user selected. Read it in OnNavSelect.
-        DataType: Text
-      SelectedUrl:
-        PropertyKind: Output
-        DisplayName: SelectedUrl
-        Description: Url of the link the user selected. Read it in OnLinkSelect.
-        DataType: Text
-      Theme:
-        PropertyKind: Input
-        DisplayName: Theme
-        Description: Pass =nfColor. The default copies the template palette so the component previews on its own.
-        DataType: Record
-        Default: |-
-          ={
-              Primary: RGBA(0, 82, 136, 1),
-              PrimaryDark: RGBA(0, 62, 103, 1),
-              PrimarySoft: RGBA(214, 227, 236, 1),
-              OnPrimary: RGBA(255, 255, 255, 1),
-              HeaderFill: RGBA(0, 43, 71, 1),
-              HeaderInk: RGBA(255, 255, 255, 1),
-              HeaderInk2: RGBA(214, 227, 236, 1),
-              Page: RGBA(237, 238, 238, 1),
-              Surface: RGBA(255, 255, 255, 1),
-              Sunk: RGBA(248, 248, 249, 1),
-              Line: RGBA(222, 223, 224, 1),
-              Ink: RGBA(25, 25, 26, 1),
-              Ink2: RGBA(68, 69, 71, 1),
-              Ink3: RGBA(90, 91, 93, 1),
-              Focus: RGBA(0, 120, 174, 1),
-              Danger: RGBA(196, 18, 48, 1),
-              DangerSoft: RGBA(246, 217, 222, 1),
-              NeutralInk: RGBA(68, 69, 71, 1),
-              NeutralSoft: RGBA(229, 229, 229, 1),
-              InfoInk: RGBA(0, 62, 103, 1),
-              InfoSoft: RGBA(214, 233, 242, 1),
-              WarningInk: RGBA(92, 72, 9, 1),
-              WarningSoft: RGBA(250, 243, 209, 1),
-              SuccessInk: RGBA(49, 79, 26, 1),
-              SuccessSoft: RGBA(229, 238, 222, 1),
-              DangerInk: RGBA(102, 9, 25, 1),
-              Hover: RGBA(0, 82, 136, 0.08),
-              Pressed: RGBA(0, 82, 136, 0.16),
-              Scrim: RGBA(25, 25, 26, 0.5),
-              Transparent: RGBA(0, 0, 0, 0)
-          }
-      Title:
-        PropertyKind: Input
-        DisplayName: Title
-        Description: The app name.
-        DataType: Text
-        Default: ="App name"
-      UserImage:
-        PropertyKind: Input
-        DisplayName: UserImage
-        Description: Signed in user's photo. Pass =User().Image. Initials show when it is blank.
-        DataType: Image
-        Default: =Blank()
-      WelcomeName:
-        PropertyKind: Input
-        DisplayName: WelcomeName
-        Description: Signed in user's full name. Shown as initials when there is no photo.
-        DataType: Text
-        Default: =""
-    Properties:
-      Fill: =cmpHeader.Theme.HeaderFill
-      Height: =56
-      SelectedKey: =_hdrSelectedKey
-      SelectedUrl: =_hdrSelectedUrl
-      Width: =1366
-    Children:
-      - conHdrBar:
+      - con_Shell_PRList:
           Control: GroupContainer@1.5.0
           Variant: AutoLayout
           Properties:
             DropShadow: =DropShadow.None
-            Fill: =cmpHeader.Theme.HeaderFill
+            Fill: =nfColor.Page
             Height: =Parent.Height
-            LayoutAlignItems: =LayoutAlignItems.Center
-            LayoutDirection: =LayoutDirection.Horizontal
-            LayoutGap: =12
-            PaddingLeft: =If(cmpHeader.Layout = "Phone", 16, 24)
-            PaddingRight: =If(cmpHeader.Layout = "Phone", 16, 24)
-            Width: =Parent.Width
-          Children:
-            - imgHdrLogo:
-                Control: Image@2.2.3
-                Properties:
-                  Height: =32
-                  Image: =cmpHeader.Logo
-                  Visible: =!IsBlank(cmpHeader.Logo)
-                  Width: =cmpHeader.LogoWidth
-            - lblHdrTitle:
-                Control: ModernText@1.0.0
-                Properties:
-                  AutoHeight: =true
-                  Color: =cmpHeader.Theme.HeaderInk
-                  FillPortions: =If(cmpHeader.Layout = "Phone", 1, 0)
-                  FontWeight: =FontWeight.Semibold
-                  LayoutMinWidth: =0
-                  PaddingBottom: =0
-                  PaddingLeft: =0
-                  PaddingRight: =0
-                  PaddingTop: =0
-                  Size: =If(cmpHeader.Layout = "Phone", 14, 16)
-                  Text: =cmpHeader.Title
-                  Width: =If(cmpHeader.Layout = "Phone", 0, 200)
-                  Wrap: =false
-            - conHdrTabs:
-                Control: GroupContainer@1.5.0
-                Variant: AutoLayout
-                Properties:
-                  DropShadow: =DropShadow.None
-                  Fill: =cmpHeader.Theme.Transparent
-                  LayoutDirection: =LayoutDirection.Horizontal
-                  LayoutGap: =4
-                  LayoutMinHeight: =0
-                  LayoutMinWidth: =0
-                  Visible: =!(cmpHeader.Layout = "Phone")
-                Children:
-                  - conHdrTab1:
-                      Control: GroupContainer@1.5.0
-                      Variant: AutoLayout
-                      Properties:
-                        DropShadow: =DropShadow.None
-                        Fill: =cmpHeader.Theme.Transparent
-                        FillPortions: =0
-                        LayoutDirection: =LayoutDirection.Vertical
-                        LayoutMinHeight: =0
-                        LayoutMinWidth: =0
-                        Visible: =CountRows(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff)) >= 1
-                        Width: =Len(Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 1)).Label & If(Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 1)).Count > 0, " (" & Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 1)).Count & ")", "")) * 8 + 32
-                      Children:
-                        - btnHdrTab1:
-                            Control: ModernButton@1.0.0
-                            Properties:
-                              AccessibleLabel: =Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 1)).Label & If(Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 1)).Count > 0, " (" & Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 1)).Count & ")", "") & If(Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 1)).Key = cmpHeader.ActiveKey, ", current page", "")
-                              AlignInContainer: =AlignInContainer.Stretch
-                              Appearance: =ButtonAppearance.Transparent
-                              Color: =If(Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 1)).Key = cmpHeader.ActiveKey, cmpHeader.Theme.HeaderInk, cmpHeader.Theme.HeaderInk2)
-                              FillPortions: =1
-                              FontWeight: =If(Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 1)).Key = cmpHeader.ActiveKey, FontWeight.Semibold, FontWeight.Normal)
-                              LayoutMinHeight: =0
-                              LayoutMinWidth: =0
-                              OnSelect: |-
-                                =Set(_hdrSelectedKey, Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 1)).Key);
-                                cmpHeader.OnNavSelect()
-                              Size: =14
-                              Text: =Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 1)).Label & If(Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 1)).Count > 0, " (" & Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 1)).Count & ")", "")
-                        - conHdrMark1:
-                            Control: GroupContainer@1.5.0
-                            Variant: ManualLayout
-                            Properties:
-                              DropShadow: =DropShadow.None
-                              Fill: =If(Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 1)).Key = cmpHeader.ActiveKey, cmpHeader.Theme.HeaderInk, cmpHeader.Theme.Transparent)
-                              FillPortions: =0
-                              Height: =3
-                              LayoutMinHeight: =0
-                              LayoutMinWidth: =0
-                  - conHdrTab2:
-                      Control: GroupContainer@1.5.0
-                      Variant: AutoLayout
-                      Properties:
-                        DropShadow: =DropShadow.None
-                        Fill: =cmpHeader.Theme.Transparent
-                        FillPortions: =0
-                        LayoutDirection: =LayoutDirection.Vertical
-                        LayoutMinHeight: =0
-                        LayoutMinWidth: =0
-                        Visible: =CountRows(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff)) >= 2
-                        Width: =Len(Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 2)).Label & If(Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 2)).Count > 0, " (" & Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 2)).Count & ")", "")) * 8 + 32
-                      Children:
-                        - btnHdrTab2:
-                            Control: ModernButton@1.0.0
-                            Properties:
-                              AccessibleLabel: =Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 2)).Label & If(Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 2)).Count > 0, " (" & Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 2)).Count & ")", "") & If(Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 2)).Key = cmpHeader.ActiveKey, ", current page", "")
-                              AlignInContainer: =AlignInContainer.Stretch
-                              Appearance: =ButtonAppearance.Transparent
-                              Color: =If(Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 2)).Key = cmpHeader.ActiveKey, cmpHeader.Theme.HeaderInk, cmpHeader.Theme.HeaderInk2)
-                              FillPortions: =1
-                              FontWeight: =If(Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 2)).Key = cmpHeader.ActiveKey, FontWeight.Semibold, FontWeight.Normal)
-                              LayoutMinHeight: =0
-                              LayoutMinWidth: =0
-                              OnSelect: |-
-                                =Set(_hdrSelectedKey, Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 2)).Key);
-                                cmpHeader.OnNavSelect()
-                              Size: =14
-                              Text: =Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 2)).Label & If(Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 2)).Count > 0, " (" & Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 2)).Count & ")", "")
-                        - conHdrMark2:
-                            Control: GroupContainer@1.5.0
-                            Variant: ManualLayout
-                            Properties:
-                              DropShadow: =DropShadow.None
-                              Fill: =If(Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 2)).Key = cmpHeader.ActiveKey, cmpHeader.Theme.HeaderInk, cmpHeader.Theme.Transparent)
-                              FillPortions: =0
-                              Height: =3
-                              LayoutMinHeight: =0
-                              LayoutMinWidth: =0
-                  - conHdrTab3:
-                      Control: GroupContainer@1.5.0
-                      Variant: AutoLayout
-                      Properties:
-                        DropShadow: =DropShadow.None
-                        Fill: =cmpHeader.Theme.Transparent
-                        FillPortions: =0
-                        LayoutDirection: =LayoutDirection.Vertical
-                        LayoutMinHeight: =0
-                        LayoutMinWidth: =0
-                        Visible: =CountRows(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff)) >= 3
-                        Width: =Len(Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 3)).Label & If(Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 3)).Count > 0, " (" & Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 3)).Count & ")", "")) * 8 + 32
-                      Children:
-                        - btnHdrTab3:
-                            Control: ModernButton@1.0.0
-                            Properties:
-                              AccessibleLabel: =Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 3)).Label & If(Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 3)).Count > 0, " (" & Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 3)).Count & ")", "") & If(Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 3)).Key = cmpHeader.ActiveKey, ", current page", "")
-                              AlignInContainer: =AlignInContainer.Stretch
-                              Appearance: =ButtonAppearance.Transparent
-                              Color: =If(Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 3)).Key = cmpHeader.ActiveKey, cmpHeader.Theme.HeaderInk, cmpHeader.Theme.HeaderInk2)
-                              FillPortions: =1
-                              FontWeight: =If(Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 3)).Key = cmpHeader.ActiveKey, FontWeight.Semibold, FontWeight.Normal)
-                              LayoutMinHeight: =0
-                              LayoutMinWidth: =0
-                              OnSelect: |-
-                                =Set(_hdrSelectedKey, Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 3)).Key);
-                                cmpHeader.OnNavSelect()
-                              Size: =14
-                              Text: =Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 3)).Label & If(Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 3)).Count > 0, " (" & Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 3)).Count & ")", "")
-                        - conHdrMark3:
-                            Control: GroupContainer@1.5.0
-                            Variant: ManualLayout
-                            Properties:
-                              DropShadow: =DropShadow.None
-                              Fill: =If(Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 3)).Key = cmpHeader.ActiveKey, cmpHeader.Theme.HeaderInk, cmpHeader.Theme.Transparent)
-                              FillPortions: =0
-                              Height: =3
-                              LayoutMinHeight: =0
-                              LayoutMinWidth: =0
-                  - conHdrTab4:
-                      Control: GroupContainer@1.5.0
-                      Variant: AutoLayout
-                      Properties:
-                        DropShadow: =DropShadow.None
-                        Fill: =cmpHeader.Theme.Transparent
-                        FillPortions: =0
-                        LayoutDirection: =LayoutDirection.Vertical
-                        LayoutMinHeight: =0
-                        LayoutMinWidth: =0
-                        Visible: =CountRows(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff)) >= 4
-                        Width: =Len(Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 4)).Label & If(Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 4)).Count > 0, " (" & Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 4)).Count & ")", "")) * 8 + 32
-                      Children:
-                        - btnHdrTab4:
-                            Control: ModernButton@1.0.0
-                            Properties:
-                              AccessibleLabel: =Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 4)).Label & If(Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 4)).Count > 0, " (" & Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 4)).Count & ")", "") & If(Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 4)).Key = cmpHeader.ActiveKey, ", current page", "")
-                              AlignInContainer: =AlignInContainer.Stretch
-                              Appearance: =ButtonAppearance.Transparent
-                              Color: =If(Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 4)).Key = cmpHeader.ActiveKey, cmpHeader.Theme.HeaderInk, cmpHeader.Theme.HeaderInk2)
-                              FillPortions: =1
-                              FontWeight: =If(Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 4)).Key = cmpHeader.ActiveKey, FontWeight.Semibold, FontWeight.Normal)
-                              LayoutMinHeight: =0
-                              LayoutMinWidth: =0
-                              OnSelect: |-
-                                =Set(_hdrSelectedKey, Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 4)).Key);
-                                cmpHeader.OnNavSelect()
-                              Size: =14
-                              Text: =Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 4)).Label & If(Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 4)).Count > 0, " (" & Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 4)).Count & ")", "")
-                        - conHdrMark4:
-                            Control: GroupContainer@1.5.0
-                            Variant: ManualLayout
-                            Properties:
-                              DropShadow: =DropShadow.None
-                              Fill: =If(Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 4)).Key = cmpHeader.ActiveKey, cmpHeader.Theme.HeaderInk, cmpHeader.Theme.Transparent)
-                              FillPortions: =0
-                              Height: =3
-                              LayoutMinHeight: =0
-                              LayoutMinWidth: =0
-                  - conHdrTab5:
-                      Control: GroupContainer@1.5.0
-                      Variant: AutoLayout
-                      Properties:
-                        DropShadow: =DropShadow.None
-                        Fill: =cmpHeader.Theme.Transparent
-                        FillPortions: =0
-                        LayoutDirection: =LayoutDirection.Vertical
-                        LayoutMinHeight: =0
-                        LayoutMinWidth: =0
-                        Visible: =CountRows(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff)) >= 5
-                        Width: =Len(Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 5)).Label & If(Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 5)).Count > 0, " (" & Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 5)).Count & ")", "")) * 8 + 32
-                      Children:
-                        - btnHdrTab5:
-                            Control: ModernButton@1.0.0
-                            Properties:
-                              AccessibleLabel: =Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 5)).Label & If(Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 5)).Count > 0, " (" & Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 5)).Count & ")", "") & If(Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 5)).Key = cmpHeader.ActiveKey, ", current page", "")
-                              AlignInContainer: =AlignInContainer.Stretch
-                              Appearance: =ButtonAppearance.Transparent
-                              Color: =If(Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 5)).Key = cmpHeader.ActiveKey, cmpHeader.Theme.HeaderInk, cmpHeader.Theme.HeaderInk2)
-                              FillPortions: =1
-                              FontWeight: =If(Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 5)).Key = cmpHeader.ActiveKey, FontWeight.Semibold, FontWeight.Normal)
-                              LayoutMinHeight: =0
-                              LayoutMinWidth: =0
-                              OnSelect: |-
-                                =Set(_hdrSelectedKey, Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 5)).Key);
-                                cmpHeader.OnNavSelect()
-                              Size: =14
-                              Text: =Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 5)).Label & If(Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 5)).Count > 0, " (" & Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 5)).Count & ")", "")
-                        - conHdrMark5:
-                            Control: GroupContainer@1.5.0
-                            Variant: ManualLayout
-                            Properties:
-                              DropShadow: =DropShadow.None
-                              Fill: =If(Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 5)).Key = cmpHeader.ActiveKey, cmpHeader.Theme.HeaderInk, cmpHeader.Theme.Transparent)
-                              FillPortions: =0
-                              Height: =3
-                              LayoutMinHeight: =0
-                              LayoutMinWidth: =0
-                  - conHdrTab6:
-                      Control: GroupContainer@1.5.0
-                      Variant: AutoLayout
-                      Properties:
-                        DropShadow: =DropShadow.None
-                        Fill: =cmpHeader.Theme.Transparent
-                        FillPortions: =0
-                        LayoutDirection: =LayoutDirection.Vertical
-                        LayoutMinHeight: =0
-                        LayoutMinWidth: =0
-                        Visible: =CountRows(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff)) >= 6
-                        Width: =Len(Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 6)).Label & If(Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 6)).Count > 0, " (" & Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 6)).Count & ")", "")) * 8 + 32
-                      Children:
-                        - btnHdrTab6:
-                            Control: ModernButton@1.0.0
-                            Properties:
-                              AccessibleLabel: =Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 6)).Label & If(Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 6)).Count > 0, " (" & Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 6)).Count & ")", "") & If(Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 6)).Key = cmpHeader.ActiveKey, ", current page", "")
-                              AlignInContainer: =AlignInContainer.Stretch
-                              Appearance: =ButtonAppearance.Transparent
-                              Color: =If(Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 6)).Key = cmpHeader.ActiveKey, cmpHeader.Theme.HeaderInk, cmpHeader.Theme.HeaderInk2)
-                              FillPortions: =1
-                              FontWeight: =If(Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 6)).Key = cmpHeader.ActiveKey, FontWeight.Semibold, FontWeight.Normal)
-                              LayoutMinHeight: =0
-                              LayoutMinWidth: =0
-                              OnSelect: |-
-                                =Set(_hdrSelectedKey, Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 6)).Key);
-                                cmpHeader.OnNavSelect()
-                              Size: =14
-                              Text: =Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 6)).Label & If(Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 6)).Count > 0, " (" & Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 6)).Count & ")", "")
-                        - conHdrMark6:
-                            Control: GroupContainer@1.5.0
-                            Variant: ManualLayout
-                            Properties:
-                              DropShadow: =DropShadow.None
-                              Fill: =If(Last(FirstN(Filter(cmpHeader.Items, !StaffOnly || cmpHeader.IsStaff), 6)).Key = cmpHeader.ActiveKey, cmpHeader.Theme.HeaderInk, cmpHeader.Theme.Transparent)
-                              FillPortions: =0
-                              Height: =3
-                              LayoutMinHeight: =0
-                              LayoutMinWidth: =0
-            - btnHdrLink1:
-                Control: ModernButton@1.0.0
-                Properties:
-                  AccessibleLabel: =Last(FirstN(Filter(cmpHeader.Links, !IsBlank(Url)), 1)).Label & ", opens in a new tab"
-                  Appearance: =ButtonAppearance.Transparent
-                  Color: =cmpHeader.Theme.HeaderInk
-                  OnSelect: |-
-                    =Set(_hdrSelectedUrl, Last(FirstN(Filter(cmpHeader.Links, !IsBlank(Url)), 1)).Url);
-                    cmpHeader.OnLinkSelect()
-                  Size: =14
-                  Text: =Last(FirstN(Filter(cmpHeader.Links, !IsBlank(Url)), 1)).Label
-                  Visible: =CountRows(Filter(cmpHeader.Links, !IsBlank(Url))) >= 1
-                  Width: =Len(Last(FirstN(Filter(cmpHeader.Links, !IsBlank(Url)), 1)).Label) * 8 + 32
-            - btnHdrLink2:
-                Control: ModernButton@1.0.0
-                Properties:
-                  AccessibleLabel: =Last(FirstN(Filter(cmpHeader.Links, !IsBlank(Url)), 2)).Label & ", opens in a new tab"
-                  Appearance: =ButtonAppearance.Transparent
-                  Color: =cmpHeader.Theme.HeaderInk
-                  OnSelect: |-
-                    =Set(_hdrSelectedUrl, Last(FirstN(Filter(cmpHeader.Links, !IsBlank(Url)), 2)).Url);
-                    cmpHeader.OnLinkSelect()
-                  Size: =14
-                  Text: =Last(FirstN(Filter(cmpHeader.Links, !IsBlank(Url)), 2)).Label
-                  Visible: =CountRows(Filter(cmpHeader.Links, !IsBlank(Url))) >= 2 && !(cmpHeader.Layout = "Phone")
-                  Width: =Len(Last(FirstN(Filter(cmpHeader.Links, !IsBlank(Url)), 2)).Label) * 8 + 32
-            - btnHdrLink3:
-                Control: ModernButton@1.0.0
-                Properties:
-                  AccessibleLabel: =Last(FirstN(Filter(cmpHeader.Links, !IsBlank(Url)), 3)).Label & ", opens in a new tab"
-                  Appearance: =ButtonAppearance.Transparent
-                  Color: =cmpHeader.Theme.HeaderInk
-                  OnSelect: |-
-                    =Set(_hdrSelectedUrl, Last(FirstN(Filter(cmpHeader.Links, !IsBlank(Url)), 3)).Url);
-                    cmpHeader.OnLinkSelect()
-                  Size: =14
-                  Text: =Last(FirstN(Filter(cmpHeader.Links, !IsBlank(Url)), 3)).Label
-                  Visible: =CountRows(Filter(cmpHeader.Links, !IsBlank(Url))) >= 3 && !(cmpHeader.Layout = "Phone")
-                  Width: =Len(Last(FirstN(Filter(cmpHeader.Links, !IsBlank(Url)), 3)).Label) * 8 + 32
-            - btnHdrLink4:
-                Control: ModernButton@1.0.0
-                Properties:
-                  AccessibleLabel: =Last(FirstN(Filter(cmpHeader.Links, !IsBlank(Url)), 4)).Label & ", opens in a new tab"
-                  Appearance: =ButtonAppearance.Transparent
-                  Color: =cmpHeader.Theme.HeaderInk
-                  OnSelect: |-
-                    =Set(_hdrSelectedUrl, Last(FirstN(Filter(cmpHeader.Links, !IsBlank(Url)), 4)).Url);
-                    cmpHeader.OnLinkSelect()
-                  Size: =14
-                  Text: =Last(FirstN(Filter(cmpHeader.Links, !IsBlank(Url)), 4)).Label
-                  Visible: =CountRows(Filter(cmpHeader.Links, !IsBlank(Url))) >= 4 && !(cmpHeader.Layout = "Phone")
-                  Width: =Len(Last(FirstN(Filter(cmpHeader.Links, !IsBlank(Url)), 4)).Label) * 8 + 32
-            - avaHdrUser:
-                Control: ModernAvatar@1.1.0
-                Properties:
-                  AccessibleLabel: ="Signed in as " & cmpHeader.WelcomeName
-                  Height: =32
-                  Image: =cmpHeader.UserImage
-                  LayoutMinHeight: =0
-                  LayoutMinWidth: =0
-                  Name: =cmpHeader.WelcomeName
-                  Tooltip: =cmpHeader.WelcomeName
-                  Visible: =!IsBlank(cmpHeader.WelcomeName)
-                  Width: =32
-
-<-->
-
-ComponentDefinitions:
-  cmpStatePanel:
-    DefinitionType: CanvasComponent
-    CustomProperties:
-      IsPhone:
-        PropertyKind: Input
-        DisplayName: IsPhone
-        Description: Pass =nfIsPhone. Stacks the buttons at full width.
-        DataType: Boolean
-        Default: =false
-      Message:
-        PropertyKind: Input
-        DisplayName: Message
-        Description: One or two sentences. Blank uses the default for the variant.
-        DataType: Text
-        Default: =""
-      OnPrimary:
-        PropertyKind: Event
-        DisplayName: OnPrimary
-        Description: The main button was selected. The screen does the work.
-        ReturnType: None
-        Default: =false
-      OnSecondary:
-        PropertyKind: Event
-        DisplayName: OnSecondary
-        Description: The second button was selected. The screen does the work.
-        ReturnType: None
-        Default: =false
-      PrimaryText:
-        PropertyKind: Input
-        DisplayName: PrimaryText
-        Description: Main button text, for example Try again. Blank hides the button.
-        DataType: Text
-        Default: =""
-      SecondaryText:
-        PropertyKind: Input
-        DisplayName: SecondaryText
-        Description: Second button text. Blank hides the button.
-        DataType: Text
-        Default: =""
-      Theme:
-        PropertyKind: Input
-        DisplayName: Theme
-        Description: Pass =nfColor. The default copies the template palette so the component previews on its own.
-        DataType: Record
-        Default: |-
-          ={
-              Primary: RGBA(0, 82, 136, 1),
-              PrimaryDark: RGBA(0, 62, 103, 1),
-              PrimarySoft: RGBA(214, 227, 236, 1),
-              OnPrimary: RGBA(255, 255, 255, 1),
-              HeaderFill: RGBA(0, 43, 71, 1),
-              HeaderInk: RGBA(255, 255, 255, 1),
-              HeaderInk2: RGBA(214, 227, 236, 1),
-              Page: RGBA(237, 238, 238, 1),
-              Surface: RGBA(255, 255, 255, 1),
-              Sunk: RGBA(248, 248, 249, 1),
-              Line: RGBA(222, 223, 224, 1),
-              Ink: RGBA(25, 25, 26, 1),
-              Ink2: RGBA(68, 69, 71, 1),
-              Ink3: RGBA(90, 91, 93, 1),
-              Focus: RGBA(0, 120, 174, 1),
-              Danger: RGBA(196, 18, 48, 1),
-              DangerSoft: RGBA(246, 217, 222, 1),
-              NeutralInk: RGBA(68, 69, 71, 1),
-              NeutralSoft: RGBA(229, 229, 229, 1),
-              InfoInk: RGBA(0, 62, 103, 1),
-              InfoSoft: RGBA(214, 233, 242, 1),
-              WarningInk: RGBA(92, 72, 9, 1),
-              WarningSoft: RGBA(250, 243, 209, 1),
-              SuccessInk: RGBA(49, 79, 26, 1),
-              SuccessSoft: RGBA(229, 238, 222, 1),
-              DangerInk: RGBA(102, 9, 25, 1),
-              Hover: RGBA(0, 82, 136, 0.08),
-              Pressed: RGBA(0, 82, 136, 0.16),
-              Scrim: RGBA(25, 25, 26, 0.5),
-              Transparent: RGBA(0, 0, 0, 0)
-          }
-      Title:
-        PropertyKind: Input
-        DisplayName: Title
-        Description: Heading. Blank uses the default for the variant.
-        DataType: Text
-        Default: =""
-      Variant:
-        PropertyKind: Input
-        DisplayName: Variant
-        Description: NoAccess, Empty, Error or NotFound. Picks the default title and message.
-        DataType: Text
-        Default: ="Empty"
-    Properties:
-      Fill: =cmpStatePanel.Theme.Surface
-      Height: =200
-    Children:
-      - conSpPanel:
-          Control: GroupContainer@1.5.0
-          Variant: AutoLayout
-          Properties:
-            DropShadow: =DropShadow.None
-            Fill: =cmpStatePanel.Theme.Surface
-            Height: =Parent.Height
-            LayoutAlignItems: =LayoutAlignItems.Center
             LayoutDirection: =LayoutDirection.Vertical
-            LayoutGap: =8
-            LayoutJustifyContent: =LayoutJustifyContent.Center
-            PaddingBottom: =24
-            PaddingLeft: =24
-            PaddingRight: =24
-            PaddingTop: =24
             Width: =Parent.Width
           Children:
-            - lblSpTitle:
-                Control: ModernText@1.0.0
+            - cmp_Header_PRList:
+                Control: CanvasComponent
+                ComponentName: cmpHeader
                 Properties:
-                  Align: =Align.Center
+                  ActiveKey: =""
                   AlignInContainer: =AlignInContainer.Stretch
-                  AutoHeight: =true
-                  Color: =cmpStatePanel.Theme.Ink
-                  FontWeight: =FontWeight.Semibold
-                  PaddingBottom: =0
-                  PaddingLeft: =0
-                  PaddingRight: =0
-                  PaddingTop: =0
-                  Size: =18
-                  Text: =Coalesce(cmpStatePanel.Title, Switch(cmpStatePanel.Variant, "NoAccess", "You do not have access", "Error", "Something went wrong", "NotFound", "Not found", "Nothing here yet"))
-            - lblSpMessage:
-                Control: ModernText@1.0.0
-                Properties:
-                  Align: =Align.Center
-                  AlignInContainer: =AlignInContainer.Stretch
-                  AutoHeight: =true
-                  Color: =cmpStatePanel.Theme.Ink2
-                  PaddingBottom: =0
-                  PaddingLeft: =0
-                  PaddingRight: =0
-                  PaddingTop: =0
-                  Size: =14
-                  Text: =Coalesce(cmpStatePanel.Message, Switch(cmpStatePanel.Variant, "NoAccess", "If you need access, contact the app owner.", "Error", "Try again. If it keeps happening, contact the app owner.", "NotFound", "It may have been removed, or the link is out of date.", "When there is something to show, it appears here."))
-            - conSpButtons:
+                  Height: =nfSize.Header
+                  IsStaff: =false
+                  Items: =nfNavMain
+                  Layout: =nfLayout
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  Links: =nfHeaderLinks
+                  Logo: =nfLogo
+                  LogoWidth: =nfApp.LogoWidth
+                  OnLinkSelect: =If(Self.SelectedUrl = "app:help", Navigate(scr_Help, ScreenTransition.Fade), Launch(Self.SelectedUrl))
+                  OnNavSelect: =false
+                  Theme: =nfColor
+                  Title: =nfApp.Name
+                  UserImage: =User().Image
+                  WelcomeName: =nf_User.DisplayName
+            - con_Main_PRList:
                 Control: GroupContainer@1.5.0
                 Variant: AutoLayout
                 Properties:
                   DropShadow: =DropShadow.None
-                  Fill: =cmpStatePanel.Theme.Transparent
-                  FillPortions: =0
-                  Height: =If(cmpStatePanel.IsPhone && !IsBlank(cmpStatePanel.PrimaryText) && !IsBlank(cmpStatePanel.SecondaryText), 88, 40)
-                  LayoutAlignItems: =LayoutAlignItems.Center
-                  LayoutDirection: =If(cmpStatePanel.IsPhone, LayoutDirection.Vertical, LayoutDirection.Horizontal)
-                  LayoutGap: =8
-                  LayoutJustifyContent: =LayoutJustifyContent.Center
+                  Fill: =nfColor.Transparent
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =nfSpace.Lg
                   LayoutMinHeight: =0
                   LayoutMinWidth: =0
-                  Visible: =!IsBlank(cmpStatePanel.PrimaryText) || !IsBlank(cmpStatePanel.SecondaryText)
+                  PaddingBottom: =nfSpace.Xl
+                  PaddingLeft: =Max(nfGutter, (Parent.Width - nfPageMaxW) / 2)
+                  PaddingRight: =Max(nfGutter, (Parent.Width - nfPageMaxW) / 2)
+                  PaddingTop: =nfSpace.Xl
                 Children:
-                  - btnSpPrimary:
-                      Control: ModernButton@1.0.0
+                  - lbl_Title_PRList:
+                      Control: ModernText@1.0.0
                       Properties:
-                        AccessibleLabel: =cmpStatePanel.PrimaryText
-                        Height: =40
-                        OnSelect: =cmpStatePanel.OnPrimary()
-                        Size: =14
-                        Text: =cmpStatePanel.PrimaryText
-                        Visible: =!IsBlank(cmpStatePanel.PrimaryText)
-                        Width: =If(cmpStatePanel.IsPhone, Parent.Width, Len(cmpStatePanel.PrimaryText) * 8 + 40)
-                  - btnSpSecondary:
-                      Control: ModernButton@1.0.0
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Color: =nfColor.Ink
+                        FontWeight: =FontWeight.Semibold
+                        Height: =30
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =nfType.H1
+                        Text: ="Requirements"
+                  - lbl_Sub_PRList:
+                      Control: ModernText@1.0.0
                       Properties:
-                        AccessibleLabel: =cmpStatePanel.SecondaryText
-                        Appearance: =ButtonAppearance.Secondary
-                        Height: =40
-                        OnSelect: =cmpStatePanel.OnSecondary()
-                        Size: =14
-                        Text: =cmpStatePanel.SecondaryText
-                        Visible: =!IsBlank(cmpStatePanel.SecondaryText)
-                        Width: =If(cmpStatePanel.IsPhone, Parent.Width, Len(cmpStatePanel.SecondaryText) * 8 + 40)
-
-<-->
-
-ComponentDefinitions:
-  cmpConfirmDialog:
-    DefinitionType: CanvasComponent
-    CustomProperties:
-      CancelLabel:
-        PropertyKind: Input
-        DisplayName: CancelLabel
-        Description: Cancel button text.
-        DataType: Text
-        Default: ="Go back"
-      ConfirmLabel:
-        PropertyKind: Input
-        DisplayName: ConfirmLabel
-        Description: Confirm button text. Name the action, for example Delete request.
-        DataType: Text
-        Default: ="Confirm"
-      IsDanger:
-        PropertyKind: Input
-        DisplayName: IsDanger
-        Description: Colours the confirm button as destructive.
-        DataType: Boolean
-        Default: =false
-      IsPhone:
-        PropertyKind: Input
-        DisplayName: IsPhone
-        Description: Pass =nfIsPhone. Shows the dialog as a bottom sheet.
-        DataType: Boolean
-        Default: =false
-      Message:
-        PropertyKind: Input
-        DisplayName: Message
-        Description: One or two sentences on what will happen.
-        DataType: Text
-        Default: ="This cannot be undone."
-      OnCancel:
-        PropertyKind: Event
-        DisplayName: OnCancel
-        Description: Cancel or the backdrop was selected. The screen hides the dialog.
-        ReturnType: None
-        Default: =false
-      OnConfirm:
-        PropertyKind: Event
-        DisplayName: OnConfirm
-        Description: Confirm was selected. The screen does the work, then hides the dialog.
-        ReturnType: None
-        Default: =false
-      Theme:
-        PropertyKind: Input
-        DisplayName: Theme
-        Description: Pass =nfColor. The default copies the template palette so the component previews on its own.
-        DataType: Record
-        Default: |-
-          ={
-              Primary: RGBA(0, 82, 136, 1),
-              PrimaryDark: RGBA(0, 62, 103, 1),
-              PrimarySoft: RGBA(214, 227, 236, 1),
-              OnPrimary: RGBA(255, 255, 255, 1),
-              HeaderFill: RGBA(0, 43, 71, 1),
-              HeaderInk: RGBA(255, 255, 255, 1),
-              HeaderInk2: RGBA(214, 227, 236, 1),
-              Page: RGBA(237, 238, 238, 1),
-              Surface: RGBA(255, 255, 255, 1),
-              Sunk: RGBA(248, 248, 249, 1),
-              Line: RGBA(222, 223, 224, 1),
-              Ink: RGBA(25, 25, 26, 1),
-              Ink2: RGBA(68, 69, 71, 1),
-              Ink3: RGBA(90, 91, 93, 1),
-              Focus: RGBA(0, 120, 174, 1),
-              Danger: RGBA(196, 18, 48, 1),
-              DangerSoft: RGBA(246, 217, 222, 1),
-              NeutralInk: RGBA(68, 69, 71, 1),
-              NeutralSoft: RGBA(229, 229, 229, 1),
-              InfoInk: RGBA(0, 62, 103, 1),
-              InfoSoft: RGBA(214, 233, 242, 1),
-              WarningInk: RGBA(92, 72, 9, 1),
-              WarningSoft: RGBA(250, 243, 209, 1),
-              SuccessInk: RGBA(49, 79, 26, 1),
-              SuccessSoft: RGBA(229, 238, 222, 1),
-              DangerInk: RGBA(102, 9, 25, 1),
-              Hover: RGBA(0, 82, 136, 0.08),
-              Pressed: RGBA(0, 82, 136, 0.16),
-              Scrim: RGBA(25, 25, 26, 0.5),
-              Transparent: RGBA(0, 0, 0, 0)
-          }
-      Title:
-        PropertyKind: Input
-        DisplayName: Title
-        Description: Dialog heading, phrased as the question.
-        DataType: Text
-        Default: ="Are you sure?"
-    Properties:
-      Fill: =cmpConfirmDialog.Theme.Transparent
-      Height: =768
-      Width: =1366
-    Children:
-      - btnCdScrim:
-          Control: Classic/Button@2.2.0
-          Properties:
-            BorderStyle: =BorderStyle.None
-            BorderThickness: =0
-            Fill: =cmpConfirmDialog.Theme.Scrim
-            FocusedBorderThickness: =2
-            Height: =Parent.Height
-            HoverBorderColor: =cmpConfirmDialog.Theme.Transparent
-            HoverFill: =cmpConfirmDialog.Theme.Scrim
-            OnSelect: =cmpConfirmDialog.OnCancel()
-            PressedBorderColor: =cmpConfirmDialog.Theme.Transparent
-            PressedFill: =cmpConfirmDialog.Theme.Scrim
-            RadiusBottomLeft: =0
-            RadiusBottomRight: =0
-            RadiusTopLeft: =0
-            RadiusTopRight: =0
-            Text: =""
-            Tooltip: ="Close dialog"
-            Width: =Parent.Width
-      - conCdCard:
-          Control: GroupContainer@1.5.0
-          Variant: AutoLayout
-          Properties:
-            DropShadow: =DropShadow.Bold
-            Fill: =cmpConfirmDialog.Theme.Surface
-            Height: =If(cmpConfirmDialog.IsPhone, 232, 216)
-            LayoutDirection: =LayoutDirection.Vertical
-            LayoutGap: =12
-            PaddingBottom: =If(cmpConfirmDialog.IsPhone, 32, 24)
-            PaddingLeft: =24
-            PaddingRight: =24
-            PaddingTop: =24
-            RadiusBottomLeft: =If(cmpConfirmDialog.IsPhone, 0, 12)
-            RadiusBottomRight: =If(cmpConfirmDialog.IsPhone, 0, 12)
-            RadiusTopLeft: =12
-            RadiusTopRight: =12
-            Width: =If(cmpConfirmDialog.IsPhone, Parent.Width, Min(440, Parent.Width - 32))
-            X: =If(cmpConfirmDialog.IsPhone, 0, (Parent.Width - Self.Width) / 2)
-            Y: =If(cmpConfirmDialog.IsPhone, Parent.Height - Self.Height, (Parent.Height - Self.Height) / 2)
-          Children:
-            - lblCdTitle:
-                Control: ModernText@1.0.0
-                Properties:
-                  AlignInContainer: =AlignInContainer.Stretch
-                  AutoHeight: =true
-                  Color: =cmpConfirmDialog.Theme.Ink
-                  FontWeight: =FontWeight.Semibold
-                  PaddingBottom: =0
-                  PaddingLeft: =0
-                  PaddingRight: =0
-                  PaddingTop: =0
-                  Size: =18
-                  Text: =cmpConfirmDialog.Title
-            - lblCdMessage:
-                Control: ModernText@1.0.0
-                Properties:
-                  AlignInContainer: =AlignInContainer.Stretch
-                  AutoHeight: =true
-                  Color: =cmpConfirmDialog.Theme.Ink2
-                  PaddingBottom: =0
-                  PaddingLeft: =0
-                  PaddingRight: =0
-                  PaddingTop: =0
-                  Size: =14
-                  Text: =cmpConfirmDialog.Message
-            - conCdButtons:
-                Control: GroupContainer@1.5.0
-                Variant: AutoLayout
-                Properties:
-                  DropShadow: =DropShadow.None
-                  Fill: =cmpConfirmDialog.Theme.Transparent
-                  FillPortions: =0
-                  Height: =40
-                  LayoutAlignItems: =LayoutAlignItems.Center
-                  LayoutDirection: =LayoutDirection.Horizontal
-                  LayoutGap: =8
-                  LayoutJustifyContent: =LayoutJustifyContent.End
-                  LayoutMinHeight: =0
-                  LayoutMinWidth: =0
-                Children:
-                  - btnCdCancel:
-                      Control: ModernButton@1.0.0
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Color: =nfColor.Ink2
+                        Height: =20
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =nfType.Body
+                        Text: ="Open a requirement to see its IGCE, or to start one."
+                  - txt_Search_PRList:
+                      Control: ModernTextInput@1.1.2
                       Properties:
-                        AccessibleLabel: =cmpConfirmDialog.CancelLabel
-                        Appearance: =ButtonAppearance.Secondary
-                        Height: =40
-                        OnSelect: =cmpConfirmDialog.OnCancel()
-                        Size: =14
-                        Text: =cmpConfirmDialog.CancelLabel
-                        Width: =If(cmpConfirmDialog.IsPhone, (Parent.Width - 8) / 2, 120)
-                  - btnCdConfirm:
-                      Control: ModernButton@1.0.0
+                        AccessibleLabel: ="Search requirements"
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Appearance: =Appearance.Outline
+                        Height: =nfSize.Control
+                        Placeholder: ="Search by PR tracker number or requirement, from the start"
+                  - con_Table_PRList:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
                       Properties:
-                        AccessibleLabel: =cmpConfirmDialog.ConfirmLabel
-                        BasePaletteColor: =If(cmpConfirmDialog.IsDanger, cmpConfirmDialog.Theme.Danger, cmpConfirmDialog.Theme.Primary)
-                        Height: =40
-                        OnSelect: =cmpConfirmDialog.OnConfirm()
-                        Size: =14
-                        Text: =cmpConfirmDialog.ConfirmLabel
-                        Width: =If(cmpConfirmDialog.IsPhone, (Parent.Width - 8) / 2, 160)
-
-
+                        BorderColor: =nfColor.Line
+                        BorderThickness: =1
+                        DropShadow: =DropShadow.None
+                        Fill: =nfColor.Surface
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        RadiusBottomLeft: =nfRadius.Md
+                        RadiusBottomRight: =nfRadius.Md
+                        RadiusTopLeft: =nfRadius.Md
+                        RadiusTopRight: =nfRadius.Md
+                      Children:
+                        - con_TableHead_PRList:
+                            Control: GroupContainer@1.5.0
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              Fill: =nfColor.Sunk
+                              FillPortions: =0
+                              Height: =40
+                              LayoutAlignItems: =LayoutAlignItems.Center
+                              LayoutDirection: =LayoutDirection.Horizontal
+                              LayoutGap: =nfSpace.Md
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingLeft: =nfSpace.Lg
+                              PaddingRight: =nfSpace.Lg
+                              RadiusTopLeft: =nfRadius.Md
+                              RadiusTopRight: =nfRadius.Md
+                            Children:
+                              - lbl_HdrPRtrackernumber_PRList:
+                                  Control: ModernText@1.0.0
+                                  Properties:
+                                    Color: =nfColor.Ink2
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =Parent.Height
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =nfType.Small
+                                    Text: ="PR TRACKER NUMBER"
+                                    Width: =200
+                                    Wrap: =false
+                              - lbl_HdrRequirement_PRList:
+                                  Control: ModernText@1.0.0
+                                  Properties:
+                                    Color: =nfColor.Ink2
+                                    FillPortions: =1
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =Parent.Height
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =nfType.Small
+                                    Text: ="REQUIREMENT"
+                                    Wrap: =false
+                              - lbl_HdrCOR_PRList:
+                                  Control: ModernText@1.0.0
+                                  Properties:
+                                    Color: =nfColor.Ink2
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =Parent.Height
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =nfType.Small
+                                    Text: ="COR"
+                                    Visible: =!nfIsPhone
+                                    Width: =200
+                                    Wrap: =false
+                              - lbl_HdrIGCE_PRList:
+                                  Control: ModernText@1.0.0
+                                  Properties:
+                                    Color: =nfColor.Ink2
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =Parent.Height
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =nfType.Small
+                                    Text: ="IGCE"
+                                    Width: =130
+                                    Wrap: =false
+                        - gal_Rows_PRList:
+                            Control: Gallery@2.15.0
+                            Variant: BrowseLayout_Vertical_ThreeTextVariant_ver5.0
+                            Properties:
+                              AccessibleLabel: ="Requirements"
+                              Items: |-
+                                =SortByColumns(
+                                    Filter(
+                                        [@RequirementTracker],
+                                        IsBlank(txt_Search_PRList.Text) || StartsWith(PRTrackerNumber, txt_Search_PRList.Text) || StartsWith(RequirementName, txt_Search_PRList.Text)
+                                    ),
+                                    "PRTrackerNumber"
+                                )
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              OnSelect: "=Set(gl_LoadedData, false);\r\n\r\n// Retrieve PR ID, Tracker, & COR\r\nSet(gl_PRID, ThisItem.ID/*Value(Param(\"PRID\"))*/);\r\nSet(gl_PRTracker, LookUp([@RequirementTracker], ID = Value(gl_PRID)).PRTrackerNumber);\r\nSet(gl_PRTrackerCOR, LookUp([@RequirementTracker], ID = Value(gl_PRID)).COR);\r\n\r\nIf(\r\n    !IsBlank(gl_PRID), \r\n    // Then\r\n        // Retrieve IGCE\r\n        Set(gl_IGCE, LookUp([@IGCEHeader], PRTrackerID.Value = Text(gl_PRID)));\r\n        \r\n        Set(gl_GFPStatus, gl_IGCE.gfpStatus); // GFP Updates\r\n        Set(gl_GFPSignatureImage, gl_IGCE.gfpCORSignature.Full); // GFP Updates\r\n        Set(gl_GFPSignatureDate, gl_IGCE.gfpCORSignatureDate); // GFP Updates\r\n        /*Set(gl_IsMember, Lower(gl_User.Email) in Office365Groups.ListGroupMembers(getIGCEAdminGroupID.Run().out_flowgroupid).value.userPrincipalName); //GFP Updates - Instant Flow, Env Variable Group Display Name: \"OCOSO Asset Receiving Ticket Solution\"*/\r\n        Set(gl_GFPWorkflowState, gl_IGCE.gfpWorkflowState); //GFP Updates\r\n        Set(gl_FormMode,FormMode.View); // FormMode\r\n\r\n        If(IsBlank(gl_IGCE),\r\n            // There's no IGCE, create blank one\r\n            /*Set(gl_IGCE,Defaults([@IGCEHeader]));*/\r\n            Set(gl_IGCE,Blank());\r\n            Set(gl_GFPSignatureImage, Blank()); // GFP Updates - Clear Signature\r\n            Set(gl_GFPStatus,\"\");  // GFP Updates - Reset GFP Status\r\n            Set(gl_GFPSignatureDate, Blank()); // GFP Updates - Reset Signature Date\r\n            Set(gl_FormMode,FormMode.New)\r\n        )\r\n\r\n        // If the IGCE is completed switch to View.\r\n        // If(gl_FormMode <> FormMode.View && gl_IGCE.Status.Value = \"Complete\", Set(gl_DisplayMode,DisplayMode.View));\r\n);\r\n\r\n// ClearCollect(col[@IGCEHeader]s, [@IGCEHeader]);\r\nClearCollect(\r\n    col_IGCELineTemplate,\r\n    [\r\n        {\r\n            LineNumber: 1001,\r\n            Category: {Value: \"Other Direct Costs\"},\r\n            Title: \"Other Direct Costs\",\r\n            Labor: false\r\n        },\r\n        {\r\n            LineNumber: 1002,\r\n            Category: {Value: \"Travel\"},\r\n            Title: \"Travel\",\r\n            Labor: false\r\n        }\r\n    ]\r\n);\r\n\r\nNavigate(scr_IGCEOverview,ScreenTransition.Fade);\r\n\r\nSet(gl_LoadedData, true)"
+                              TemplateSize: =52
+                              Visible: |-
+                                =!(IsEmpty(Filter(
+                                        [@RequirementTracker],
+                                        IsBlank(txt_Search_PRList.Text) || StartsWith(PRTrackerNumber, txt_Search_PRList.Text) || StartsWith(RequirementName, txt_Search_PRList.Text)
+                                    )))
+                            Children:
+                              - con_Row_PRList:
+                                  Control: GroupContainer@1.5.0
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    Fill: =nfColor.Transparent
+                                    Height: =Parent.TemplateHeight - 1
+                                    LayoutAlignItems: =LayoutAlignItems.Center
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =nfSpace.Md
+                                    PaddingLeft: =nfSpace.Lg
+                                    PaddingRight: =nfSpace.Lg
+                                    Width: =Parent.TemplateWidth
+                                  Children:
+                                    - lbl_PRtrackernumber_PRList:
+                                        Control: ModernText@1.0.0
+                                        Properties:
+                                          Color: =nfColor.Ink
+                                          FontWeight: =FontWeight.Semibold
+                                          Height: =20
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =nfType.Body
+                                          Text: =ThisItem.PRTrackerNumber
+                                          Width: =200
+                                          Wrap: =false
+                                    - lbl_Requirement_PRList:
+                                        Control: ModernText@1.0.0
+                                        Properties:
+                                          Color: =nfColor.Ink
+                                          FillPortions: =1
+                                          Height: =20
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =nfType.Body
+                                          Text: =ThisItem.RequirementName
+                                          Wrap: =false
+                                    - lbl_COR_PRList:
+                                        Control: ModernText@1.0.0
+                                        Properties:
+                                          Color: =nfColor.Ink2
+                                          Height: =20
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =nfType.Body
+                                          Text: =ThisItem.COR.DisplayName
+                                          Visible: =!nfIsPhone
+                                          Width: =200
+                                          Wrap: =false
+                                    - lbl_IGCE_PRList:
+                                        Control: ModernText@1.0.0
+                                        Properties:
+                                          Color: =nfColor.Ink2
+                                          Height: =20
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =nfType.Body
+                                          Text: |-
+                                            =With({ i: LookUp([@IGCEHeader], PRTrackerID.Value = Text(ThisItem.ID)) }, If(IsBlank(i), "Not started", i.Status.Value))
+                                          Width: =130
+                                          Wrap: =false
+                              - con_RowRule_PRList:
+                                  Control: GroupContainer@1.5.0
+                                  Variant: ManualLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    Fill: =nfColor.Line
+                                    Height: =1
+                                    Width: =Parent.TemplateWidth
+                                    Y: =Parent.TemplateHeight - 1
+                              - btn_RowOpen_PRList:
+                                  Control: Classic/Button@2.2.0
+                                  Properties:
+                                    BorderStyle: =BorderStyle.None
+                                    BorderThickness: =0
+                                    Fill: =nfColor.Transparent
+                                    FocusedBorderThickness: =2
+                                    Height: =Parent.TemplateHeight - 1
+                                    HoverBorderColor: =nfColor.Transparent
+                                    HoverFill: =nfColor.Hover
+                                    OnSelect: =Select(Parent)
+                                    PressedBorderColor: =nfColor.Transparent
+                                    PressedFill: =nfColor.Pressed
+                                    RadiusBottomLeft: =0
+                                    RadiusBottomRight: =0
+                                    RadiusTopLeft: =0
+                                    RadiusTopRight: =0
+                                    Text: =""
+                                    Tooltip: ="Open " & ThisItem.PRTrackerNumber & ", " & ThisItem.RequirementName
+                                    Width: =Parent.TemplateWidth
+                        - cmp_Empty_PRList:
+                            Control: CanvasComponent
+                            ComponentName: cmpStatePanel
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Stretch
+                              FillPortions: =1
+                              Height: =180
+                              IsPhone: =nfIsPhone
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              Message: ="Check the PR tracker number, or clear the search to see them all."
+                              OnPrimary: =Reset(txt_Search_PRList)
+                              OnSecondary: =false
+                              PrimaryText: =If(IsBlank(txt_Search_PRList.Text), "", "Clear search")
+                              SecondaryText: =""
+                              Theme: =nfColor
+                              Title: ="No requirements match"
+                              Variant: ="Empty"
+                              Visible: |-
+                                =IsEmpty(Filter(
+                                        [@RequirementTracker],
+                                        IsBlank(txt_Search_PRList.Text) || StartsWith(PRTrackerNumber, txt_Search_PRList.Text) || StartsWith(RequirementName, txt_Search_PRList.Text)
+                                    ))
