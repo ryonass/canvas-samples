@@ -219,25 +219,26 @@ Screens:
                             Variant: Modern
                             Layout: Vertical
                             Properties:
-                              DataSource: ='OCOSO Requests'
+                              DataSource: =colRequests
                               DefaultMode: =If(locId > 0, FormMode.Edit, FormMode.New)
-                              Item: =LookUp('OCOSO Requests', ID = locId)
+                              Item: =LookUp(colRequests, ID = locId)
                               LayoutMinHeight: =0
                               LayoutMinWidth: =0
                               NumberOfColumns: =If(nfIsPhone, 1, 2)
                               OnFailure: =Notify("The " & nfItem & " could not be saved. " & Self.Error, NotificationType.Error)
                               OnSuccess: |-
                                 =With(
-                                    { r: Self.LastSubmit },
-                                    // Copy the saved row into the session's collection so every other screen shows it straight away.
-                                    If(
-                                        IsBlank(LookUp(colRequests, ID = r.ID)),
-                                        Collect(colRequests, { ID: r.ID, Title: r.Title, RequesterEmail: r.RequesterEmail, RequesterName: r.RequesterName, DivisionMEO: { Id: r.DivisionMEO.Id, Value: r.DivisionMEO.Value }, Location: { Id: r.Location.Id, Value: r.Location.Value }, AssetTag: r.AssetTag, ServiceKey: r.ServiceKey, Status: r.Status, IsOpen: LookUp(nfStatus, Key = r.Status).Open, AssignedTo: r.AssignedTo, ExternalRef: r.ExternalRef, Created: r.Created, Modified: r.Modified }),
-                                        Patch(colRequests, LookUp(colRequests, ID = r.ID), { Title: r.Title, DivisionMEO: { Id: r.DivisionMEO.Id, Value: r.DivisionMEO.Value }, Location: { Id: r.Location.Id, Value: r.Location.Value }, AssetTag: r.AssetTag, ServiceKey: r.ServiceKey, ExternalRef: r.ExternalRef, Modified: r.Modified })
-                                    );
-                                    Collect(colHistory, { RequestId: r.ID, Action: If(locId > 0, "Edited", nfStatusLabel(nfStartStatus)), ActorEmail: nfUserEmail, ActorName: nfUserName, Created: Now() });
+                                    {
+                                        // The form has just written to colRequests. A new row has no ID yet: a collection does not number
+                                        // its rows the way a list does. Find the row, and work out the next number for a new one.
+                                        row: If(locId > 0, LookUp(colRequests, ID = locId), LookUp(colRequests, IsBlank(ID))),
+                                        id: If(locId > 0, locId, Max(colRequests, ID) + 1)
+                                    },
+                                    // What a SharePoint list sets by itself: the ID, the dates, and IsOpen's default.
+                                    Patch(colRequests, row, { ID: id, IsOpen: LookUp(nfStatus, Key = row.Status).Open, Created: If(locId > 0, row.Created, Now()), Modified: Now() });
+                                    Collect(colHistory, { RequestId: id, Action: If(locId > 0, "Edited", nfStatusLabel(nfStartStatus)), ActorEmail: nfUserEmail, ActorName: nfUserName, Created: Now() });
                                     Notify(nfItemCap & If(locId > 0, " saved.", " submitted."), NotificationType.Success);
-                                    Navigate(scrDetail, ScreenTransition.None, { locId: r.ID, locFrom: "list" })
+                                    Navigate(scrDetail, ScreenTransition.None, { locId: id, locFrom: "list" })
                                 )
                             Children:
                               - crdFrmTitle:
@@ -417,7 +418,7 @@ Screens:
                                           DefaultSelectedItems: =[Parent.Default]
                                           DisplayMode: =Parent.DisplayMode
                                           ItemDisplayText: =ThisItem.Value
-                                          Items: =Choices([@'OCOSO Requests'].'DivisionMEO')
+                                          Items: =colDivisions
                                           SelectMultiple: =false
                                           Size: =nfType.Input
                                           Width: =Parent.Width - 48
@@ -486,7 +487,7 @@ Screens:
                                           DefaultSelectedItems: =[Parent.Default]
                                           DisplayMode: =Parent.DisplayMode
                                           ItemDisplayText: =ThisItem.Value
-                                          Items: =Choices([@'OCOSO Requests'].'Location')
+                                          Items: =colLocations
                                           SelectMultiple: =false
                                           Size: =nfType.Input
                                           Width: =Parent.Width - 48
