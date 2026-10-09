@@ -1,14 +1,14 @@
 Screens:
-  scrForm:
+  scrFormSteps:
     Properties:
       Fill: =nfColor.Page
       OnVisible: |-
         =UpdateContext({ locLoading: true });
-        UpdateContext({ locConfirm: Blank() });
-        ResetForm(frmFrmItem);
+        UpdateContext({ locConfirm: Blank(), locStep: 1 });
+        ResetForm(frmStpItem);
         UpdateContext({ locLoading: false })
     Children:
-      - conFrmRoot:
+      - conStpRoot:
           Control: GroupContainer@1.5.0
           Variant: AutoLayout
           Properties:
@@ -18,7 +18,7 @@ Screens:
             LayoutDirection: =LayoutDirection.Vertical
             Width: =Parent.Width
           Children:
-            - cmpFrmHeader:
+            - cmpStpHeader:
                 Control: CanvasComponent
                 ComponentName: cmpHeader
                 Properties:
@@ -39,7 +39,7 @@ Screens:
                   Title: =nfApp.Name
                   UserImage: =User().Image
                   WelcomeName: =nfUserName
-            - conFrmHeaderRule:
+            - conStpHeaderRule:
                 Control: GroupContainer@1.5.0
                 Variant: ManualLayout
                 Properties:
@@ -49,7 +49,7 @@ Screens:
                   Height: =1
                   LayoutMinHeight: =0
                   LayoutMinWidth: =0
-            - conFrmBody:
+            - conStpBody:
                 Control: GroupContainer@1.5.0
                 Variant: AutoLayout
                 Properties:
@@ -66,7 +66,7 @@ Screens:
                   PaddingRight: =Max(nfGutter, (Parent.Width - nfFormMaxW) / 2)
                   PaddingTop: =nfSpace.Xl
                 Children:
-                  - conFrmHead:
+                  - conStpHead:
                       Control: GroupContainer@1.5.0
                       Variant: AutoLayout
                       Properties:
@@ -81,7 +81,7 @@ Screens:
                         LayoutMinWidth: =0
                         Width: =Min(Parent.Width - 2 * nfGutter, nfPageMaxW)
                       Children:
-                        - conFrmTitleText:
+                        - conStpTitleText:
                             Control: GroupContainer@1.5.0
                             Variant: AutoLayout
                             Properties:
@@ -93,7 +93,7 @@ Screens:
                               LayoutMinHeight: =0
                               LayoutMinWidth: =0
                             Children:
-                              - lblFrmTitle:
+                              - lblStpTitle:
                                   Control: ModernText@1.0.0
                                   Properties:
                                     AlignInContainer: =AlignInContainer.Stretch
@@ -107,7 +107,7 @@ Screens:
                                     Size: =nfType.H1
                                     Text: =If(locId > 0, "Edit " & nfItem, nfNavLabel("form"))
                                     Wrap: =false
-                              - lblFrmSub:
+                              - lblStpSub:
                                   Control: ModernText@1.0.0
                                   Properties:
                                     AlignInContainer: =AlignInContainer.Stretch
@@ -120,7 +120,587 @@ Screens:
                                     Size: =nfType.Body
                                     Text: =If(locId > 0, nfItemCap & " " & locId, "Your " & nfItem & " goes to the " & nfApp.Team & ".")
                                     Wrap: =false
-                  - conFrmHelp:
+                  - conStpSteps:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Fill: =nfColor.Transparent
+                        FillPortions: =0
+                        Height: =36
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =nfSpace.Sm
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        Visible: =!nfIsPhone
+                        Width: =Min(Parent.Width - 2 * nfGutter, nfPageMaxW)
+                      Children:
+                        - conStpStep1:
+                            Control: GroupContainer@1.5.0
+                            Variant: ManualLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              Fill: =nfColor.Transparent
+                              FillPortions: =0
+                              Height: =36
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              Visible: =CountRows(nfFormSteps) >= 1
+                              Width: =52 + Len(Last(FirstN(nfFormSteps, 1)).Label) * 9
+                            Children:
+                              - conStpDot1:
+                                  Control: GroupContainer@1.5.0
+                                  Variant: ManualLayout
+                                  Properties:
+                                    BorderColor: =If(locStep >= 1, nfColor.Primary, nfColor.Ink3)
+                                    BorderThickness: =2
+                                    DropShadow: =DropShadow.None
+                                    Fill: =If(locStep >= 1, nfColor.Primary, nfColor.Surface)
+                                    Height: =28
+                                    RadiusBottomLeft: =14
+                                    RadiusBottomRight: =14
+                                    RadiusTopLeft: =14
+                                    RadiusTopRight: =14
+                                    Width: =28
+                                    X: =4
+                                    Y: =4
+                                  Children:
+                                    - lblStpDot1:
+                                        Control: ModernText@1.0.0
+                                        Properties:
+                                          Align: =Align.Center
+                                          AutoHeight: =true
+                                          Color: =If(locStep >= 1, nfColor.OnPrimary, nfColor.Ink2)
+                                          FontWeight: =FontWeight.Semibold
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =nfType.Small
+                                          Text: =If(locStep > 1, "✓", "1")
+                                          Width: =Parent.Width
+                                          Wrap: =false
+                                          Y: =(Parent.Height - Self.Height) / 2
+                              - lblStpStep1:
+                                  Control: ModernText@1.0.0
+                                  Properties:
+                                    AutoHeight: =true
+                                    Color: =If(locStep >= 1, nfColor.Ink, nfColor.Ink2)
+                                    FontWeight: =If(locStep = 1, FontWeight.Semibold, FontWeight.Normal)
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =nfType.Body
+                                    Text: =Last(FirstN(nfFormSteps, 1)).Label
+                                    Width: =Parent.Width - 44
+                                    Wrap: =false
+                                    X: =40
+                                    Y: =8
+                              - btnStpStep1:
+                                  Control: Classic/Button@2.2.0
+                                  Properties:
+                                    BorderStyle: =BorderStyle.None
+                                    BorderThickness: =0
+                                    Fill: =nfColor.Transparent
+                                    FocusedBorderThickness: =2
+                                    Height: =Parent.Height
+                                    HoverBorderColor: =nfColor.Transparent
+                                    HoverFill: =nfColor.Hover
+                                    OnSelect: |-
+                                      =UpdateContext({ locStep: 1 })
+                                    PressedBorderColor: =nfColor.Transparent
+                                    PressedFill: =nfColor.Pressed
+                                    RadiusBottomLeft: =0
+                                    RadiusBottomRight: =0
+                                    RadiusTopLeft: =0
+                                    RadiusTopRight: =0
+                                    Text: =""
+                                    Tooltip: ="Go back to step 1, " & Last(FirstN(nfFormSteps, 1)).Label
+                                    Visible: =locStep > 1
+                                    Width: =Parent.Width
+                        - conStpLine2:
+                            Control: GroupContainer@1.5.0
+                            Variant: ManualLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              Fill: =nfColor.Transparent
+                              Height: =36
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =24
+                              Visible: =CountRows(nfFormSteps) >= 2
+                            Children:
+                              - conStpLineRule2:
+                                  Control: GroupContainer@1.5.0
+                                  Variant: ManualLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    Fill: =If(locStep >= 2, nfColor.Primary, nfColor.Ink3)
+                                    Height: =2
+                                    Width: =Parent.Width
+                                    Y: =17
+                        - conStpStep2:
+                            Control: GroupContainer@1.5.0
+                            Variant: ManualLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              Fill: =nfColor.Transparent
+                              FillPortions: =0
+                              Height: =36
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              Visible: =CountRows(nfFormSteps) >= 2
+                              Width: =52 + Len(Last(FirstN(nfFormSteps, 2)).Label) * 9
+                            Children:
+                              - conStpDot2:
+                                  Control: GroupContainer@1.5.0
+                                  Variant: ManualLayout
+                                  Properties:
+                                    BorderColor: =If(locStep >= 2, nfColor.Primary, nfColor.Ink3)
+                                    BorderThickness: =2
+                                    DropShadow: =DropShadow.None
+                                    Fill: =If(locStep >= 2, nfColor.Primary, nfColor.Surface)
+                                    Height: =28
+                                    RadiusBottomLeft: =14
+                                    RadiusBottomRight: =14
+                                    RadiusTopLeft: =14
+                                    RadiusTopRight: =14
+                                    Width: =28
+                                    X: =4
+                                    Y: =4
+                                  Children:
+                                    - lblStpDot2:
+                                        Control: ModernText@1.0.0
+                                        Properties:
+                                          Align: =Align.Center
+                                          AutoHeight: =true
+                                          Color: =If(locStep >= 2, nfColor.OnPrimary, nfColor.Ink2)
+                                          FontWeight: =FontWeight.Semibold
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =nfType.Small
+                                          Text: =If(locStep > 2, "✓", "2")
+                                          Width: =Parent.Width
+                                          Wrap: =false
+                                          Y: =(Parent.Height - Self.Height) / 2
+                              - lblStpStep2:
+                                  Control: ModernText@1.0.0
+                                  Properties:
+                                    AutoHeight: =true
+                                    Color: =If(locStep >= 2, nfColor.Ink, nfColor.Ink2)
+                                    FontWeight: =If(locStep = 2, FontWeight.Semibold, FontWeight.Normal)
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =nfType.Body
+                                    Text: =Last(FirstN(nfFormSteps, 2)).Label
+                                    Width: =Parent.Width - 44
+                                    Wrap: =false
+                                    X: =40
+                                    Y: =8
+                              - btnStpStep2:
+                                  Control: Classic/Button@2.2.0
+                                  Properties:
+                                    BorderStyle: =BorderStyle.None
+                                    BorderThickness: =0
+                                    Fill: =nfColor.Transparent
+                                    FocusedBorderThickness: =2
+                                    Height: =Parent.Height
+                                    HoverBorderColor: =nfColor.Transparent
+                                    HoverFill: =nfColor.Hover
+                                    OnSelect: |-
+                                      =UpdateContext({ locStep: 2 })
+                                    PressedBorderColor: =nfColor.Transparent
+                                    PressedFill: =nfColor.Pressed
+                                    RadiusBottomLeft: =0
+                                    RadiusBottomRight: =0
+                                    RadiusTopLeft: =0
+                                    RadiusTopRight: =0
+                                    Text: =""
+                                    Tooltip: ="Go back to step 2, " & Last(FirstN(nfFormSteps, 2)).Label
+                                    Visible: =locStep > 2
+                                    Width: =Parent.Width
+                        - conStpLine3:
+                            Control: GroupContainer@1.5.0
+                            Variant: ManualLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              Fill: =nfColor.Transparent
+                              Height: =36
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =24
+                              Visible: =CountRows(nfFormSteps) >= 3
+                            Children:
+                              - conStpLineRule3:
+                                  Control: GroupContainer@1.5.0
+                                  Variant: ManualLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    Fill: =If(locStep >= 3, nfColor.Primary, nfColor.Ink3)
+                                    Height: =2
+                                    Width: =Parent.Width
+                                    Y: =17
+                        - conStpStep3:
+                            Control: GroupContainer@1.5.0
+                            Variant: ManualLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              Fill: =nfColor.Transparent
+                              FillPortions: =0
+                              Height: =36
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              Visible: =CountRows(nfFormSteps) >= 3
+                              Width: =52 + Len(Last(FirstN(nfFormSteps, 3)).Label) * 9
+                            Children:
+                              - conStpDot3:
+                                  Control: GroupContainer@1.5.0
+                                  Variant: ManualLayout
+                                  Properties:
+                                    BorderColor: =If(locStep >= 3, nfColor.Primary, nfColor.Ink3)
+                                    BorderThickness: =2
+                                    DropShadow: =DropShadow.None
+                                    Fill: =If(locStep >= 3, nfColor.Primary, nfColor.Surface)
+                                    Height: =28
+                                    RadiusBottomLeft: =14
+                                    RadiusBottomRight: =14
+                                    RadiusTopLeft: =14
+                                    RadiusTopRight: =14
+                                    Width: =28
+                                    X: =4
+                                    Y: =4
+                                  Children:
+                                    - lblStpDot3:
+                                        Control: ModernText@1.0.0
+                                        Properties:
+                                          Align: =Align.Center
+                                          AutoHeight: =true
+                                          Color: =If(locStep >= 3, nfColor.OnPrimary, nfColor.Ink2)
+                                          FontWeight: =FontWeight.Semibold
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =nfType.Small
+                                          Text: =If(locStep > 3, "✓", "3")
+                                          Width: =Parent.Width
+                                          Wrap: =false
+                                          Y: =(Parent.Height - Self.Height) / 2
+                              - lblStpStep3:
+                                  Control: ModernText@1.0.0
+                                  Properties:
+                                    AutoHeight: =true
+                                    Color: =If(locStep >= 3, nfColor.Ink, nfColor.Ink2)
+                                    FontWeight: =If(locStep = 3, FontWeight.Semibold, FontWeight.Normal)
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =nfType.Body
+                                    Text: =Last(FirstN(nfFormSteps, 3)).Label
+                                    Width: =Parent.Width - 44
+                                    Wrap: =false
+                                    X: =40
+                                    Y: =8
+                              - btnStpStep3:
+                                  Control: Classic/Button@2.2.0
+                                  Properties:
+                                    BorderStyle: =BorderStyle.None
+                                    BorderThickness: =0
+                                    Fill: =nfColor.Transparent
+                                    FocusedBorderThickness: =2
+                                    Height: =Parent.Height
+                                    HoverBorderColor: =nfColor.Transparent
+                                    HoverFill: =nfColor.Hover
+                                    OnSelect: |-
+                                      =UpdateContext({ locStep: 3 })
+                                    PressedBorderColor: =nfColor.Transparent
+                                    PressedFill: =nfColor.Pressed
+                                    RadiusBottomLeft: =0
+                                    RadiusBottomRight: =0
+                                    RadiusTopLeft: =0
+                                    RadiusTopRight: =0
+                                    Text: =""
+                                    Tooltip: ="Go back to step 3, " & Last(FirstN(nfFormSteps, 3)).Label
+                                    Visible: =locStep > 3
+                                    Width: =Parent.Width
+                        - conStpLine4:
+                            Control: GroupContainer@1.5.0
+                            Variant: ManualLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              Fill: =nfColor.Transparent
+                              Height: =36
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =24
+                              Visible: =CountRows(nfFormSteps) >= 4
+                            Children:
+                              - conStpLineRule4:
+                                  Control: GroupContainer@1.5.0
+                                  Variant: ManualLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    Fill: =If(locStep >= 4, nfColor.Primary, nfColor.Ink3)
+                                    Height: =2
+                                    Width: =Parent.Width
+                                    Y: =17
+                        - conStpStep4:
+                            Control: GroupContainer@1.5.0
+                            Variant: ManualLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              Fill: =nfColor.Transparent
+                              FillPortions: =0
+                              Height: =36
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              Visible: =CountRows(nfFormSteps) >= 4
+                              Width: =52 + Len(Last(FirstN(nfFormSteps, 4)).Label) * 9
+                            Children:
+                              - conStpDot4:
+                                  Control: GroupContainer@1.5.0
+                                  Variant: ManualLayout
+                                  Properties:
+                                    BorderColor: =If(locStep >= 4, nfColor.Primary, nfColor.Ink3)
+                                    BorderThickness: =2
+                                    DropShadow: =DropShadow.None
+                                    Fill: =If(locStep >= 4, nfColor.Primary, nfColor.Surface)
+                                    Height: =28
+                                    RadiusBottomLeft: =14
+                                    RadiusBottomRight: =14
+                                    RadiusTopLeft: =14
+                                    RadiusTopRight: =14
+                                    Width: =28
+                                    X: =4
+                                    Y: =4
+                                  Children:
+                                    - lblStpDot4:
+                                        Control: ModernText@1.0.0
+                                        Properties:
+                                          Align: =Align.Center
+                                          AutoHeight: =true
+                                          Color: =If(locStep >= 4, nfColor.OnPrimary, nfColor.Ink2)
+                                          FontWeight: =FontWeight.Semibold
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =nfType.Small
+                                          Text: =If(locStep > 4, "✓", "4")
+                                          Width: =Parent.Width
+                                          Wrap: =false
+                                          Y: =(Parent.Height - Self.Height) / 2
+                              - lblStpStep4:
+                                  Control: ModernText@1.0.0
+                                  Properties:
+                                    AutoHeight: =true
+                                    Color: =If(locStep >= 4, nfColor.Ink, nfColor.Ink2)
+                                    FontWeight: =If(locStep = 4, FontWeight.Semibold, FontWeight.Normal)
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =nfType.Body
+                                    Text: =Last(FirstN(nfFormSteps, 4)).Label
+                                    Width: =Parent.Width - 44
+                                    Wrap: =false
+                                    X: =40
+                                    Y: =8
+                              - btnStpStep4:
+                                  Control: Classic/Button@2.2.0
+                                  Properties:
+                                    BorderStyle: =BorderStyle.None
+                                    BorderThickness: =0
+                                    Fill: =nfColor.Transparent
+                                    FocusedBorderThickness: =2
+                                    Height: =Parent.Height
+                                    HoverBorderColor: =nfColor.Transparent
+                                    HoverFill: =nfColor.Hover
+                                    OnSelect: |-
+                                      =UpdateContext({ locStep: 4 })
+                                    PressedBorderColor: =nfColor.Transparent
+                                    PressedFill: =nfColor.Pressed
+                                    RadiusBottomLeft: =0
+                                    RadiusBottomRight: =0
+                                    RadiusTopLeft: =0
+                                    RadiusTopRight: =0
+                                    Text: =""
+                                    Tooltip: ="Go back to step 4, " & Last(FirstN(nfFormSteps, 4)).Label
+                                    Visible: =locStep > 4
+                                    Width: =Parent.Width
+                        - conStpLine5:
+                            Control: GroupContainer@1.5.0
+                            Variant: ManualLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              Fill: =nfColor.Transparent
+                              Height: =36
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =24
+                              Visible: =CountRows(nfFormSteps) >= 5
+                            Children:
+                              - conStpLineRule5:
+                                  Control: GroupContainer@1.5.0
+                                  Variant: ManualLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    Fill: =If(locStep >= 5, nfColor.Primary, nfColor.Ink3)
+                                    Height: =2
+                                    Width: =Parent.Width
+                                    Y: =17
+                        - conStpStep5:
+                            Control: GroupContainer@1.5.0
+                            Variant: ManualLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              Fill: =nfColor.Transparent
+                              FillPortions: =0
+                              Height: =36
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              Visible: =CountRows(nfFormSteps) >= 5
+                              Width: =52 + Len(Last(FirstN(nfFormSteps, 5)).Label) * 9
+                            Children:
+                              - conStpDot5:
+                                  Control: GroupContainer@1.5.0
+                                  Variant: ManualLayout
+                                  Properties:
+                                    BorderColor: =If(locStep >= 5, nfColor.Primary, nfColor.Ink3)
+                                    BorderThickness: =2
+                                    DropShadow: =DropShadow.None
+                                    Fill: =If(locStep >= 5, nfColor.Primary, nfColor.Surface)
+                                    Height: =28
+                                    RadiusBottomLeft: =14
+                                    RadiusBottomRight: =14
+                                    RadiusTopLeft: =14
+                                    RadiusTopRight: =14
+                                    Width: =28
+                                    X: =4
+                                    Y: =4
+                                  Children:
+                                    - lblStpDot5:
+                                        Control: ModernText@1.0.0
+                                        Properties:
+                                          Align: =Align.Center
+                                          AutoHeight: =true
+                                          Color: =If(locStep >= 5, nfColor.OnPrimary, nfColor.Ink2)
+                                          FontWeight: =FontWeight.Semibold
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =nfType.Small
+                                          Text: =If(locStep > 5, "✓", "5")
+                                          Width: =Parent.Width
+                                          Wrap: =false
+                                          Y: =(Parent.Height - Self.Height) / 2
+                              - lblStpStep5:
+                                  Control: ModernText@1.0.0
+                                  Properties:
+                                    AutoHeight: =true
+                                    Color: =If(locStep >= 5, nfColor.Ink, nfColor.Ink2)
+                                    FontWeight: =If(locStep = 5, FontWeight.Semibold, FontWeight.Normal)
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =nfType.Body
+                                    Text: =Last(FirstN(nfFormSteps, 5)).Label
+                                    Width: =Parent.Width - 44
+                                    Wrap: =false
+                                    X: =40
+                                    Y: =8
+                              - btnStpStep5:
+                                  Control: Classic/Button@2.2.0
+                                  Properties:
+                                    BorderStyle: =BorderStyle.None
+                                    BorderThickness: =0
+                                    Fill: =nfColor.Transparent
+                                    FocusedBorderThickness: =2
+                                    Height: =Parent.Height
+                                    HoverBorderColor: =nfColor.Transparent
+                                    HoverFill: =nfColor.Hover
+                                    OnSelect: |-
+                                      =UpdateContext({ locStep: 5 })
+                                    PressedBorderColor: =nfColor.Transparent
+                                    PressedFill: =nfColor.Pressed
+                                    RadiusBottomLeft: =0
+                                    RadiusBottomRight: =0
+                                    RadiusTopLeft: =0
+                                    RadiusTopRight: =0
+                                    Text: =""
+                                    Tooltip: ="Go back to step 5, " & Last(FirstN(nfFormSteps, 5)).Label
+                                    Visible: =locStep > 5
+                                    Width: =Parent.Width
+                  - conStpBar:
+                      Control: GroupContainer@1.5.0
+                      Variant: ManualLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Fill: =nfColor.Line
+                        FillPortions: =0
+                        Height: =4
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        Visible: =nfIsPhone
+                        Width: =Min(Parent.Width - 2 * nfGutter, nfPageMaxW)
+                      Children:
+                        - conStpBarDone:
+                            Control: GroupContainer@1.5.0
+                            Variant: ManualLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              Fill: =nfColor.Primary
+                              Height: =Parent.Height
+                              Width: =Parent.Width * locStep / CountRows(nfFormSteps)
+                  - conStpWhere:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Fill: =nfColor.Transparent
+                        FillPortions: =0
+                        Height: =If(nfIsPhone, 52, 20)
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =nfSpace.Xs
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        Width: =Min(Parent.Width - 2 * nfGutter, nfPageMaxW)
+                      Children:
+                        - lblStpWhere:
+                            Control: ModernText@1.0.0
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Stretch
+                              AutoHeight: =true
+                              Color: =nfColor.Ink
+                              FontWeight: =FontWeight.Semibold
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =nfType.H2
+                              Text: |-
+                                ="Step " & locStep & " of " & CountRows(nfFormSteps) & ": " & LookUp(nfFormSteps, Step = locStep).Label
+                              Visible: =nfIsPhone
+                              Wrap: =false
+                        - lblStpHint:
+                            Control: ModernText@1.0.0
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Stretch
+                              AutoHeight: =true
+                              Color: =nfColor.Ink2
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =nfType.Body
+                              Text: =LookUp(nfFormSteps, Step = locStep).Hint
+                              Wrap: =false
+                  - conStpHelp:
                       Control: GroupContainer@1.5.0
                       Variant: AutoLayout
                       Properties:
@@ -140,9 +720,10 @@ Screens:
                         RadiusBottomRight: =nfRadius.Md
                         RadiusTopLeft: =nfRadius.Md
                         RadiusTopRight: =nfRadius.Md
+                        Visible: =locStep = 1
                         Width: =Min(Parent.Width - 2 * nfGutter, nfPageMaxW)
                       Children:
-                        - lblFrmHelpText:
+                        - lblStpHelpText:
                             Control: ModernText@1.0.0
                             Properties:
                               AlignInContainer: =AlignInContainer.Stretch
@@ -154,7 +735,7 @@ Screens:
                               PaddingTop: =0
                               Size: =nfType.Body
                               Text: =nfApp.FormInstructions
-                        - conFrmContact:
+                        - conStpContact:
                             Control: GroupContainer@1.5.0
                             Variant: AutoLayout
                             Properties:
@@ -168,7 +749,7 @@ Screens:
                               LayoutMinHeight: =0
                               LayoutMinWidth: =0
                             Children:
-                              - lblFrmContact:
+                              - lblStpContact:
                                   Control: ModernText@1.0.0
                                   Properties:
                                     AutoHeight: =true
@@ -182,7 +763,7 @@ Screens:
                                     Size: =nfType.Small
                                     Text: ="Questions? Email " & nfApp.ContactEmail
                                     Wrap: =false
-                              - btnFrmEmail:
+                              - btnStpEmail:
                                   Control: ModernButton@1.0.0
                                   Properties:
                                     AccessibleLabel: ="Email us"
@@ -191,7 +772,7 @@ Screens:
                                     OnSelect: =Launch("mailto:" & nfApp.ContactEmail)
                                     Size: =nfType.Body
                                     Text: ="Email us"
-                  - conFrmCard:
+                  - conStpCard:
                       Control: GroupContainer@1.5.0
                       Variant: AutoLayout
                       Properties:
@@ -200,7 +781,7 @@ Screens:
                         DropShadow: =DropShadow.None
                         Fill: =nfColor.Surface
                         FillPortions: =0
-                        Height: =RoundUp(6 / If(nfIsPhone, 1, 2), 0) * 88 + 2 * nfSpace.Lg
+                        Height: =RoundUp(Switch(locStep, 1, 2, 2, 4, 6) / If(nfIsPhone, 1, 2), 0) * 88 + 2 * nfSpace.Lg
                         LayoutDirection: =LayoutDirection.Vertical
                         LayoutMinHeight: =0
                         LayoutMinWidth: =0
@@ -214,7 +795,7 @@ Screens:
                         RadiusTopRight: =nfRadius.Md
                         Width: =Min(Parent.Width - 2 * nfGutter, nfPageMaxW)
                       Children:
-                        - frmFrmItem:
+                        - frmStpItem:
                             Control: Form@2.4.4
                             Variant: Modern
                             Layout: Vertical
@@ -241,7 +822,7 @@ Screens:
                                     Navigate(scrDetail, ScreenTransition.None, { locId: id, locFrom: "list" })
                                 )
                             Children:
-                              - crdFrmTitle:
+                              - crdStpTitle:
                                   Control: TypedDataCard@1.0.7
                                   Variant: ModernTextualEdit
                                   IsLocked: true
@@ -249,16 +830,18 @@ Screens:
                                     BorderColor: =nfColor.Transparent
                                     DataField: ="Title"
                                     Default: =ThisItem.Title
+                                    DisplayMode: =If(locStep = CountRows(nfFormSteps), DisplayMode.View, Parent.DisplayMode)
                                     DisplayName: ="Title"
                                     MaxLength: =255
                                     Required: =true
-                                    Update: =txtFrmTitleValue.Text
+                                    Update: =txtStpTitleValue.Text
+                                    Visible: =locStep = 1 || locStep = CountRows(nfFormSteps)
                                     Width: =400
                                     WidthFit: =true
                                     X: =0
                                     Y: =0
                                   Children:
-                                    - lblFrmTitleKey:
+                                    - lblStpTitleKey:
                                         Control: ModernText@1.0.0
                                         MetadataKey: FieldName
                                         Properties:
@@ -272,7 +855,7 @@ Screens:
                                           Wrap: =false
                                           X: =24
                                           Y: =10
-                                    - txtFrmTitleValue:
+                                    - txtStpTitleValue:
                                         Control: ModernTextInput@1.1.2
                                         MetadataKey: FieldValue
                                         Properties:
@@ -285,8 +868,8 @@ Screens:
                                           ValidationState: =If(IsBlank(Parent.Error), ValidationState.None, ValidationState.Error)
                                           Width: =Parent.Width - 48
                                           X: =24
-                                          Y: =lblFrmTitleKey.Y + lblFrmTitleKey.Height + 4
-                                    - lblFrmTitleError:
+                                          Y: =lblStpTitleKey.Y + lblStpTitleKey.Height + 4
+                                    - lblStpTitleError:
                                         Control: ModernText@1.0.0
                                         MetadataKey: ErrorMessage
                                         Properties:
@@ -297,8 +880,8 @@ Screens:
                                           Visible: =And(!IsBlank(Parent.Error), Parent.DisplayMode = DisplayMode.Edit)
                                           Width: =Parent.Width - 48
                                           X: =24
-                                          Y: =txtFrmTitleValue.Y + txtFrmTitleValue.Height
-                                    - lblFrmTitleStar:
+                                          Y: =txtStpTitleValue.Y + txtStpTitleValue.Height
+                                    - lblStpTitleStar:
                                         Control: ModernText@1.0.0
                                         MetadataKey: FieldRequired
                                         Properties:
@@ -310,8 +893,8 @@ Screens:
                                           Text: ="*"
                                           Visible: =And(Parent.Required, Parent.DisplayMode = DisplayMode.Edit)
                                           Width: =30
-                                          Y: =lblFrmTitleKey.Y
-                              - crdFrmSvc:
+                                          Y: =lblStpTitleKey.Y
+                              - crdStpSvc:
                                   Control: TypedDataCard@1.0.7
                                   Variant: ModernTextualEdit
                                   IsLocked: true
@@ -319,16 +902,18 @@ Screens:
                                     BorderColor: =nfColor.Transparent
                                     DataField: ="ServiceKey"
                                     Default: =ThisItem.ServiceKey
+                                    DisplayMode: =If(locStep = CountRows(nfFormSteps), DisplayMode.View, Parent.DisplayMode)
                                     DisplayName: ="Service"
                                     MaxLength: =255
                                     Required: =true
-                                    Update: =drpFrmSvcValue.Selected.Key
+                                    Update: =drpStpSvcValue.Selected.Key
+                                    Visible: =locStep = 1 || locStep = CountRows(nfFormSteps)
                                     Width: =400
                                     WidthFit: =true
                                     X: =1
                                     Y: =0
                                   Children:
-                                    - lblFrmSvcKey:
+                                    - lblStpSvcKey:
                                         Control: ModernText@1.0.0
                                         MetadataKey: FieldName
                                         Properties:
@@ -342,7 +927,7 @@ Screens:
                                           Wrap: =false
                                           X: =24
                                           Y: =10
-                                    - drpFrmSvcValue:
+                                    - drpStpSvcValue:
                                         Control: ModernDropdown@1.0.3
                                         MetadataKey: FieldValue
                                         Properties:
@@ -354,8 +939,8 @@ Screens:
                                           Size: =nfType.Input
                                           Width: =Parent.Width - 48
                                           X: =24
-                                          Y: =lblFrmSvcKey.Y + lblFrmSvcKey.Height + 4
-                                    - lblFrmSvcError:
+                                          Y: =lblStpSvcKey.Y + lblStpSvcKey.Height + 4
+                                    - lblStpSvcError:
                                         Control: ModernText@1.0.0
                                         MetadataKey: ErrorMessage
                                         Properties:
@@ -366,8 +951,8 @@ Screens:
                                           Visible: =And(!IsBlank(Parent.Error), Parent.DisplayMode = DisplayMode.Edit)
                                           Width: =Parent.Width - 48
                                           X: =24
-                                          Y: =drpFrmSvcValue.Y + drpFrmSvcValue.Height
-                                    - lblFrmSvcStar:
+                                          Y: =drpStpSvcValue.Y + drpStpSvcValue.Height
+                                    - lblStpSvcStar:
                                         Control: ModernText@1.0.0
                                         MetadataKey: FieldRequired
                                         Properties:
@@ -379,8 +964,8 @@ Screens:
                                           Text: ="*"
                                           Visible: =And(Parent.Required, Parent.DisplayMode = DisplayMode.Edit)
                                           Width: =30
-                                          Y: =lblFrmSvcKey.Y
-                              - crdFrmDivision:
+                                          Y: =lblStpSvcKey.Y
+                              - crdStpDivision:
                                   Control: TypedDataCard@1.0.7
                                   Variant: ModernComboBoxEdit
                                   IsLocked: true
@@ -388,15 +973,17 @@ Screens:
                                     BorderColor: =nfColor.Transparent
                                     DataField: ="DivisionMEO"
                                     Default: =ThisItem.DivisionMEO
+                                    DisplayMode: =If(locStep = CountRows(nfFormSteps), DisplayMode.View, Parent.DisplayMode)
                                     DisplayName: ="Division or MEO"
                                     Required: =true
-                                    Update: =cmbFrmDivisionValue.Selected
+                                    Update: =cmbStpDivisionValue.Selected
+                                    Visible: =locStep = 2 || locStep = CountRows(nfFormSteps)
                                     Width: =400
                                     WidthFit: =true
                                     X: =0
                                     Y: =1
                                   Children:
-                                    - lblFrmDivisionKey:
+                                    - lblStpDivisionKey:
                                         Control: ModernText@1.0.0
                                         MetadataKey: FieldName
                                         Properties:
@@ -410,7 +997,7 @@ Screens:
                                           Wrap: =false
                                           X: =24
                                           Y: =10
-                                    - cmbFrmDivisionValue:
+                                    - cmbStpDivisionValue:
                                         Control: ModernCombobox@1.1.2
                                         MetadataKey: FieldValue
                                         Properties:
@@ -423,8 +1010,8 @@ Screens:
                                           Size: =nfType.Input
                                           Width: =Parent.Width - 48
                                           X: =24
-                                          Y: =lblFrmDivisionKey.Y + lblFrmDivisionKey.Height + 4
-                                    - lblFrmDivisionError:
+                                          Y: =lblStpDivisionKey.Y + lblStpDivisionKey.Height + 4
+                                    - lblStpDivisionError:
                                         Control: ModernText@1.0.0
                                         MetadataKey: ErrorMessage
                                         Properties:
@@ -435,8 +1022,8 @@ Screens:
                                           Visible: =And(!IsBlank(Parent.Error), Parent.DisplayMode = DisplayMode.Edit)
                                           Width: =Parent.Width - 48
                                           X: =24
-                                          Y: =cmbFrmDivisionValue.Y + cmbFrmDivisionValue.Height
-                                    - lblFrmDivisionStar:
+                                          Y: =cmbStpDivisionValue.Y + cmbStpDivisionValue.Height
+                                    - lblStpDivisionStar:
                                         Control: ModernText@1.0.0
                                         MetadataKey: FieldRequired
                                         Properties:
@@ -448,8 +1035,8 @@ Screens:
                                           Text: ="*"
                                           Visible: =And(Parent.Required, Parent.DisplayMode = DisplayMode.Edit)
                                           Width: =30
-                                          Y: =lblFrmDivisionKey.Y
-                              - crdFrmLocation:
+                                          Y: =lblStpDivisionKey.Y
+                              - crdStpLocation:
                                   Control: TypedDataCard@1.0.7
                                   Variant: ModernComboBoxEdit
                                   IsLocked: true
@@ -457,15 +1044,17 @@ Screens:
                                     BorderColor: =nfColor.Transparent
                                     DataField: ="Location"
                                     Default: =ThisItem.Location
+                                    DisplayMode: =If(locStep = CountRows(nfFormSteps), DisplayMode.View, Parent.DisplayMode)
                                     DisplayName: ="Location"
                                     Required: =false
-                                    Update: =cmbFrmLocationValue.Selected
+                                    Update: =cmbStpLocationValue.Selected
+                                    Visible: =locStep = 2 || locStep = CountRows(nfFormSteps)
                                     Width: =400
                                     WidthFit: =true
                                     X: =1
                                     Y: =1
                                   Children:
-                                    - lblFrmLocationKey:
+                                    - lblStpLocationKey:
                                         Control: ModernText@1.0.0
                                         MetadataKey: FieldName
                                         Properties:
@@ -479,7 +1068,7 @@ Screens:
                                           Wrap: =false
                                           X: =24
                                           Y: =10
-                                    - cmbFrmLocationValue:
+                                    - cmbStpLocationValue:
                                         Control: ModernCombobox@1.1.2
                                         MetadataKey: FieldValue
                                         Properties:
@@ -492,8 +1081,8 @@ Screens:
                                           Size: =nfType.Input
                                           Width: =Parent.Width - 48
                                           X: =24
-                                          Y: =lblFrmLocationKey.Y + lblFrmLocationKey.Height + 4
-                                    - lblFrmLocationError:
+                                          Y: =lblStpLocationKey.Y + lblStpLocationKey.Height + 4
+                                    - lblStpLocationError:
                                         Control: ModernText@1.0.0
                                         MetadataKey: ErrorMessage
                                         Properties:
@@ -504,8 +1093,8 @@ Screens:
                                           Visible: =And(!IsBlank(Parent.Error), Parent.DisplayMode = DisplayMode.Edit)
                                           Width: =Parent.Width - 48
                                           X: =24
-                                          Y: =cmbFrmLocationValue.Y + cmbFrmLocationValue.Height
-                                    - lblFrmLocationStar:
+                                          Y: =cmbStpLocationValue.Y + cmbStpLocationValue.Height
+                                    - lblStpLocationStar:
                                         Control: ModernText@1.0.0
                                         MetadataKey: FieldRequired
                                         Properties:
@@ -517,8 +1106,8 @@ Screens:
                                           Text: ="*"
                                           Visible: =And(Parent.Required, Parent.DisplayMode = DisplayMode.Edit)
                                           Width: =30
-                                          Y: =lblFrmLocationKey.Y
-                              - crdFrmAsset:
+                                          Y: =lblStpLocationKey.Y
+                              - crdStpAsset:
                                   Control: TypedDataCard@1.0.7
                                   Variant: ModernTextualEdit
                                   IsLocked: true
@@ -526,16 +1115,18 @@ Screens:
                                     BorderColor: =nfColor.Transparent
                                     DataField: ="AssetTag"
                                     Default: =ThisItem.AssetTag
+                                    DisplayMode: =If(locStep = CountRows(nfFormSteps), DisplayMode.View, Parent.DisplayMode)
                                     DisplayName: ="Asset tag"
                                     MaxLength: =50
                                     Required: =false
-                                    Update: =txtFrmAssetValue.Text
+                                    Update: =txtStpAssetValue.Text
+                                    Visible: =locStep = 2 || locStep = CountRows(nfFormSteps)
                                     Width: =400
                                     WidthFit: =true
                                     X: =0
                                     Y: =2
                                   Children:
-                                    - lblFrmAssetKey:
+                                    - lblStpAssetKey:
                                         Control: ModernText@1.0.0
                                         MetadataKey: FieldName
                                         Properties:
@@ -549,7 +1140,7 @@ Screens:
                                           Wrap: =false
                                           X: =24
                                           Y: =10
-                                    - txtFrmAssetValue:
+                                    - txtStpAssetValue:
                                         Control: ModernTextInput@1.1.2
                                         MetadataKey: FieldValue
                                         Properties:
@@ -562,8 +1153,8 @@ Screens:
                                           ValidationState: =If(IsBlank(Parent.Error), ValidationState.None, ValidationState.Error)
                                           Width: =Parent.Width - 48
                                           X: =24
-                                          Y: =lblFrmAssetKey.Y + lblFrmAssetKey.Height + 4
-                                    - lblFrmAssetError:
+                                          Y: =lblStpAssetKey.Y + lblStpAssetKey.Height + 4
+                                    - lblStpAssetError:
                                         Control: ModernText@1.0.0
                                         MetadataKey: ErrorMessage
                                         Properties:
@@ -574,8 +1165,8 @@ Screens:
                                           Visible: =And(!IsBlank(Parent.Error), Parent.DisplayMode = DisplayMode.Edit)
                                           Width: =Parent.Width - 48
                                           X: =24
-                                          Y: =txtFrmAssetValue.Y + txtFrmAssetValue.Height
-                                    - lblFrmAssetStar:
+                                          Y: =txtStpAssetValue.Y + txtStpAssetValue.Height
+                                    - lblStpAssetStar:
                                         Control: ModernText@1.0.0
                                         MetadataKey: FieldRequired
                                         Properties:
@@ -587,8 +1178,8 @@ Screens:
                                           Text: ="*"
                                           Visible: =And(Parent.Required, Parent.DisplayMode = DisplayMode.Edit)
                                           Width: =30
-                                          Y: =lblFrmAssetKey.Y
-                              - crdFrmRef:
+                                          Y: =lblStpAssetKey.Y
+                              - crdStpRef:
                                   Control: TypedDataCard@1.0.7
                                   Variant: ModernTextualEdit
                                   IsLocked: true
@@ -596,16 +1187,18 @@ Screens:
                                     BorderColor: =nfColor.Transparent
                                     DataField: ="ExternalRef"
                                     Default: =ThisItem.ExternalRef
+                                    DisplayMode: =If(locStep = CountRows(nfFormSteps), DisplayMode.View, Parent.DisplayMode)
                                     DisplayName: ="External reference"
                                     MaxLength: =100
                                     Required: =false
-                                    Update: =txtFrmRefValue.Text
+                                    Update: =txtStpRefValue.Text
+                                    Visible: =locStep = 2 || locStep = CountRows(nfFormSteps)
                                     Width: =400
                                     WidthFit: =true
                                     X: =1
                                     Y: =2
                                   Children:
-                                    - lblFrmRefKey:
+                                    - lblStpRefKey:
                                         Control: ModernText@1.0.0
                                         MetadataKey: FieldName
                                         Properties:
@@ -619,7 +1212,7 @@ Screens:
                                           Wrap: =false
                                           X: =24
                                           Y: =10
-                                    - txtFrmRefValue:
+                                    - txtStpRefValue:
                                         Control: ModernTextInput@1.1.2
                                         MetadataKey: FieldValue
                                         Properties:
@@ -632,8 +1225,8 @@ Screens:
                                           ValidationState: =If(IsBlank(Parent.Error), ValidationState.None, ValidationState.Error)
                                           Width: =Parent.Width - 48
                                           X: =24
-                                          Y: =lblFrmRefKey.Y + lblFrmRefKey.Height + 4
-                                    - lblFrmRefError:
+                                          Y: =lblStpRefKey.Y + lblStpRefKey.Height + 4
+                                    - lblStpRefError:
                                         Control: ModernText@1.0.0
                                         MetadataKey: ErrorMessage
                                         Properties:
@@ -644,8 +1237,8 @@ Screens:
                                           Visible: =And(!IsBlank(Parent.Error), Parent.DisplayMode = DisplayMode.Edit)
                                           Width: =Parent.Width - 48
                                           X: =24
-                                          Y: =txtFrmRefValue.Y + txtFrmRefValue.Height
-                                    - lblFrmRefStar:
+                                          Y: =txtStpRefValue.Y + txtStpRefValue.Height
+                                    - lblStpRefStar:
                                         Control: ModernText@1.0.0
                                         MetadataKey: FieldRequired
                                         Properties:
@@ -657,26 +1250,26 @@ Screens:
                                           Text: ="*"
                                           Visible: =And(Parent.Required, Parent.DisplayMode = DisplayMode.Edit)
                                           Width: =30
-                                          Y: =lblFrmRefKey.Y
-                              - crdFrmReqEmail:
+                                          Y: =lblStpRefKey.Y
+                              - crdStpReqEmail:
                                   Control: TypedDataCard@1.0.7
                                   Variant: ModernTextualEdit
                                   IsLocked: true
                                   Properties:
                                     BorderColor: =nfColor.Transparent
                                     DataField: ="RequesterEmail"
-                                    Default: =If(frmFrmItem.Mode = FormMode.New, nfUserEmail, ThisItem.RequesterEmail)
+                                    Default: =If(frmStpItem.Mode = FormMode.New, nfUserEmail, ThisItem.RequesterEmail)
                                     DisplayName: ="RequesterEmail"
                                     MaxLength: =255
                                     Required: =false
-                                    Update: =txtFrmReqEmailValue.Text
+                                    Update: =txtStpReqEmailValue.Text
                                     Visible: =false
                                     Width: =400
                                     WidthFit: =true
                                     X: =0
                                     Y: =3
                                   Children:
-                                    - lblFrmReqEmailKey:
+                                    - lblStpReqEmailKey:
                                         Control: ModernText@1.0.0
                                         MetadataKey: FieldName
                                         Properties:
@@ -690,7 +1283,7 @@ Screens:
                                           Wrap: =false
                                           X: =24
                                           Y: =10
-                                    - txtFrmReqEmailValue:
+                                    - txtStpReqEmailValue:
                                         Control: ModernTextInput@1.1.2
                                         MetadataKey: FieldValue
                                         Properties:
@@ -703,8 +1296,8 @@ Screens:
                                           ValidationState: =If(IsBlank(Parent.Error), ValidationState.None, ValidationState.Error)
                                           Width: =Parent.Width - 48
                                           X: =24
-                                          Y: =lblFrmReqEmailKey.Y + lblFrmReqEmailKey.Height + 4
-                                    - lblFrmReqEmailError:
+                                          Y: =lblStpReqEmailKey.Y + lblStpReqEmailKey.Height + 4
+                                    - lblStpReqEmailError:
                                         Control: ModernText@1.0.0
                                         MetadataKey: ErrorMessage
                                         Properties:
@@ -715,8 +1308,8 @@ Screens:
                                           Visible: =And(!IsBlank(Parent.Error), Parent.DisplayMode = DisplayMode.Edit)
                                           Width: =Parent.Width - 48
                                           X: =24
-                                          Y: =txtFrmReqEmailValue.Y + txtFrmReqEmailValue.Height
-                                    - lblFrmReqEmailStar:
+                                          Y: =txtStpReqEmailValue.Y + txtStpReqEmailValue.Height
+                                    - lblStpReqEmailStar:
                                         Control: ModernText@1.0.0
                                         MetadataKey: FieldRequired
                                         Properties:
@@ -728,26 +1321,26 @@ Screens:
                                           Text: ="*"
                                           Visible: =And(Parent.Required, Parent.DisplayMode = DisplayMode.Edit)
                                           Width: =30
-                                          Y: =lblFrmReqEmailKey.Y
-                              - crdFrmReqName:
+                                          Y: =lblStpReqEmailKey.Y
+                              - crdStpReqName:
                                   Control: TypedDataCard@1.0.7
                                   Variant: ModernTextualEdit
                                   IsLocked: true
                                   Properties:
                                     BorderColor: =nfColor.Transparent
                                     DataField: ="RequesterName"
-                                    Default: =If(frmFrmItem.Mode = FormMode.New, nfUserName, ThisItem.RequesterName)
+                                    Default: =If(frmStpItem.Mode = FormMode.New, nfUserName, ThisItem.RequesterName)
                                     DisplayName: ="RequesterName"
                                     MaxLength: =255
                                     Required: =false
-                                    Update: =txtFrmReqNameValue.Text
+                                    Update: =txtStpReqNameValue.Text
                                     Visible: =false
                                     Width: =400
                                     WidthFit: =true
                                     X: =1
                                     Y: =3
                                   Children:
-                                    - lblFrmReqNameKey:
+                                    - lblStpReqNameKey:
                                         Control: ModernText@1.0.0
                                         MetadataKey: FieldName
                                         Properties:
@@ -761,7 +1354,7 @@ Screens:
                                           Wrap: =false
                                           X: =24
                                           Y: =10
-                                    - txtFrmReqNameValue:
+                                    - txtStpReqNameValue:
                                         Control: ModernTextInput@1.1.2
                                         MetadataKey: FieldValue
                                         Properties:
@@ -774,8 +1367,8 @@ Screens:
                                           ValidationState: =If(IsBlank(Parent.Error), ValidationState.None, ValidationState.Error)
                                           Width: =Parent.Width - 48
                                           X: =24
-                                          Y: =lblFrmReqNameKey.Y + lblFrmReqNameKey.Height + 4
-                                    - lblFrmReqNameError:
+                                          Y: =lblStpReqNameKey.Y + lblStpReqNameKey.Height + 4
+                                    - lblStpReqNameError:
                                         Control: ModernText@1.0.0
                                         MetadataKey: ErrorMessage
                                         Properties:
@@ -786,8 +1379,8 @@ Screens:
                                           Visible: =And(!IsBlank(Parent.Error), Parent.DisplayMode = DisplayMode.Edit)
                                           Width: =Parent.Width - 48
                                           X: =24
-                                          Y: =txtFrmReqNameValue.Y + txtFrmReqNameValue.Height
-                                    - lblFrmReqNameStar:
+                                          Y: =txtStpReqNameValue.Y + txtStpReqNameValue.Height
+                                    - lblStpReqNameStar:
                                         Control: ModernText@1.0.0
                                         MetadataKey: FieldRequired
                                         Properties:
@@ -799,26 +1392,26 @@ Screens:
                                           Text: ="*"
                                           Visible: =And(Parent.Required, Parent.DisplayMode = DisplayMode.Edit)
                                           Width: =30
-                                          Y: =lblFrmReqNameKey.Y
-                              - crdFrmStatus:
+                                          Y: =lblStpReqNameKey.Y
+                              - crdStpStatus:
                                   Control: TypedDataCard@1.0.7
                                   Variant: ModernTextualEdit
                                   IsLocked: true
                                   Properties:
                                     BorderColor: =nfColor.Transparent
                                     DataField: ="Status"
-                                    Default: =If(frmFrmItem.Mode = FormMode.New, nfStartStatus, ThisItem.Status)
+                                    Default: =If(frmStpItem.Mode = FormMode.New, nfStartStatus, ThisItem.Status)
                                     DisplayName: ="Status"
                                     MaxLength: =255
                                     Required: =false
-                                    Update: =txtFrmStatusValue.Text
+                                    Update: =txtStpStatusValue.Text
                                     Visible: =false
                                     Width: =400
                                     WidthFit: =true
                                     X: =0
                                     Y: =4
                                   Children:
-                                    - lblFrmStatusKey:
+                                    - lblStpStatusKey:
                                         Control: ModernText@1.0.0
                                         MetadataKey: FieldName
                                         Properties:
@@ -832,7 +1425,7 @@ Screens:
                                           Wrap: =false
                                           X: =24
                                           Y: =10
-                                    - txtFrmStatusValue:
+                                    - txtStpStatusValue:
                                         Control: ModernTextInput@1.1.2
                                         MetadataKey: FieldValue
                                         Properties:
@@ -845,8 +1438,8 @@ Screens:
                                           ValidationState: =If(IsBlank(Parent.Error), ValidationState.None, ValidationState.Error)
                                           Width: =Parent.Width - 48
                                           X: =24
-                                          Y: =lblFrmStatusKey.Y + lblFrmStatusKey.Height + 4
-                                    - lblFrmStatusError:
+                                          Y: =lblStpStatusKey.Y + lblStpStatusKey.Height + 4
+                                    - lblStpStatusError:
                                         Control: ModernText@1.0.0
                                         MetadataKey: ErrorMessage
                                         Properties:
@@ -857,8 +1450,8 @@ Screens:
                                           Visible: =And(!IsBlank(Parent.Error), Parent.DisplayMode = DisplayMode.Edit)
                                           Width: =Parent.Width - 48
                                           X: =24
-                                          Y: =txtFrmStatusValue.Y + txtFrmStatusValue.Height
-                                    - lblFrmStatusStar:
+                                          Y: =txtStpStatusValue.Y + txtStpStatusValue.Height
+                                    - lblStpStatusStar:
                                         Control: ModernText@1.0.0
                                         MetadataKey: FieldRequired
                                         Properties:
@@ -870,8 +1463,8 @@ Screens:
                                           Text: ="*"
                                           Visible: =And(Parent.Required, Parent.DisplayMode = DisplayMode.Edit)
                                           Width: =30
-                                          Y: =lblFrmStatusKey.Y
-                              - crdFrmAssigned:
+                                          Y: =lblStpStatusKey.Y
+                              - crdStpAssigned:
                                   Control: TypedDataCard@1.0.7
                                   Variant: ModernTextualEdit
                                   IsLocked: true
@@ -882,14 +1475,14 @@ Screens:
                                     DisplayName: ="AssignedTo"
                                     MaxLength: =255
                                     Required: =false
-                                    Update: =txtFrmAssignedValue.Text
+                                    Update: =txtStpAssignedValue.Text
                                     Visible: =false
                                     Width: =400
                                     WidthFit: =true
                                     X: =1
                                     Y: =4
                                   Children:
-                                    - lblFrmAssignedKey:
+                                    - lblStpAssignedKey:
                                         Control: ModernText@1.0.0
                                         MetadataKey: FieldName
                                         Properties:
@@ -903,7 +1496,7 @@ Screens:
                                           Wrap: =false
                                           X: =24
                                           Y: =10
-                                    - txtFrmAssignedValue:
+                                    - txtStpAssignedValue:
                                         Control: ModernTextInput@1.1.2
                                         MetadataKey: FieldValue
                                         Properties:
@@ -916,8 +1509,8 @@ Screens:
                                           ValidationState: =If(IsBlank(Parent.Error), ValidationState.None, ValidationState.Error)
                                           Width: =Parent.Width - 48
                                           X: =24
-                                          Y: =lblFrmAssignedKey.Y + lblFrmAssignedKey.Height + 4
-                                    - lblFrmAssignedError:
+                                          Y: =lblStpAssignedKey.Y + lblStpAssignedKey.Height + 4
+                                    - lblStpAssignedError:
                                         Control: ModernText@1.0.0
                                         MetadataKey: ErrorMessage
                                         Properties:
@@ -928,8 +1521,8 @@ Screens:
                                           Visible: =And(!IsBlank(Parent.Error), Parent.DisplayMode = DisplayMode.Edit)
                                           Width: =Parent.Width - 48
                                           X: =24
-                                          Y: =txtFrmAssignedValue.Y + txtFrmAssignedValue.Height
-                                    - lblFrmAssignedStar:
+                                          Y: =txtStpAssignedValue.Y + txtStpAssignedValue.Height
+                                    - lblStpAssignedStar:
                                         Control: ModernText@1.0.0
                                         MetadataKey: FieldRequired
                                         Properties:
@@ -941,54 +1534,103 @@ Screens:
                                           Text: ="*"
                                           Visible: =And(Parent.Required, Parent.DisplayMode = DisplayMode.Edit)
                                           Width: =30
-                                          Y: =lblFrmAssignedKey.Y
-                  - conFrmActions:
+                                          Y: =lblStpAssignedKey.Y
+            - conStpFootRule:
+                Control: GroupContainer@1.5.0
+                Variant: ManualLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Fill: =nfColor.Line
+                  FillPortions: =0
+                  Height: =1
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+            - conStpFoot:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Fill: =nfColor.Surface
+                  FillPortions: =0
+                  Height: =nfSize.Control + 2 * nfSpace.Md
+                  LayoutAlignItems: =LayoutAlignItems.Center
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutGap: =nfSpace.Sm
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  PaddingLeft: =Max(nfGutter, (Parent.Width - nfFormMaxW) / 2)
+                  PaddingRight: =Max(nfGutter, (Parent.Width - nfFormMaxW) / 2)
+                Children:
+                  - btnStpCancel:
+                      Control: ModernButton@1.0.0
+                      Properties:
+                        AccessibleLabel: ="Cancel"
+                        Appearance: =ButtonAppearance.Secondary
+                        Height: =nfSize.Control
+                        OnSelect: |-
+                          =If(
+                              frmStpItem.Unsaved,
+                              UpdateContext({ locConfirm: { Action: "discard", Title: "Discard your changes?", Message: "What you entered on this form will be lost.", Label: "Discard", Danger: true } }),
+                              If(locId > 0, Navigate(scrDetail, ScreenTransition.None, { locId: locId, locFrom: "list" }), Navigate(scrList, ScreenTransition.None, { locStatusFilter: "all" }))
+                          )
+                        Size: =nfType.Body
+                        Text: ="Cancel"
+                        Width: =90
+                  - conStpFootGap:
                       Control: GroupContainer@1.5.0
-                      Variant: AutoLayout
+                      Variant: ManualLayout
                       Properties:
                         DropShadow: =DropShadow.None
                         Fill: =nfColor.Transparent
-                        FillPortions: =0
-                        Height: =nfSize.Control
-                        LayoutAlignItems: =LayoutAlignItems.Center
-                        LayoutDirection: =LayoutDirection.Horizontal
-                        LayoutGap: =nfSpace.Sm
-                        LayoutJustifyContent: =LayoutJustifyContent.End
+                        Height: =1
                         LayoutMinHeight: =0
                         LayoutMinWidth: =0
-                        Width: =Min(Parent.Width - 2 * nfGutter, nfPageMaxW)
-                      Children:
-                        - btnFrmCancel:
-                            Control: ModernButton@1.0.0
-                            Properties:
-                              AccessibleLabel: ="Cancel"
-                              Appearance: =ButtonAppearance.Secondary
-                              Height: =nfSize.Control
-                              OnSelect: |-
-                                =If(
-                                    frmFrmItem.Unsaved,
-                                    UpdateContext({ locConfirm: { Action: "discard", Title: "Discard your changes?", Message: "What you entered on this form will be lost.", Label: "Discard", Danger: true } }),
-                                    If(locId > 0, Navigate(scrDetail, ScreenTransition.None, { locId: locId, locFrom: "list" }), Navigate(scrList, ScreenTransition.None, { locStatusFilter: "all" }))
-                                )
-                              Size: =nfType.Body
-                              Text: ="Cancel"
-                              Width: =110
-                        - btnFrmSubmit:
-                            Control: ModernButton@1.0.0
-                            Properties:
-                              AccessibleLabel: =If(locId > 0, "Save changes", "Submit " & nfItem)
-                              Height: =nfSize.Control
-                              OnSelect: |-
-                                =If(
-                                    locId > 0 && !frmFrmItem.Unsaved,
-                                    Notify("No changes to save.", NotificationType.Information);
-                                    If(locId > 0, Navigate(scrDetail, ScreenTransition.None, { locId: locId, locFrom: "list" }), Navigate(scrList, ScreenTransition.None, { locStatusFilter: "all" })),
-                                    SubmitForm(frmFrmItem)
-                                )
-                              Size: =nfType.Body
-                              Text: =If(locId > 0, "Save changes", "Submit " & nfItem)
-                              Width: =150
-            - conFrmBottomRule:
+                  - btnStpBack:
+                      Control: ModernButton@1.0.0
+                      Properties:
+                        AccessibleLabel: ="Back"
+                        Appearance: =ButtonAppearance.Secondary
+                        Height: =nfSize.Control
+                        OnSelect: |-
+                          =UpdateContext({ locStep: locStep - 1 })
+                        Size: =nfType.Body
+                        Text: ="Back"
+                        Visible: =locStep > 1
+                        Width: =90
+                  - btnStpNext:
+                      Control: ModernButton@1.0.0
+                      Properties:
+                        AccessibleLabel: ="Next"
+                        Height: =nfSize.Control
+                        OnSelect: |-
+                          =If(
+                              locStep = 1 && (IsBlank(txtStpTitleValue.Text) || IsBlank(drpStpSvcValue.Selected.Key)),
+                              Notify("To continue, fill in: Title, Service.", NotificationType.Error),
+                              locStep = 2 && (IsBlank(cmbStpDivisionValue.Selected.Value)),
+                              Notify("To continue, fill in: Division or MEO.", NotificationType.Error),
+                              UpdateContext({ locStep: locStep + 1 })
+                          )
+                        Size: =nfType.Body
+                        Text: ="Next"
+                        Visible: =locStep < CountRows(nfFormSteps)
+                        Width: =90
+                  - btnStpSubmit:
+                      Control: ModernButton@1.0.0
+                      Properties:
+                        AccessibleLabel: =If(locId > 0, "Save changes", "Submit " & nfItem)
+                        Height: =nfSize.Control
+                        OnSelect: |-
+                          =If(
+                              locId > 0 && !frmStpItem.Unsaved,
+                              Notify("No changes to save.", NotificationType.Information);
+                              If(locId > 0, Navigate(scrDetail, ScreenTransition.None, { locId: locId, locFrom: "list" }), Navigate(scrList, ScreenTransition.None, { locStatusFilter: "all" })),
+                              SubmitForm(frmStpItem)
+                          )
+                        Size: =nfType.Body
+                        Text: =If(locId > 0, "Save changes", "Submit " & nfItem)
+                        Visible: =locStep = CountRows(nfFormSteps)
+                        Width: =150
+            - conStpBottomRule:
                 Control: GroupContainer@1.5.0
                 Variant: ManualLayout
                 Properties:
@@ -999,7 +1641,7 @@ Screens:
                   LayoutMinHeight: =0
                   LayoutMinWidth: =0
                   Visible: =nfIsPhone
-            - conFrmBottomBar:
+            - conStpBottomBar:
                 Control: GroupContainer@1.5.0
                 Variant: AutoLayout
                 Properties:
@@ -1014,7 +1656,7 @@ Screens:
                   PaddingRight: =nfSpace.Sm
                   Visible: =nfIsPhone
                 Children:
-                  - cmpFrmBottomNav:
+                  - cmpStpBottomNav:
                       Control: CanvasComponent
                       ComponentName: cmpBottomNav
                       Properties:
@@ -1027,7 +1669,7 @@ Screens:
                         LayoutMinWidth: =0
                         OnSelect: =nfGo(Self.SelectedKey)
                         Theme: =nfColor
-      - cmpFrmConfirm:
+      - cmpStpConfirm:
           Control: CanvasComponent
           ComponentName: cmpConfirmDialog
           Properties:
@@ -1041,13 +1683,13 @@ Screens:
               =UpdateContext({ locConfirm: Blank() })
             OnConfirm: |-
               =UpdateContext({ locConfirm: Blank() });
-              ResetForm(frmFrmItem);
+              ResetForm(frmStpItem);
               If(locId > 0, Navigate(scrDetail, ScreenTransition.None, { locId: locId, locFrom: "list" }), Navigate(scrList, ScreenTransition.None, { locStatusFilter: "all" }))
             Theme: =nfColor
             Title: =locConfirm.Title
             Visible: =!IsBlank(locConfirm)
             Width: =Parent.Width
-      - conFrmLoading:
+      - conStpLoading:
           Control: GroupContainer@1.5.0
           Variant: ManualLayout
           Properties:
@@ -1057,7 +1699,7 @@ Screens:
             Visible: =locLoading
             Width: =Parent.Width
           Children:
-            - conFrmLoadingCard:
+            - conStpLoadingCard:
                 Control: GroupContainer@1.5.0
                 Variant: AutoLayout
                 Properties:
@@ -1075,7 +1717,7 @@ Screens:
                   X: =(Parent.Width - Self.Width) / 2
                   Y: =(Parent.Height - Self.Height) / 2
                 Children:
-                  - lblFrmLoading:
+                  - lblStpLoading:
                       Control: ModernText@1.0.0
                       Properties:
                         Align: =Align.Center
